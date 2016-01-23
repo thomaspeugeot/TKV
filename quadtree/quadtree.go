@@ -44,21 +44,41 @@ package quadtree
 // the X coordinate code depends on the level
 //	level 0: there is no coordinate
 //	level 1: west if 0, east is 128 (0x80)
-//	level 2: quarters coordinates are 0, 64 (0x40), 128 (0x80), 192 (0x84)
+//	level 2: node coordinates are 0, 64 (0x40), 128 (0x80), 192 (0x84)
 //	...
+//	level 8: node coordinates are encoded on the full 8 bits, from 0 to 0xFF (255)
 type Coord uint32
 
 // node level of a node coord c
+// is between 0 and 8
 func Level(c Coord) int { return int( c >> 16) }
 
 // x coord node coord c
 func x(c Coord) int { return int((c & 0x0000FFFF) >> 8) }
 
+// y coord node coord c
+func y(c Coord) int { return int( c & 0x000000FF) }
+
 // check encoding of c
 func checkIntegrity( c Coord) bool {
 	
-	// check byte 4 is null
-	if res := 0x000000FF & c; res != 0x00 {
+	//	byte 0 is null
+	if res := 0xFF000000 & c; res != 0x00 {
+		return false
+	}
+	
+	// check level is below or equal to 8
+	if Level( c) > 8 {
+		return false
+	}
+	
+	// check x coord is encoded acoording to the level
+	if (0xFF >> uint( 8 - Level(c))) & x(c) != 0x00 {
+		return false
+	}
+
+	// check y coord
+	if (0xFF >> uint( 8 - Level(c))) & y(c) != 0x00 {
 		return false
 	}
 	

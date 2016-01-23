@@ -12,20 +12,23 @@ func TestLevel(t *testing.T) {
 		want int
 	}{
 		{0, 0},
-		{1<<24, 1},
-		{1<<24 + 34, 1},
-		{21<<24 + 1 <<23, 21},
+		{1<<16, 1},
+		{1<<16 + 34, 1},
+		{21<<16 + 1 <<12, 21},
 	}
 		
 	for _, c := range cases {
 		got := Level(c.in)
 		if( got != c.want) {
 			t.Errorf("Level(%32b) == %d, want %d", c.in, got, c.want)
+			t.Errorf("Level(|%8b|%8b|%8b|%8b|) == %d, want %d", 
+					0x000000FF & (c.in >> 24), 0x000000FF & (c.in >> 16), 0x000000FF & (c.in >> 8), 0x000000FF & c.in, 
+					got, c.want)
 		}	
 	}
 }
 
-func TestCheckIntegrity( t *testing.T) {
+func TestIntegrity( t *testing.T) {
 	
 	cases := []struct {
 		in Coord
@@ -33,13 +36,20 @@ func TestCheckIntegrity( t *testing.T) {
 	}{
 		{ 0x00, true},
 		{ 0x000000FF, false},
-		{ 0x000A0001, false},
-		{ 0x000A0000, true},
+		{ 0x000a0001, false},
+		{ 0x00070001, true},
+		{ 0x000A0000, false},
+		{ 0x0A0A0000, false},
 	}
-	for _, c := range cases {
+	for rank, c := range cases {
 		got := checkIntegrity(c.in)
 		if( got != c.want) {
-			t.Errorf("checkIntegrity(%b) == %t, want %t", c.in, got, c.want)
+			// t.Errorf("checkIntegrity(%b) == %t, want %t", c.in, got, c.want)
+			t.Errorf("case %d - checkIntegrity of |%8b|%8b|%8b|%8b|, %8x, level %d == %t, want %t", 
+					rank,
+					0x000000FF & (c.in >> 24), 0x000000FF & (c.in >> 16), 0x000000FF & (c.in >> 8), 0x000000FF & c.in, 
+					c.in, Level( c.in),
+					got, c.want)
 		}	
 	}
 }
