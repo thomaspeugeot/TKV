@@ -1,15 +1,18 @@
 // Compact implementation of a static 2D quadtree
+//
+// Caution : Work In Progress
 // 
 // 1st Goal is to support the Barnes Hut implementation for spreading bodies on a 2D square.
 // 
 // 2nd Goal is to support more than 1 million bodies
-// there are constraints:
 //
-// - X,Y coordinates are float64 between 0 & 1
+// A quatree is a set of nodes holding bodies.
 //
-// - quadtree architecture is static
+// This implementation put constraints on inputs :
 //
-// - depth is limited to 8 (256 * 256 cells at the level 8)
+//	Bodies's X,Y coordinates are float64 between 0 & 1
+//	Quadtree architecture is static
+//	Depth of nodes is limited to 8 (256 * 256 cells at the level 8)
 //
 // to see the doc
 //
@@ -18,13 +21,25 @@ package quadtree
 
 // 
 // Coordinate system of a node
+//
+// Situation : most quadtree implementation are dynamic (the nodes can be created and deleted after the quadtree initialisation). 
+// This is an optimal solution if bodies are sparesely located (as in cosmology). Access to node is in (log(n)) 
+// 
+// Current case is different because bodies are uniformly spread on a 2D square.
+//
+// Problem : the dynamic implementation is not necessary for uniformly spread bodies
+//
+// Solution : a static quadtree with the following requirements 
+//
+//	Node coordinates are their rank in a direct access table. 
+//	Node coordinates of a body are computed directly from body's X,Y position
 // 
 // Coordinates of a node are coded as follow
 //
-// 	1st byte : level (root = 0, max depth = 7) 
-// 	2nd byte : X coordinate 
-// 	3nd byte : Y coordinate : coded on 
-//	4th byte : 0x00 (unused) 
+//	byte 0 : 0x00 (unused) 
+// 	byte 1 : level (root = 0, max depth = 7) 
+// 	byte 2 : X coordinate 
+// 	byte 3 : Y coordinate : coded on 
 //
 // the X coordinate code depends on the level
 //	level 0: there is no coordinate
@@ -33,12 +48,11 @@ package quadtree
 //	...
 type Coord uint32
 
-// get node level from node coord c
-func Level(c Coord) int {
-	result := int(c >> 24)
-	
-	return result
-}
+// node level of a node coord c
+func Level(c Coord) int { return int( c >> 16) }
+
+// x coord node coord c
+func x(c Coord) int { return int((c & 0x0000FFFF) >> 8) }
 
 // check encoding of c
 func checkIntegrity( c Coord) bool {

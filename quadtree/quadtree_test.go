@@ -20,7 +20,7 @@ func TestLevel(t *testing.T) {
 	for _, c := range cases {
 		got := Level(c.in)
 		if( got != c.want) {
-			t.Errorf("Level(%b) == %d, want %d", c.in, got, c.want)
+			t.Errorf("Level(%32b) == %d, want %d", c.in, got, c.want)
 		}	
 	}
 }
