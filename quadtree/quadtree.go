@@ -62,7 +62,10 @@ type Body struct {
 
 // a node is a body (
 type Node struct {
-	Bodies [](*Body)// bodies of the node (only at level 8, above, the list is empty)
+	// bodies of the node 
+	//  at level 8, this is the list of bodies pertaining in the bounding box of the node
+	// for level 7 to 0, this is the list of the four bodies of the nodes at the level below (or +1)
+	Bodies [](*Body)
 	Body // barycenter with mass of all the bodies of the node
 }
 
@@ -158,6 +161,76 @@ func checkIntegrity( c Coord) bool {
 	return true
 }
 
+type Direction uint
+const (
+	NW = 0x0000
+	NE = 0x0100
+	SW = 0x0001
+	SE = 0x0101
+)
+
+// compute quadtree Nodes for levels from 0 to 7
+func (q * Quadtree) updateNodesAbove8() {
+	
+	for level := 7; level >= 0; level-- {
+	
+		// nb of nodes for the current level
+		nbNodesX := 1 << uint(level)
+		nbNodesY := 1 << uint(level)
+		
+		// parse nodes of level
+		for i := 0; i < nbNodesX; i++ {
+			for j := 0; j < nbNodesY; j++ {
+				
+				coord := Coord( uint(level)<<16 | uint(i)<<8 | uint(j))
+				node := q[coord]
+				node.updateNode()
+			}
+		}
+	}
+}
+
+// setup quadtree Nodes for levels from 0 to 7
+func (q * Quadtree) setupNodeLinks() {
+	
+	for level := 7; level >= 0; level-- {
+	
+		// nb of nodes for the current level
+		nbNodesX := 1 << uint(level)
+		nbNodesY := 1 << uint(level)
+
+		// level below has a higher number (this goes against elevator common sense)
+		levelBelow := level+1
+		
+		// parse nodes of level
+		for i := 0; i < nbNodesX; i++ {
+			for j := 0; j < nbNodesY; j++ {
+				
+				coord := Coord( uint(level)<<16 | uint(i)<<8 | uint(j))
+				node := q[coord]
+				node.Bodies = make([]*Body, 4)
+				shift := uint( 8-levelBelow)
+				
+				// to go east at the level below, we flip to 1 the bit that is significant at that level 
+				coordNW := Coord( uint(levelBelow)<<16 | uint(i)<<8 | uint(j) | NW << shift)
+				coordNE := Coord( uint(levelBelow)<<16 | uint(i)<<8 | uint(j) | NE << shift)
+				coordSW := Coord( uint(levelBelow)<<16 | uint(i)<<8 | uint(j) | SW << shift)
+				coordSE := Coord( uint(levelBelow)<<16 | uint(i)<<8 | uint(j) | SE << shift)
+				
+				nodeNW := q[coordNW]
+				nodeNE := q[coordNE]
+				nodeSW := q[coordSW]
+				nodeSE := q[coordSE]
+				
+				node.Bodies[0] = & nodeNW.Body
+				node.Bodies[1] = & nodeNE.Body
+				node.Bodies[2] = & nodeSW.Body
+				node.Bodies[3] = & nodeSE.Body
+			}
+		}
+	}
+}
+
 // reset a Quadtree level 8
 // clear all nodes bodies & set masse to 0
 func (q * Quadtree) resetLevel8() {
@@ -184,7 +257,7 @@ func (q * Quadtree) computeLevel8 (bodies []Body) {
 	}		
 }
 
-// compute COM of quadtree at level with bodies 
+// compute COM of quadtree at level 8 
 func (q * Quadtree) computeCOMAtLevel8 () {
 
 	q.resetLevel8()
@@ -205,3 +278,19 @@ func (q * Quadtree) computeCOMAtLevel8 () {
 	}		
 }
 
+func (n * Node) updateNode() {
+	
+	n.M = 0.0
+	// get all bodies of the node
+	for _, b	:= range n.Bodies {
+		n.M += b.M
+		n.X += b.X*b.M
+		n.Y += b.Y*b.M
+	}	
+	
+	// divide by total mass to get the barycenter
+	if n.M > 0 {
+		n.X /= n.M
+		n.Y /= n.M
+	}
+}
