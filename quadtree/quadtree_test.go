@@ -60,6 +60,83 @@ func TestIntegrity( t *testing.T) {
 	}
 }
 
+
+
+func TestSetX(t * testing.T) {
+	cases := []struct {
+		in Coord
+		inX int
+		want Coord
+	}{
+		{ 0x00080000, 8, 0x00080800 }, 
+	}
+	for _, c := range cases {
+		coord := c.in
+		coord.setX( c.inX)
+		got := coord
+		if( coord != c.want) {
+			t.Errorf("%#v setX(%d) == |%8b|%8b|%8b|%8b|, got %8x, want %8x", c.in, c.inX,
+			0x000000FF & (got >> 24), 0x000000FF & (got >> 16), 
+			0x000000FF & (got >> 8), 0x000000FF & got, got, c.want) 
+		}
+	}
+}
+
+func TestSetY(t * testing.T) {
+	cases := []struct {
+		in Coord
+		inY int
+		want Coord
+	}{
+		{ 0x00080000, 8, 0x00080008 }, 
+	}
+	for _, c := range cases {
+		got := c.in
+		got.setY( c.inY)
+		if( got != c.want) {
+			t.Errorf("%#v setY(%d) == |%8b|%8b|%8b|%8b|, got %8x, want %8x", c.in, c.inY,
+			0x000000FF & (got >> 24), 0x000000FF & (got >> 16), 
+			0x000000FF & (got >> 8), 0x000000FF & got, got, c.want) 
+		}
+	}
+}
+
+func TestGetCoord8(t * testing.T) {
+	cases := []struct {
+		in Body
+		want Coord
+	}{
+		{ Body{0.0, 0.0, 0.0}, 0x00080000 }, 
+		{ Body{0.0, 255.999, 255.999}, 0x0008FFFF }, 
+	}
+	for _, c := range cases {
+		got := c.in.getCoord8()
+		if( got != c.want) {
+			t.Errorf("getCoord8(%#v) == |%8b|%8b|%8b|%8b|, %8x, want %8x", c.in, 
+			0x000000FF & (got >> 24), 0x000000FF & (got >> 16), 
+			0x000000FF & (got >> 8), 0x000000FF & got, got, c.want) 
+		}
+	}
+}
+
+///
+
+func BenchmarkSetLevel(b * testing.B) {
+	for i := 0; i<b.N;i++ {		var c Coord;	c.setLevel(6) }
+}
+
+func BenchmarkSetX(b * testing.B) {
+	for i := 0; i<b.N;i++ {		var c Coord;	c.setX(6) }
+}
+
+func BenchmarkSetY(b * testing.B) {
+	for i := 0; i<b.N;i++ {		var c Coord;	c.setY(6) }
+}
+
+func BenchmarkGetCoord8(b * testing.B) {
+	for i := 0; i<b.N;i++ {		var b Body; b.getCoord8()}
+}
+
 // init a quadtree with random position
 //
 func initQuadtree( qa * Quadtree, nbBodies int) {
@@ -85,54 +162,4 @@ func BenchmarkInitQuadtree(b * testing.B) {
 		initQuadtree( &q , 1000000)
 	}
 
-}
-
-func BenchmarkSetLevel(b * testing.B) {
-	for i := 0; i<b.N;i++ {		var c Coord;	c.setLevel(6) }
-}
-
-func BenchmarkSetX(b * testing.B) {
-	for i := 0; i<b.N;i++ {		var c Coord;	c.setX(6) }
-}
-
-func BenchmarkSetY(b * testing.B) {
-	for i := 0; i<b.N;i++ {		var c Coord;	c.setY(6) }
-}
-
-func TestGetCoord8(t * testing.T) {
-	cases := []struct {
-		in Body
-		want Coord
-	}{
-		{ Body{0.0, 0.0, 0.0}, 0x00080000 }, 
-	}
-	for _, c := range cases {
-		got := c.in.getCoord8()
-		if( got != c.want) {
-			t.Errorf("getCoord8(%#v) == |%8b|%8b|%8b|%8b|, %8x, want %8x", c.in, 
-			0x000000FF & (got >> 24), 0x000000FF & (got >> 16), 
-			0x000000FF & (got >> 8), 0x000000FF & got, got, c.want) 
-		}
-	}
-}
-
-func TesSet(t * testing.T) {
-	cases := []struct {
-		inCoord Coord
-		inLevel int
-		inCoords PosSuite
-		want bool
-	}{
-		{	0, 			2, 			PosSuite{1, 2}, 			true}, // level is OK
-		{	0, 			2, 			PosSuite{1, 4}, 			false}, // one pos is above 3
-		{	0, 			2, 			PosSuite{1, -1}, 			false}, // one pos is below 0
-		{	0, 			1, 			PosSuite{1, 2}, 			false}, // level is not good
- 	}
-		
-	for _, c := range cases {
-		got := set( &c.inCoord, c.inLevel, c.inCoords)
-		if( got != c.want) {
-			t.Errorf("Set(%b, %d, %q) == %t, want %t", c.inCoord, c.inLevel, c.inCoords, got, c.want)
-		}	
-	}
 }

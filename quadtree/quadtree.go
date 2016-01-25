@@ -57,26 +57,41 @@ type Coord uint32
 // is between 0 and 8 and coded on 2nd byte of the Coord c
 func (c Coord) getLevel() int { return int( c >> 16) }
 func (c * Coord) setLevel(level int) { 
+	
+	*c = *c & 0x0000FFFF // reset level but bytes for x & y are preserved
 	var pad uint32
-	pad = (uint32(level) << 16) & 0x0000FFFF
-	*c = *c & Coord(pad)
+	pad = (uint32(level) << 16) 
+	*c = *c | Coord(pad) // set level
+	
 }
 
 // x coord
 func (c Coord) getX() int { return int((c & 0x0000FFFF) >> 8) }
 func (c * Coord) setX(x int) { 
+	// fmt.Printf( "SetX c before reset x %8x\n", *c)
+
+	*c = *c & 0x00FF00FF // reset x bytes
+	// fmt.Printf( "SetX c after reset x %8x\n", *c)
+	
 	var pad uint32
-	pad = (uint32(x) << 8) & 0x00FFFFFF
-	*c = *c & Coord(pad)
+	pad = (uint32(x) << 8) 
+	// fmt.Printf( "SetX pad %8x\n", pad)
+
+
+	*c = *c | Coord(pad)
+
+	// fmt.Printf( "SetX c after x input %8x\n", *c)
 	// if !checkIntegrity( *c) { panic("set X failed")}
 }
 
 // y coord
 func (c Coord) getY() int { return int( c & 0x000000FF) }
-func (c Coord) setY(y int) { 
+func (c * Coord) setY(y int) { 
+	*c = *c & 0x00FFFF00 // reset y bytes
+	
 	var pad uint32
-	pad = uint32(y) & 0x00FFFFFF
-	c = c & Coord(pad)
+	pad = uint32(y) 
+	*c = *c | Coord(pad)
 }
 
 // a body is a position & a mass
@@ -100,8 +115,8 @@ type Quadtree [8*256*256]Node
 func ( b Body) getCoord8() Coord {
 	var c Coord
 	
-	(&c).setLevel( 8)
-	fmt.Printf( "After SetLevel c %8x\n", c)
+	c.setLevel( 8)
+	// fmt.Printf( "After SetLevel c %8x\n", c)
 	c.setX( int(b.X * 256.0) )
 	c.setY( int(b.Y * 256.0) )
 	
