@@ -53,6 +53,31 @@ import (
 //	level 8: node coordinates are encoded on the full 8 bits, from 0 to 0xFF (255)
 type Coord uint32
 
+// a body is a position & a mass
+type Body struct {
+	X float64
+	Y float64
+	M float64
+}
+
+// a node is a body (
+type Node struct {
+	Bodies [](*Body)// bodies of the node (only at level 8, above, the list is empty)
+	Body // barycenter with mass of all the bodies of the node
+}
+
+
+// a Quadtree store Nodes. It is a an array with direct access to the Nodes with the Nodes coordinate
+// see Coord
+type Quadtree [16*256*256]Node
+
+var optim bool
+
+func init() {
+	optim = true
+	fmt.Printf("Size of quadtree %d\n", 8*256*256)
+} 
+
 // node level of a node coord c
 // is between 0 and 8 and coded on 2nd byte of the Coord c
 func (c Coord) getLevel() int { return int( c >> 16) }
@@ -94,32 +119,15 @@ func (c * Coord) setY(y int) {
 	*c = *c | Coord(pad)
 }
 
-// a body is a position & a mass
-type Body struct {
-	X float64
-	Y float64
-	M float64
-}
 
-// a node is a body (
-type Node struct {
-	Bodies []Body // bodies of the node (only at level 8, above, the list is empty)
-	Body // barycenter with mass of all the bodies of the node
-}
 
-// a Quadtree store Nodes. It is a an array with direct access to the Nodes with the Nodes coordinate
-// see Coord
-type Quadtree [8*256*256]Node
-
-// compute Node coordinates at level 8 of a body
+// get Node coordinates at level 8
 func ( b Body) getCoord8() Coord {
 	var c Coord
 	
 	c.setLevel( 8)
-	// fmt.Printf( "After SetLevel c %8x\n", c)
 	c.setX( int(b.X * 256.0) )
 	c.setY( int(b.Y * 256.0) )
-	
 	return c
 }
 
@@ -150,20 +158,50 @@ func checkIntegrity( c Coord) bool {
 	return true
 }
 
-// suite of integer between 0 & 3 denoting position of the 
-// node within the node above level.
-type PosSuite []int
-
-// initiate a node coordinate from level and coords
-// coords is an array of int with length level
-func set( c *Coord, level int, coords PosSuite) bool {
-	result := true
+// reset a Quadtree level 8
+// clear all nodes bodies & set masse to 0
+func (q * Quadtree) resetLevel8() {
 	
-	if len(coords) != level { 
-		result = false
+	for _, n := range q {
+		//		if i >= (1<<16) { return }
+		n.Bodies = make([]*Body, 0) // this put the slice into garbage collection
 	}
+}
+
+// fill quadtree at level with bodies 
+func (q * Quadtree) computeLevel8 (bodies []Body) {
+
+	q.resetLevel8()
+	for _, b := range bodies {
 	
+		// get coord of body (this is direct access)
+		coord := b.getCoord8()
 	
-	return result
+		if (false) { fmt.Printf("computeLevel8 coordinate %d\n", coord) }
+		
+		nodeBodies := q[coord].Bodies
+		nodeBodies = append( nodeBodies, &b)
+	}		
+}
+
+// compute COM of quadtree at level with bodies 
+func (q * Quadtree) computeCOMAtLevel8 () {
+
+	q.resetLevel8()
+	for _, n := range q {
+		
+		n.M = 0.0
+		// get all bodies of the node
+		for _, b	:= range n.Bodies {
+			n.M += b.M
+			n.X += b.X*b.M
+			n.Y += b.Y*b.M
+		}	
+		// divide by total mass to get the barycenter
+		if n.M > 0 {
+			n.X /= n.M
+			n.Y /= n.M
+		}
+	}		
 }
 

@@ -119,6 +119,16 @@ func TestGetCoord8(t * testing.T) {
 	}
 }
 
+func TestComputeLevel8(t * testing.T) {
+	var q Quadtree
+	var bodies []Body
+		
+	initQuadtree( &q, &bodies, 1)
+	
+	q.computeLevel8( bodies)
+}
+
+
 ///
 
 func BenchmarkSetLevel(b * testing.B) {
@@ -137,29 +147,52 @@ func BenchmarkGetCoord8(b * testing.B) {
 	for i := 0; i<b.N;i++ {		var b Body; b.getCoord8()}
 }
 
+func BenchmarkResetLevel8(b * testing.B) {
+	var q Quadtree
+	for i := 0; i<b.N;i++ {	q.resetLevel8()}
+}
+
+func BenchmarkComputeLevel8(b * testing.B) {
+	var q Quadtree
+	var bodies []Body
+		
+	initQuadtree( &q, &bodies, 1000000)
+	
+	for i := 0; i<b.N;i++ {	q.computeLevel8( bodies)}
+}
+
+func BenchmarkComputeCOMAtLevel8(b * testing.B) {
+	var q Quadtree
+	var bodies []Body
+		
+	initQuadtree( &q, &bodies, 1000000)
+	q.computeLevel8( bodies)
+	
+	for i := 0; i<b.N;i++ {	q.computeCOMAtLevel8()}
+}
+
+
+
 // init a quadtree with random position
-//
-func initQuadtree( qa * Quadtree, nbBodies int) {
+func initQuadtree( qa * Quadtree, bodies * []Body, nbBodies int) {
 	
 	var q Quadtree
-	b := make([]Body, nbBodies)
+	*bodies = make([]Body, nbBodies)
 	
 	// init bodies
 	for i := 0; i < nbBodies; i++ {
-		b[i].X = rand.Float64()
-		b[i].Y = rand.Float64()
-		b[i].M = rand.Float64()
+		(*bodies)[i].X = rand.Float64()
+		(*bodies)[i].Y = rand.Float64()
+		(*bodies)[i].M = rand.Float64()
 	}
-	
-	//
 	qa = &q
-	
 }
 
 func BenchmarkInitQuadtree(b * testing.B) {
 	for i := 0; i<b.N;i++ {
 		var q Quadtree
-		initQuadtree( &q , 1000000)
+		var bodies []Body
+		initQuadtree( &q , &bodies, 1000000)
 	}
 
 }
