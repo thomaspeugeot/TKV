@@ -126,10 +126,10 @@ func ( b Body) getCoord8() Coord {
 }
 
 // check encoding of c
-func checkIntegrity( c Coord) bool {
+func ( c * Coord) checkIntegrity() bool {
 	
 	//	byte 0 is null
-	if res := 0xFF000000 & c; res != 0x00 {
+	if res := 0xFF000000 & (*c); res != 0x00 {
 		return false
 	}
 	
@@ -216,7 +216,7 @@ func (c * Coord) String() string {
 }
 
 // setup quadtree Nodes for levels from 0 to 7
-func (q * Quadtree) setupNodeLinks() {
+func (q * Quadtree) SetupNodeLinks() {
 	
 	for level := 7; level >= 0; level-- {
 	

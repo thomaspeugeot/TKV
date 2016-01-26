@@ -48,7 +48,7 @@ func TestCoordIntegrity( t *testing.T) {
 		{ 0x0A0A0000, false}, // byte 0 shall be null
 	}
 	for rank, c := range cases {
-		got := checkIntegrity(c.in)
+		got := c.in.checkIntegrity()
 		if( got != c.want) {
 			// t.Errorf("checkIntegrity(%b) == %t, want %t", c.in, got, c.want)
 			t.Errorf("case %d - checkIntegrity of |%8b|%8b|%8b|%8b|, %8x, level %d == %t, want %t", 
@@ -143,6 +143,23 @@ func TestGetCoord8(t * testing.T) {
 	}
 }
 
+// check computation of nodes below
+func TestNodesBelow(t * testing.T) {
+	var q Quadtree
+	var c Coord
+	c.setLevel( 1)
+	c.setX(128)
+	c.setY(128)
+	
+	if ! c.checkIntegrity() { t.Errorf("invalid input %s", &c) }
+	
+	coordNW, coordNE, coordSW, coordSE := q.NodesBelow( c)
+	fmt.Printf("\nin %s\nnw %s\nne %s\nsw %s\nse %s", &c, &coordNW, &coordNE, &coordSW, &coordSE)
+
+	n_coordNW, coordNE, coordSW, coordSE := q.NodesBelow( coordNW)
+	fmt.Printf("\n\nin %s\nnw %s\nne %s\nsw %s\nse %s", &coordNW, &n_coordNW, &coordNE, &coordSW, &coordSE)
+}
+
 func TestComputeLevel8(t * testing.T) {
 	var q Quadtree
 	var bodies []Body
@@ -156,5 +173,5 @@ func TestComputeLevel8(t * testing.T) {
 func TestSetupNodeLinks(t * testing.T) {
 	var q Quadtree
 		
-	q.setupNodeLinks()	
+	q.SetupNodeLinks()	
 }
