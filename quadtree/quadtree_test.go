@@ -2,10 +2,10 @@ package quadtree
 
 import (
 	"testing"
-	"math/rand"
+	"fmt"
 )
 
-
+// test function Level()
 func TestLevel(t *testing.T) {
 
 	cases := []struct {
@@ -19,10 +19,10 @@ func TestLevel(t *testing.T) {
 	}
 		
 	for _, c := range cases {
-		got := c.in.getLevel()
+		got := c.in.Level()
 		if( got != c.want) {
-			t.Errorf("getLevel(%32b) == %d, want %d", c.in, got, c.want)
-			t.Errorf("getLevel(|%8b|%8b|%8b|%8b|) == %d, want %d", 
+			t.Errorf("Level(%32b) == %d, want %d", c.in, got, c.want)
+			t.Errorf("Level(|%8b|%8b|%8b|%8b|) == %d, want %d", 
 					0x000000FF & (c.in >> 24), 0x000000FF & (c.in >> 16), 0x000000FF & (c.in >> 8), 0x000000FF & c.in, 
 					got, c.want)
 		}	
@@ -30,8 +30,8 @@ func TestLevel(t *testing.T) {
 }
 
 
-
-func TestIntegrity( t *testing.T) {
+// test function "check integrity" of Coords
+func TestCoordIntegrity( t *testing.T) {
 	
 	cases := []struct {
 		in Coord
@@ -45,7 +45,7 @@ func TestIntegrity( t *testing.T) {
 		{ 0x00070101, false}, // the last bit of x shall be 0
 		{ 0x00080001, true}, // the last bit can be 1
 		{ 0x000A0000, false},
-		{ 0x0A0A0000, false}, // byt0 shall be null
+		{ 0x0A0A0000, false}, // byte 0 shall be null
 	}
 	for rank, c := range cases {
 		got := checkIntegrity(c.in)
@@ -54,13 +54,11 @@ func TestIntegrity( t *testing.T) {
 			t.Errorf("case %d - checkIntegrity of |%8b|%8b|%8b|%8b|, %8x, level %d == %t, want %t", 
 					rank,
 					0x000000FF & (c.in >> 24), 0x000000FF & (c.in >> 16), 0x000000FF & (c.in >> 8), 0x000000FF & c.in, 
-					c.in, c.in.getLevel(),
+					c.in, c.in.Level(),
 					got, c.want)
 		}	
 	}
 }
-
-
 
 func TestSetX(t * testing.T) {
 	cases := []struct {
@@ -69,17 +67,28 @@ func TestSetX(t * testing.T) {
 		want Coord
 	}{
 		{ 0x00080000, 8, 0x00080800 }, 
+		{ 0x00080001, 8, 0x00080801 }, 
 	}
 	for _, c := range cases {
 		coord := c.in
 		coord.setX( c.inX)
 		got := coord
 		if( coord != c.want) {
-			t.Errorf("%#v setX(%d) == |%8b|%8b|%8b|%8b|, got %8x, want %8x", c.in, c.inX,
-			0x000000FF & (got >> 24), 0x000000FF & (got >> 16), 
-			0x000000FF & (got >> 8), 0x000000FF & got, got, c.want) 
+			t.Errorf("\n setX(%d)\nin   %s\ngot  %s, \nwant %s", 
+			c.inX, &c.in, &got, &c.want) 
 		}
 	}
+}
+
+func TestCoordString(t * testing.T) {
+
+	c := Coord( 0x00080A0B)
+
+	want := "{|       0|    1000|    1010|    1011|    80a0b}"
+	
+	got := fmt.Sprintf("%s", &c)
+	
+	if got != want { t.Errorf("\ngot  %s\nwant %s", got, want) }
 }
 
 func TestSetY(t * testing.T) {
@@ -98,6 +107,21 @@ func TestSetY(t * testing.T) {
 			0x000000FF & (got >> 24), 0x000000FF & (got >> 16), 
 			0x000000FF & (got >> 8), 0x000000FF & got, got, c.want) 
 		}
+	}
+}
+
+func TestUpdateNode(t * testing.T) {
+
+	n := Node{}
+	n.Bodies = make([](*Body), 2)
+	n.Bodies[0] = &Body{ 0.5, 0.0, 1.0}
+	n.Bodies[1] = &Body{ -0.5, 0.0, 1.0}
+	
+	want := Body{ 0.0, 0.0, 2.0}
+	
+	n.updateNode()
+	if( n.Body != want) {
+		t.Errorf("update node(%#v) want %#v, got %#v", n.Body, want, n)
 	}
 }
 
@@ -133,83 +157,4 @@ func TestSetupNodeLinks(t * testing.T) {
 	var q Quadtree
 		
 	q.setupNodeLinks()	
-}
-
-
-///
-
-func BenchmarkSetLevel(b * testing.B) {
-	for i := 0; i<b.N;i++ {		var c Coord;	c.setLevel(6) }
-}
-
-func BenchmarkSetX(b * testing.B) {
-	for i := 0; i<b.N;i++ {		var c Coord;	c.setX(6) }
-}
-
-func BenchmarkSetY(b * testing.B) {
-	for i := 0; i<b.N;i++ {		var c Coord;	c.setY(6) }
-}
-
-func BenchmarkGetCoord8(b * testing.B) {
-	for i := 0; i<b.N;i++ {		var b Body; b.getCoord8()}
-}
-
-func BenchmarkResetLevel8(b * testing.B) {
-	var q Quadtree
-	for i := 0; i<b.N;i++ {	q.resetLevel8()}
-}
-
-func BenchmarkComputeLevel8(b * testing.B) {
-	var q Quadtree
-	var bodies []Body
-		
-	initQuadtree( &q, &bodies, 1000000)
-	
-	for i := 0; i<b.N;i++ {	q.computeLevel8( bodies)}
-}
-
-func BenchmarkComputeCOMAtLevel8(b * testing.B) {
-	var q Quadtree
-	var bodies []Body
-		
-	initQuadtree( &q, &bodies, 1000000)
-	q.computeLevel8( bodies)
-	
-	for i := 0; i<b.N;i++ {	q.computeCOMAtLevel8()}
-}
-
-func BenchmarkUpdateNodesAbove8(b * testing.B) {
-	var q Quadtree
-	var bodies []Body
-		
-	initQuadtree( &q, &bodies, 1000000)
-	q.setupNodeLinks()
-	q.computeLevel8( bodies)
-	
-	for i := 0; i<b.N;i++ {	q.updateNodesAbove8()}
-}
-
-
-
-// init a quadtree with random position
-func initQuadtree( q * Quadtree, bodies * []Body, nbBodies int) {
-	
-	// var q Quadtree
-	*bodies = make([]Body, nbBodies)
-	
-	// init bodies
-	for i := 0; i < nbBodies; i++ {
-		(*bodies)[i].X = rand.Float64()
-		(*bodies)[i].Y = rand.Float64()
-		(*bodies)[i].M = rand.Float64()
-	}
-}
-
-func BenchmarkInitQuadtree(b * testing.B) {
-	for i := 0; i<b.N;i++ {
-		var q Quadtree
-		var bodies []Body
-		initQuadtree( &q , &bodies, 1000000)
-	}
-
 }

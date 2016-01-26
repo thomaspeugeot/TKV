@@ -21,6 +21,7 @@ package quadtree
 
 import (
 	"fmt"
+	"bytes"
 )
 
 // 
@@ -72,18 +73,17 @@ type Node struct {
 
 // a Quadtree store Nodes. It is a an array with direct access to the Nodes with the Nodes coordinate
 // see Coord
-type Quadtree [16*256*256]Node
+type Quadtree [1<<20]Node
 
 var optim bool
 
 func init() {
 	optim = true
-	fmt.Printf("Size of quadtree %d\n", 8*256*256)
 } 
 
 // node level of a node coord c
 // is between 0 and 8 and coded on 2nd byte of the Coord c
-func (c Coord) getLevel() int { return int( c >> 16) }
+func (c Coord) Level() int { return int( c >> 16) }
 func (c * Coord) setLevel(level int) { 
 	
 	*c = *c & 0x0000FFFF // reset level but bytes for x & y are preserved
@@ -94,26 +94,19 @@ func (c * Coord) setLevel(level int) {
 }
 
 // x coord
-func (c Coord) getX() int { return int((c & 0x0000FFFF) >> 8) }
+func (c Coord) X() int { return int((c & 0x0000FFFF) >> 8) }
 func (c * Coord) setX(x int) { 
-	// fmt.Printf( "SetX c before reset x %8x\n", *c)
 
 	*c = *c & 0x00FF00FF // reset x bytes
-	// fmt.Printf( "SetX c after reset x %8x\n", *c)
 	
 	var pad uint32
 	pad = (uint32(x) << 8) 
-	// fmt.Printf( "SetX pad %8x\n", pad)
-
 
 	*c = *c | Coord(pad)
-
-	// fmt.Printf( "SetX c after x input %8x\n", *c)
-	// if !checkIntegrity( *c) { panic("set X failed")}
 }
 
 // y coord
-func (c Coord) getY() int { return int( c & 0x000000FF) }
+func (c Coord) Y() int { return int( c & 0x000000FF) }
 func (c * Coord) setY(y int) { 
 	*c = *c & 0x00FFFF00 // reset y bytes
 	
@@ -121,8 +114,6 @@ func (c * Coord) setY(y int) {
 	pad = uint32(y) 
 	*c = *c | Coord(pad)
 }
-
-
 
 // get Node coordinates at level 8
 func ( b Body) getCoord8() Coord {
@@ -143,25 +134,25 @@ func checkIntegrity( c Coord) bool {
 	}
 	
 	// check level is below or equal to 8
-	if c.getLevel() > 8 {
+	if c.Level() > 8 {
 		return false
 	}
 	
 	// check x coord is encoded acoording to the level
-	if (false) { fmt.Printf( "y (0xFF >> uint( setLevel(%d))) %08b\n", c.getLevel(), 0xFF >> uint( c.getLevel())) }
-	if (0xFF >> uint( c.getLevel())) & c.getX() != 0x00 {
+	if (false) { fmt.Printf( "y (0xFF >> uint( setLevel(%d))) %08b\n", c.Level(), 0xFF >> uint( c.Level())) }
+	if (0xFF >> uint( c.Level())) & c.X() != 0x00 {
 		return false
 	}
 
 	// check y coord
-	if (0xFF >> uint( c.getLevel())) & c.getY() != 0x00 {
+	if (0xFF >> uint( c.Level())) & c.Y() != 0x00 {
 		return false
 	}
 	
 	return true
 }
 
-type Direction uint
+// constants used to navigate from one node to the other
 const (
 	NW = 0x0000
 	NE = 0x0100
@@ -190,6 +181,40 @@ func (q * Quadtree) updateNodesAbove8() {
 	}
 }
 
+// get nodes coords below
+func (q * Quadtree) NodesBelow(c Coord)  (coordNW, coordNE, coordSW, coordSE Coord) {
+
+	levelBelow := c.Level() + 1
+	i := c.X()
+	j := c.Y()
+	shift := uint( 8-levelBelow)
+
+	// to go east at the level below, we flip to 1 the bit that is significant at that level 
+	coordNW = Coord( uint(levelBelow)<<16 | uint(i)<<8 | uint(j) | NW << shift)
+	coordNE = Coord( uint(levelBelow)<<16 | uint(i)<<8 | uint(j) | NE << shift)
+	coordSW = Coord( uint(levelBelow)<<16 | uint(i)<<8 | uint(j) | SW << shift)
+	coordSE = Coord( uint(levelBelow)<<16 | uint(i)<<8 | uint(j) | SE << shift)
+	
+	return coordNW, coordNE, coordSW, coordSE
+}
+
+// print a coord
+func (c * Coord) String() string {
+	var buf bytes.Buffer
+	buf.WriteByte('{')
+		
+	fmt.Fprintf(&buf, "|%8b|%8b|%8b|%8b| %8x",
+		0x000000FF & (*c >> 24), 
+		0x000000FF & (*c >> 16), 
+		0x000000FF & (*c >> 8), 
+		0x000000FF & *c, 
+		*c)
+	
+	buf.WriteByte('}')
+	return buf.String()
+
+}
+
 // setup quadtree Nodes for levels from 0 to 7
 func (q * Quadtree) setupNodeLinks() {
 	
@@ -199,9 +224,6 @@ func (q * Quadtree) setupNodeLinks() {
 		nbNodesX := 1 << uint(level)
 		nbNodesY := 1 << uint(level)
 
-		// level below has a higher number (this goes against elevator common sense)
-		levelBelow := level+1
-		
 		// parse nodes of level
 		for i := 0; i < nbNodesX; i++ {
 			for j := 0; j < nbNodesY; j++ {
@@ -209,19 +231,14 @@ func (q * Quadtree) setupNodeLinks() {
 				coord := Coord( uint(level)<<16 | uint(i)<<8 | uint(j))
 				node := q[coord]
 				node.Bodies = make([]*Body, 4)
-				shift := uint( 8-levelBelow)
 				
-				// to go east at the level below, we flip to 1 the bit that is significant at that level 
-				coordNW := Coord( uint(levelBelow)<<16 | uint(i)<<8 | uint(j) | NW << shift)
-				coordNE := Coord( uint(levelBelow)<<16 | uint(i)<<8 | uint(j) | NE << shift)
-				coordSW := Coord( uint(levelBelow)<<16 | uint(i)<<8 | uint(j) | SW << shift)
-				coordSE := Coord( uint(levelBelow)<<16 | uint(i)<<8 | uint(j) | SE << shift)
+				coordNW, coordNE, coordSW, coordSE := q.NodesBelow(coord)
 				
-				nodeNW := q[coordNW]
-				nodeNE := q[coordNE]
-				nodeSW := q[coordSW]
-				nodeSE := q[coordSE]
-				
+				nodeNW := &q[coordNW]
+				nodeNE := &q[coordNE]
+				nodeSW := &q[coordSW]
+				nodeSE := &q[coordSE]
+	
 				node.Bodies[0] = & nodeNW.Body
 				node.Bodies[1] = & nodeNE.Body
 				node.Bodies[2] = & nodeSW.Body
@@ -235,8 +252,10 @@ func (q * Quadtree) setupNodeLinks() {
 // clear all nodes bodies & set masse to 0
 func (q * Quadtree) resetLevel8() {
 	
-	for _, n := range q {
-		//		if i >= (1<<16) { return }
+	// qLevel8 is the part of the quadtree for the level 8
+	qLevel8 := (*q)[1<<19:]
+	for _, n := range qLevel8 {
+	
 		n.Bodies = make([]*Body, 0) // this put the slice into garbage collection
 	}
 }
@@ -244,13 +263,10 @@ func (q * Quadtree) resetLevel8() {
 // fill quadtree at level with bodies 
 func (q * Quadtree) computeLevel8 (bodies []Body) {
 
-	q.resetLevel8()
 	for _, b := range bodies {
 	
 		// get coord of body (this is direct access)
 		coord := b.getCoord8()
-	
-		if (false) { fmt.Printf("computeLevel8 coordinate %d\n", coord) }
 		
 		nodeBodies := q[coord].Bodies
 		nodeBodies = append( nodeBodies, &b)
@@ -262,25 +278,17 @@ func (q * Quadtree) computeCOMAtLevel8 () {
 
 	q.resetLevel8()
 	for _, n := range q {
-		
-		n.M = 0.0
-		// get all bodies of the node
-		for _, b	:= range n.Bodies {
-			n.M += b.M
-			n.X += b.X*b.M
-			n.Y += b.Y*b.M
-		}	
-		// divide by total mass to get the barycenter
-		if n.M > 0 {
-			n.X /= n.M
-			n.Y /= n.M
-		}
+		n.updateNode()
 	}		
 }
 
+// update COM of a node (reset the COM)
 func (n * Node) updateNode() {
 	
 	n.M = 0.0
+	n.X = 0.0
+	n.Y = 0.0
+	
 	// get all bodies of the node
 	for _, b	:= range n.Bodies {
 		n.M += b.M
