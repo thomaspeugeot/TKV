@@ -1,3 +1,4 @@
+// this the file for the test (benchmarks are in another file)
 package quadtree
 
 import (
