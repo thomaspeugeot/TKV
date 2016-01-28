@@ -59,6 +59,7 @@ type Body struct {
 	X float64
 	Y float64
 	M float64
+	prev, next * Body // bodies are linked together when they belong to a quadtree
 }
 
 // a node is a body (
@@ -66,8 +67,9 @@ type Node struct {
 	// bodies of the node 
 	//  at level 8, this is the list of bodies pertaining in the bounding box of the node
 	// for level 7 to 0, this is the list of the four bodies of the nodes at the level below (or +1)
-	Bodies [](*Body)
+	
 	Body // barycenter with mass of all the bodies of the node
+	first * Body  // link to the bodies below
 }
 
 
@@ -230,8 +232,6 @@ func (q * Quadtree) SetupNodeLinks() {
 				
 				coord := Coord( uint(level)<<16 | uint(i)<<8 | uint(j))
 				node := q[coord]
-				node.Bodies = make([]*Body, 4)
-				
 				coordNW, coordNE, coordSW, coordSE := q.NodesBelow(coord)
 				
 				nodeNW := &q[coordNW]
@@ -239,24 +239,13 @@ func (q * Quadtree) SetupNodeLinks() {
 				nodeSW := &q[coordSW]
 				nodeSE := &q[coordSE]
 	
-				node.Bodies[0] = & nodeNW.Body
-				node.Bodies[1] = & nodeNE.Body
-				node.Bodies[2] = & nodeSW.Body
-				node.Bodies[3] = & nodeSE.Body
+				// bodies of the nodes below are chained
+				node.Body.next = & (nodeNW.Body)
+				nodeNW.Body.next = & (nodeNE.Body)
+				nodeNE.Body.next = & (nodeSW.Body)
+				nodeSW.Body.next = & (nodeSE.Body)
 			}
 		}
-	}
-}
-
-// reset a Quadtree level 8
-// clear all nodes bodies & set masse to 0
-func (q * Quadtree) resetLevel8() {
-	
-	// qLevel8 is the part of the quadtree for the level 8
-	qLevel8 := (*q)[1<<19:]
-	for _, n := range qLevel8 {
-	
-		n.Bodies = make([]*Body, 0) // this put the slice into garbage collection
 	}
 }
 
@@ -265,18 +254,35 @@ func (q * Quadtree) computeLevel8 (bodies []Body) {
 
 	for _, b := range bodies {
 	
+		// link the next body to the previous one
+		if( b.next != nil) {
+			b.next.prev = b.prev
+		}
+		// link the previous body to the next one
+		if (b.prev != nil) {
+			b.prev = b.next
+		}
+		
 		// get coord of body (this is direct access)
 		coord := b.getCoord8()
+
+		// put body as the first body of the node
+		// shift the first body if it is already there
+		if( q[coord].first != nil) {
+			// double link body to the current node's first
+			b.next = q[coord].first
+			q[coord].first.prev = &b
+		}
 		
-		nodeBodies := q[coord].Bodies
-		nodeBodies = append( nodeBodies, &b)
+		// body b is the new node's first
+		q[coord].first = &b
+		b.prev = q[coord].first
 	}		
 }
 
 // compute COM of quadtree at level 8 
 func (q * Quadtree) computeCOMAtLevel8 () {
 
-	q.resetLevel8()
 	for _, n := range q {
 		n.updateNode()
 	}		
@@ -289,8 +295,8 @@ func (n * Node) updateNode() {
 	n.X = 0.0
 	n.Y = 0.0
 	
-	// get all bodies of the node
-	for _, b	:= range n.Bodies {
+	// parse bodies of the node
+	for b := n.first ; b != nil; b = b.next {
 		n.M += b.M
 		n.X += b.X*b.M
 		n.Y += b.Y*b.M

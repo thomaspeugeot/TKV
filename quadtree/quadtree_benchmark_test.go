@@ -21,11 +21,6 @@ func BenchmarkGetCoord8(b * testing.B) {
 	for i := 0; i<b.N;i++ {		var b Body; b.getCoord8()}
 }
 
-func BenchmarkResetLevel8(b * testing.B) {
-	var q Quadtree
-	for i := 0; i<b.N;i++ {	q.resetLevel8()}
-}
-
 func BenchmarkComputeLevel8(b * testing.B) {
 	var q Quadtree
 	var bodies []Body
