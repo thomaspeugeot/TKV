@@ -114,11 +114,11 @@ func TestSetY(t * testing.T) {
 func TestUpdateNode(t * testing.T) {
 
 	n := Node{}
-	n.Bodies = make([](*Body), 2)
-	n.Bodies[0] = &Body{ 0.5, 0.0, 1.0}
-	n.Bodies[1] = &Body{ -0.5, 0.0, 1.0}
-	
-	want := Body{ 0.0, 0.0, 2.0}
+	b1 := Body{ 0.5, 0.0, 1.0, n.first, nil}
+	b2 := Body{ -0.5, 0.0, 1.0, &b1, nil}
+	b1.next = &b2
+		
+	want := Body{ 0.0, 0.0, 2.0, nil, nil}
 	
 	n.updateNode()
 	if( n.Body != want) {
@@ -131,8 +131,8 @@ func TestGetCoord8(t * testing.T) {
 		in Body
 		want Coord
 	}{
-		{ Body{0.0, 0.0, 0.0}, 0x00080000 }, 
-		{ Body{0.0, 255.999, 255.999}, 0x0008FFFF }, 
+		{ Body{0.0, 0.0, 0.0, nil, nil}, 0x00080000 }, 
+		{ Body{0.0, 255.999, 255.999, nil, nil}, 0x0008FFFF }, 
 	}
 	for _, c := range cases {
 		got := c.in.getCoord8()
