@@ -21,7 +21,7 @@ func BenchmarkGetCoord8(b * testing.B) {
 	for i := 0; i<b.N;i++ {		var b Body; b.getCoord8()}
 }
 
-func BenchmarkComputeLevel8(b * testing.B) {
+func BenchmarkUpdateNodesList(b * testing.B) {
 	var q Quadtree
 	var bodies []Body
 		
@@ -35,20 +35,10 @@ func BenchmarkUpdateNodesCOM(b * testing.B) {
 	var bodies []Body
 		
 	initQuadtree( &q, &bodies, 1000000)
+	q.InitCoord()
 	q.updateNodesList( bodies)
 	
 	for i := 0; i<b.N;i++ {	q.updateNodesCOM()}
-}
-
-func BenchmarkUpdateNodesAbove8(b * testing.B) {
-	var q Quadtree
-	var bodies []Body
-		
-	initQuadtree( &q, &bodies, 1000000)
-	q.SetupNodeLinks()
-	q.updateNodesList( bodies)
-	
-	for i := 0; i<b.N;i++ {	q.updateNodesAbove8()}
 }
 
 // init a quadtree with random position

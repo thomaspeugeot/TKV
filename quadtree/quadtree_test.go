@@ -114,7 +114,7 @@ func TestSetY(t * testing.T) {
 func TestUpdateNodesList(t * testing.T) {
 	
 	var q Quadtree
-	q.SetupNodeLinks()
+	q.SetupNodesLinks()
 	
 	var bodies []Body	
 	
@@ -128,7 +128,7 @@ func TestUpdateNodesList(t * testing.T) {
 func TestUpdateNodesCOM(t * testing.T) {
 	
 	var q Quadtree
-	q.SetupNodeLinks()
+	q.SetupNodesLinks()
 	
 	var bodies []Body	
 	
@@ -143,11 +143,31 @@ func TestUpdateNodesCOM(t * testing.T) {
 	fmt.Printf("TestUpdateNodesCOM end\n")
 }
 	
+func TestInitCoord(t * testing.T) {
+
+	var q Quadtree
+	q.InitCoord()
 	
+	cases := []struct {
+		in Coord
+		want Coord
+	}{
+		{ 0x00080000, 0x00080000},
+		{ 0x00080001, 0x00080001},
+	}
+	
+	for _, c := range cases {
+		got := q[c.in].c
+		if( got != c.want) {
+			t.Errorf("coord %8x got %8x want %8x", c.in, got, c.want) 
+		}
+	}	
+}
+
 func TestUpdateNodeCOM(t * testing.T) {
 	
 	var q Quadtree
-	q.SetupNodeLinks()
+	q.SetupNodesLinks()
 	
 	var c Coord
 	c.setLevel(8)
@@ -162,7 +182,7 @@ func TestUpdateNodeCOM(t * testing.T) {
 		
 	want := Body{ X:0.0, Y:0.0, M:2.0, prev:nil, next:n.Body.next}
 	
-	n.updateNodeCOM()
+	n.updateCOM()
 	if( n.Body != want) {
 		t.Errorf("update\nnode(%#v)\nwant %#v", n.Body, want)
 	}
@@ -204,8 +224,8 @@ func TestNodesBelow(t * testing.T) {
 }
 
 
-func TestSetupNodeLinks(t * testing.T) {
+func TestSetupNodesLinks(t * testing.T) {
 	var q Quadtree
 		
-	q.SetupNodeLinks()	
+	q.SetupNodesLinks()	
 }

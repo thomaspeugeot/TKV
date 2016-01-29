@@ -72,6 +72,7 @@ type Node struct {
 	// this body is linked with the bodies at his level in the node
 	Body 
 	first * Body  // link to the bodies below
+	c Coord // coordinate within the quadtree (for debug purpose only)
 }
 
 
@@ -165,7 +166,7 @@ const (
 )
 
 // compute quadtree Nodes for levels from 0 to 7
-func (q * Quadtree) updateNodesAbove8() {
+func (q * Quadtree) updateNodesCOMAbove8() {
 	
 	for level := 7; level >= 0; level-- {
 	
@@ -178,8 +179,8 @@ func (q * Quadtree) updateNodesAbove8() {
 			for j := 0; j < nbNodesY; j++ {
 				
 				coord := Coord( uint(level)<<16 | uint(i)<<8 | uint(j))
-				node := q[coord]
-				node.updateNodeCOM()
+				node := &(q[coord])
+				node.updateCOM()
 			}
 		}
 	}
@@ -219,8 +220,29 @@ func (c * Coord) String() string {
 
 }
 
-// setup quadtree Nodes for levels from 0 to 7
-func (q * Quadtree) SetupNodeLinks() {
+// init coords
+func (q * Quadtree) InitCoord() {
+
+	for level := 8; level >= 0; level-- {
+	
+		// nb of nodes for the current level
+		nbNodesX := 1 << uint(level)
+		nbNodesY := 1 << uint(level)
+		
+		// parse nodes of level
+		for i := 0; i < nbNodesX; i++ {
+			for j := 0; j < nbNodesY; j++ {
+				
+				coord := Coord( uint(level)<<16 | uint(i)<<8 | uint(j))
+				node := &(q[coord])
+				node.c = coord
+			}
+		}
+	}
+}
+
+// setup quadtree Nodes for levels from 7 to 0
+func (q * Quadtree) SetupNodesLinks() {
 	
 	for level := 7; level >= 0; level-- {
 	
@@ -233,7 +255,7 @@ func (q * Quadtree) SetupNodeLinks() {
 			for j := 0; j < nbNodesY; j++ {
 				
 				coord := Coord( uint(level)<<16 | uint(i)<<8 | uint(j))
-				node := q[coord]
+				node := &q[coord]
 				coordNW, coordNE, coordSW, coordSE := q.NodesBelow(coord)
 				
 				nodeNW := &q[coordNW]
@@ -254,7 +276,9 @@ func (q * Quadtree) SetupNodeLinks() {
 // fill quadtree at level with bodies 
 func (q * Quadtree) updateNodesList (bodies []Body) {
 
-	for _, b := range bodies {
+	for idx, _ := range bodies {
+	
+		b := &(bodies[idx])
 	
 		// link the next body to the previous one
 		if( b.next != nil) {
@@ -273,30 +297,41 @@ func (q * Quadtree) updateNodesList (bodies []Body) {
 		if( q[coord].first != nil) {
 			// double link body to the current node's first
 			b.next = q[coord].first
-			q[coord].first.prev = &b
+			q[coord].first.prev = b
 		}
 		
 		// body b is the new node's first
-		q[coord].first = &b
+		q[coord].first = b
 		b.prev = q[coord].first
 	}		
 }
 
-// compute COM of quadtree at level 8 
+// compute COM of quadtree from level 8 to level 0
 func (q * Quadtree) updateNodesCOM () {
 
-	// part of the quadtree at level 8
-	// since all coord start with 0x08xxyy, coords at level follow pattern
-	// 0x08xxyy
-	quadtreeLevel8 := q[1<<19:]
-
-	for _, n := range quadtreeLevel8 {
-		n.updateNodeCOM()
-	}		
+	// compute is bottom up
+	for level := 7; level >= 0; level-- {
+	
+		// nb of nodes for the current level
+		nbNodesX := 1 << uint(level)
+		nbNodesY := 1 << uint(level)
+		
+		// parse nodes of level
+		for i := 0; i < nbNodesX; i++ {
+			for j := 0; j < nbNodesY; j++ {
+				
+				coord := Coord( uint(level)<<16 | uint(i)<<8 | uint(j))
+				fmt.Printf("\nupdateNodesCOM updating coord %8x", coord)
+				
+				node := &(q[coord])
+				node.updateCOM()
+			}
+		}
+	}	
 }
 
 // update COM of a node (reset the COM)
-func (n * Node) updateNodeCOM() {
+func (n * Node) updateCOM() {
 	
 	n.M = 0.0
 	n.X = 0.0
@@ -304,6 +339,9 @@ func (n * Node) updateNodeCOM() {
 	
 	// parse bodies of the node
 	for b := n.first ; b != nil; b = b.next {
+		fmt.Printf("updateCOM body adress %x\n", &b)
+		if( b.next == b) { panic("linked to itself")}
+		
 		n.M += b.M
 		n.X += b.X*b.M
 		n.Y += b.Y*b.M
