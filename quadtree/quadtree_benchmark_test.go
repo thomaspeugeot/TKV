@@ -27,17 +27,17 @@ func BenchmarkComputeLevel8(b * testing.B) {
 		
 	initQuadtree( &q, &bodies, 1000000)
 	
-	for i := 0; i<b.N;i++ {	q.computeLevel8( bodies)}
+	for i := 0; i<b.N;i++ {	q.updateNodesList( bodies)}
 }
 
-func BenchmarkComputeCOMAtLevel8(b * testing.B) {
+func BenchmarkUpdateNodesCOM(b * testing.B) {
 	var q Quadtree
 	var bodies []Body
 		
 	initQuadtree( &q, &bodies, 1000000)
-	q.computeLevel8( bodies)
+	q.updateNodesList( bodies)
 	
-	for i := 0; i<b.N;i++ {	q.computeCOMAtLevel8()}
+	for i := 0; i<b.N;i++ {	q.updateNodesCOM()}
 }
 
 func BenchmarkUpdateNodesAbove8(b * testing.B) {
@@ -46,7 +46,7 @@ func BenchmarkUpdateNodesAbove8(b * testing.B) {
 		
 	initQuadtree( &q, &bodies, 1000000)
 	q.SetupNodeLinks()
-	q.computeLevel8( bodies)
+	q.updateNodesList( bodies)
 	
 	for i := 0; i<b.N;i++ {	q.updateNodesAbove8()}
 }

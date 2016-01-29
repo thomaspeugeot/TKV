@@ -111,7 +111,40 @@ func TestSetY(t * testing.T) {
 	}
 }
 
-func TestUpdateNode(t * testing.T) {
+func TestUpdateNodesList(t * testing.T) {
+	
+	var q Quadtree
+	q.SetupNodeLinks()
+	
+	var bodies []Body	
+	
+	fmt.Printf("TestUpdateNodesList before initQuadtree\n")
+	initQuadtree( &q, &bodies, 1000000)
+
+	fmt.Printf("TestUpdateNodesList before updateNodesList\n")
+	q.updateNodesList( bodies)
+}
+
+func TestUpdateNodesCOM(t * testing.T) {
+	
+	var q Quadtree
+	q.SetupNodeLinks()
+	
+	var bodies []Body	
+	
+	fmt.Printf("TestUpdateNodesCOM before initQuadtree\n")
+	initQuadtree( &q, &bodies, 10000)
+
+	fmt.Printf("TestUpdateNodesCOM before updateNodesList\n")
+	q.updateNodesList( bodies)
+	
+	fmt.Printf("TestUpdateNodesCOM before updateNodesCOM\n")
+	q.updateNodesCOM()
+	fmt.Printf("TestUpdateNodesCOM end\n")
+}
+	
+	
+func TestUpdateNodeCOM(t * testing.T) {
 	
 	var q Quadtree
 	q.SetupNodeLinks()
@@ -127,9 +160,9 @@ func TestUpdateNode(t * testing.T) {
 	b2 := Body{ -0.5, 0.0, 1.0, &b1, nil}
 	b1.next = &b2
 		
-	want := Body{ X:0.0, Y:0.0, M:2.0, prev:nil, next:&b1}
+	want := Body{ X:0.0, Y:0.0, M:2.0, prev:nil, next:n.Body.next}
 	
-	n.updateNode()
+	n.updateNodeCOM()
 	if( n.Body != want) {
 		t.Errorf("update\nnode(%#v)\nwant %#v", n.Body, want)
 	}
@@ -168,15 +201,6 @@ func TestNodesBelow(t * testing.T) {
 
 	n_coordNW, coordNE, coordSW, coordSE := q.NodesBelow( coordNW)
 	fmt.Printf("\n\nin %s\nnw %s\nne %s\nsw %s\nse %s", &coordNW, &n_coordNW, &coordNE, &coordSW, &coordSE)
-}
-
-func TestComputeLevel8(t * testing.T) {
-	var q Quadtree
-	var bodies []Body
-		
-	initQuadtree( &q, &bodies, 1)
-	
-	q.computeLevel8( bodies)
 }
 
 

@@ -179,7 +179,7 @@ func (q * Quadtree) updateNodesAbove8() {
 				
 				coord := Coord( uint(level)<<16 | uint(i)<<8 | uint(j))
 				node := q[coord]
-				node.updateNode()
+				node.updateNodeCOM()
 			}
 		}
 	}
@@ -252,7 +252,7 @@ func (q * Quadtree) SetupNodeLinks() {
 }
 
 // fill quadtree at level with bodies 
-func (q * Quadtree) computeLevel8 (bodies []Body) {
+func (q * Quadtree) updateNodesList (bodies []Body) {
 
 	for _, b := range bodies {
 	
@@ -283,15 +283,20 @@ func (q * Quadtree) computeLevel8 (bodies []Body) {
 }
 
 // compute COM of quadtree at level 8 
-func (q * Quadtree) computeCOMAtLevel8 () {
+func (q * Quadtree) updateNodesCOM () {
 
-	for _, n := range q {
-		n.updateNode()
+	// part of the quadtree at level 8
+	// since all coord start with 0x08xxyy, coords at level follow pattern
+	// 0x08xxyy
+	quadtreeLevel8 := q[1<<19:]
+
+	for _, n := range quadtreeLevel8 {
+		n.updateNodeCOM()
 	}		
 }
 
 // update COM of a node (reset the COM)
-func (n * Node) updateNode() {
+func (n * Node) updateNodeCOM() {
 	
 	n.M = 0.0
 	n.X = 0.0
