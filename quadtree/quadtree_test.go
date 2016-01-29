@@ -160,27 +160,6 @@ func TestUpdateNodesCOM(t * testing.T) {
 	// fmt.Printf("TestUpdateNodesCOM end\n")
 }
 	
-func TestInitCoord(t * testing.T) {
-
-	var q Quadtree
-	q.InitCoord()
-	
-	cases := []struct {
-		in Coord
-		want Coord
-	}{
-		{ 0x00080000, 0x00080000},
-		{ 0x00080001, 0x00080001},
-	}
-	
-	for _, c := range cases {
-		got := q[c.in].c
-		if( got != c.want) {
-			t.Errorf("coord %8x got %8x want %8x", c.in, got, c.want) 
-		}
-	}	
-}
-
 func TestUpdateNodeCOM(t * testing.T) {
 	
 	var q Quadtree

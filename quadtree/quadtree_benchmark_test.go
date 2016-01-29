@@ -40,7 +40,6 @@ func BenchmarkUpdateNodesCOM_10M(b * testing.B) {
 	var bodies []Body
 		
 	initQuadtree( &q, &bodies, 10000000)
-	q.InitCoord()
 	q.updateNodesList( bodies)
 	
 	b.ResetTimer()

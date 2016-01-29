@@ -72,7 +72,6 @@ type Node struct {
 	// this body is linked with the bodies at his level in the node
 	Body 
 	first * Body  // link to the bodies below
-	c Coord // coordinate within the quadtree (for debug purpose only)
 }
 
 
@@ -235,31 +234,6 @@ func (c * Coord) String() string {
 
 }
 
-// init coords
-func (q * Quadtree) InitCoord() {
-
-	for level := 8; level >= 0; level-- {
-	
-		// nb of nodes for the current level
-		nbNodesX := 1 << uint(level)
-		nbNodesY := 1 << uint(level)
-		
-		// parse nodes of level
-		for i := 0; i < nbNodesX; i++ {
-			for j := 0; j < nbNodesY; j++ {
-				
-				var coord Coord 
-				coord.setLevel( level)
-				coord.setXHexa(i, level)
-				coord.setYHexa(j, level)
-				
-				node := &(q[coord])
-				node.c = coord
-			}
-		}
-	}
-}
-
 // setup quadtree Nodes for levels from 7 to 0
 func (q * Quadtree) SetupNodesLinks() {
 	
@@ -356,7 +330,7 @@ func (q * Quadtree) updateNodesCOM () {
 	}	
 }
 
-// update COM of a node (reset the COM)
+// update COM of a node (reset the current COM before)
 func (n * Node) updateCOM() {
 	
 	n.M = 0.0
