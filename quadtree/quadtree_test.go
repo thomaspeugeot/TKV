@@ -112,17 +112,26 @@ func TestSetY(t * testing.T) {
 }
 
 func TestUpdateNode(t * testing.T) {
-
-	n := Node{}
-	b1 := Body{ 0.5, 0.0, 1.0, n.first, nil}
+	
+	var q Quadtree
+	q.SetupNodeLinks()
+	
+	var c Coord
+	c.setLevel(8)
+	c.setX(0x010)
+	c.setY(0x001)
+	
+	n := q[c]
+	b1 := Body{ X:0.5, Y:0.0, M:1.0, prev:n.first, next:nil}
+	n.first = &b1
 	b2 := Body{ -0.5, 0.0, 1.0, &b1, nil}
 	b1.next = &b2
 		
-	want := Body{ 0.0, 0.0, 2.0, nil, nil}
+	want := Body{ X:0.0, Y:0.0, M:2.0, prev:nil, next:&b1}
 	
 	n.updateNode()
 	if( n.Body != want) {
-		t.Errorf("update node(%#v) want %#v, got %#v", n.Body, want, n)
+		t.Errorf("update\nnode(%#v)\nwant %#v", n.Body, want)
 	}
 }
 

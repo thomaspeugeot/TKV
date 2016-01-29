@@ -59,7 +59,7 @@ type Body struct {
 	X float64
 	Y float64
 	M float64
-	prev, next * Body // bodies are linked together when they belong to a quadtree
+	prev, next * Body // bodies of a node are linked together
 }
 
 // a node is a body (
@@ -68,7 +68,9 @@ type Node struct {
 	//  at level 8, this is the list of bodies pertaining in the bounding box of the node
 	// for level 7 to 0, this is the list of the four bodies of the nodes at the level below (or +1)
 	
-	Body // barycenter with mass of all the bodies of the node
+	// Barycenter with mass of all the bodies of the node
+	// this body is linked with the bodies at his level in the node
+	Body 
 	first * Body  // link to the bodies below
 }
 
@@ -240,7 +242,7 @@ func (q * Quadtree) SetupNodeLinks() {
 				nodeSE := &q[coordSE]
 	
 				// bodies of the nodes below are chained
-				node.Body.next = & (nodeNW.Body)
+				node.first = & (nodeNW.Body)
 				nodeNW.Body.next = & (nodeNE.Body)
 				nodeNE.Body.next = & (nodeSW.Body)
 				nodeSW.Body.next = & (nodeSE.Body)
