@@ -29,7 +29,7 @@ func BenchmarkUpdateNodesList_10M(b * testing.B) {
 	var q Quadtree
 	var bodies []Body
 		
-	initQuadtree( &q, &bodies, 10000000)
+	initBodies( &bodies, 10000000)
 	b.ResetTimer()
 	
 	for i := 0; i<b.N;i++ {	q.updateNodesList( bodies)}
@@ -39,7 +39,7 @@ func BenchmarkUpdateNodesCOM_10M(b * testing.B) {
 	var q Quadtree
 	var bodies []Body
 		
-	initQuadtree( &q, &bodies, 10000000)
+	initBodies( &bodies, 10000000)
 	q.updateNodesList( bodies)
 	
 	b.ResetTimer()
@@ -48,7 +48,7 @@ func BenchmarkUpdateNodesCOM_10M(b * testing.B) {
 }
 
 // init a quadtree with random position
-func initQuadtree( q * Quadtree, bodies * []Body, nbBodies int) {
+func initBodies( bodies * []Body, nbBodies int) {
 	
 	// var q Quadtree
 	*bodies = make([]Body, nbBodies)
@@ -62,9 +62,10 @@ func initQuadtree( q * Quadtree, bodies * []Body, nbBodies int) {
 }
 
 func BenchmarkInitQuadtree(b * testing.B) {
+	var bodies []Body
+
+
 	for i := 0; i<b.N;i++ {
-		var q Quadtree
-		var bodies []Body
-		initQuadtree( &q , &bodies, 1000000)
+		initBodies( &bodies, 1000000)
 	}
 }
