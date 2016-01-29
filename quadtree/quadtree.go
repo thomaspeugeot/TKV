@@ -100,7 +100,8 @@ func (c * Coord) setLevel(level int) {
 
 // x coord
 func (c Coord) X() int { return int((c & 0x0000FFFF) >> 8) }
-func (c * Coord) setX(x int) { 
+// set X coordinate of node in Hexa from 0 to 255
+func (c * Coord) setXHexaLevel8(x int) { 
 
 	*c = *c & 0x00FF00FF // reset x bytes
 	
@@ -109,15 +110,25 @@ func (c * Coord) setX(x int) {
 
 	*c = *c | Coord(pad)
 }
+// set X coordinate in Hexa according to level
+// x is between 0 and 1<<(level-1)
+func (c * Coord) setXHexa(x int, level int) {
+	c.setXHexaLevel8( x << (8- uint(level)))
+}
 
 // y coord
 func (c Coord) Y() int { return int( c & 0x000000FF) }
-func (c * Coord) setY(y int) { 
+func (c * Coord) setYHexaLevel8(y int) { 
 	*c = *c & 0x00FFFF00 // reset y bytes
 	
 	var pad uint32
 	pad = uint32(y) 
 	*c = *c | Coord(pad)
+}
+// set Y coordinate in Hexa according to level
+// y is between 0 and 1<<(level-1)
+func (c * Coord) setYHexa(y int, level int) {
+	c.setYHexaLevel8( y << (8-uint(level)))
 }
 
 // get Node coordinates at level 8
@@ -125,8 +136,8 @@ func ( b Body) getCoord8() Coord {
 	var c Coord
 	
 	c.setLevel( 8)
-	c.setX( int(b.X * 256.0) )
-	c.setY( int(b.Y * 256.0) )
+	c.setXHexaLevel8( int(b.X * 256.0) )
+	c.setYHexaLevel8( int(b.Y * 256.0) )
 	return c
 }
 
@@ -178,7 +189,11 @@ func (q * Quadtree) updateNodesCOMAbove8() {
 		for i := 0; i < nbNodesX; i++ {
 			for j := 0; j < nbNodesY; j++ {
 				
-				coord := Coord( uint(level)<<16 | uint(i)<<8 | uint(j))
+				var coord Coord 
+				coord.setLevel( level)
+				coord.setXHexa(i, level)
+				coord.setYHexa(j, level)
+				
 				node := &(q[coord])
 				node.updateCOM()
 			}
@@ -233,7 +248,11 @@ func (q * Quadtree) InitCoord() {
 		for i := 0; i < nbNodesX; i++ {
 			for j := 0; j < nbNodesY; j++ {
 				
-				coord := Coord( uint(level)<<16 | uint(i)<<8 | uint(j))
+				var coord Coord 
+				coord.setLevel( level)
+				coord.setXHexa(i, level)
+				coord.setYHexa(j, level)
+				
 				node := &(q[coord])
 				node.c = coord
 			}
@@ -254,8 +273,12 @@ func (q * Quadtree) SetupNodesLinks() {
 		for i := 0; i < nbNodesX; i++ {
 			for j := 0; j < nbNodesY; j++ {
 				
-				coord := Coord( uint(level)<<16 | uint(i)<<8 | uint(j))
-				node := &q[coord]
+				var coord Coord 
+				coord.setLevel( level)
+				coord.setXHexa(i, level)
+				coord.setYHexa(j, level)
+				
+				node := &(q[coord])
 				coordNW, coordNE, coordSW, coordSE := q.NodesBelow(coord)
 				
 				nodeNW := &q[coordNW]
@@ -264,6 +287,7 @@ func (q * Quadtree) SetupNodesLinks() {
 				nodeSE := &q[coordSE]
 	
 				// bodies of the nodes below are chained
+				// fmt.Printf("%8x\n", coord)
 				node.first = & (nodeNW.Body)
 				nodeNW.Body.next = & (nodeNE.Body)
 				nodeNE.Body.next = & (nodeSW.Body)
@@ -320,8 +344,10 @@ func (q * Quadtree) updateNodesCOM () {
 		for i := 0; i < nbNodesX; i++ {
 			for j := 0; j < nbNodesY; j++ {
 				
-				coord := Coord( uint(level)<<16 | uint(i)<<8 | uint(j))
-				fmt.Printf("\nupdateNodesCOM updating coord %8x", coord)
+				var coord Coord 
+				coord.setLevel(level)
+				coord.setXHexa(i, level)
+				coord.setYHexa(j, level)
 				
 				node := &(q[coord])
 				node.updateCOM()
@@ -339,7 +365,7 @@ func (n * Node) updateCOM() {
 	
 	// parse bodies of the node
 	for b := n.first ; b != nil; b = b.next {
-		fmt.Printf("updateCOM body adress %x\n", &b)
+		// fmt.Printf("updateCOM body adress %x\n", &b)
 		if( b.next == b) { panic("linked to itself")}
 		
 		n.M += b.M

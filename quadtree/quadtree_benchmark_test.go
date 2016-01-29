@@ -10,11 +10,11 @@ func BenchmarkSetLevel(b * testing.B) {
 }
 
 func BenchmarkSetX(b * testing.B) {
-	for i := 0; i<b.N;i++ {		var c Coord;	c.setX(6) }
+	for i := 0; i<b.N;i++ {		var c Coord;	c.setXHexaLevel8(6) }
 }
 
 func BenchmarkSetY(b * testing.B) {
-	for i := 0; i<b.N;i++ {		var c Coord;	c.setY(6) }
+	for i := 0; i<b.N;i++ {		var c Coord;	c.setYHexaLevel8(6) }
 }
 
 func BenchmarkGetCoord8(b * testing.B) {

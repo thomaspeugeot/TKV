@@ -61,7 +61,7 @@ func TestCoordIntegrity( t *testing.T) {
 	}
 }
 
-func TestSetX(t * testing.T) {
+func TestSetXHexaLevel8(t * testing.T) {
 	cases := []struct {
 		in Coord
 		inX int
@@ -72,10 +72,10 @@ func TestSetX(t * testing.T) {
 	}
 	for _, c := range cases {
 		coord := c.in
-		coord.setX( c.inX)
+		coord.setXHexaLevel8( c.inX)
 		got := coord
 		if( coord != c.want) {
-			t.Errorf("\n setX(%d)\nin   %s\ngot  %s, \nwant %s", 
+			t.Errorf("\n setXHexa(%d)\nin   %s\ngot  %s, \nwant %s", 
 			c.inX, &c.in, &got, &c.want) 
 		}
 	}
@@ -92,7 +92,7 @@ func TestCoordString(t * testing.T) {
 	if got != want { t.Errorf("\ngot  %s\nwant %s", got, want) }
 }
 
-func TestSetY(t * testing.T) {
+func TestSetYHexaLevel8(t * testing.T) {
 	cases := []struct {
 		in Coord
 		inY int
@@ -102,9 +102,9 @@ func TestSetY(t * testing.T) {
 	}
 	for _, c := range cases {
 		got := c.in
-		got.setY( c.inY)
+		got.setYHexaLevel8( c.inY)
 		if( got != c.want) {
-			t.Errorf("%#v setY(%d) == |%8b|%8b|%8b|%8b|, got %8x, want %8x", c.in, c.inY,
+			t.Errorf("%#v setYHexa(%d) == |%8b|%8b|%8b|%8b|, got %8x, want %8x", c.in, c.inY,
 			0x000000FF & (got >> 24), 0x000000FF & (got >> 16), 
 			0x000000FF & (got >> 8), 0x000000FF & got, got, c.want) 
 		}
@@ -125,6 +125,23 @@ func TestUpdateNodesList(t * testing.T) {
 	q.updateNodesList( bodies)
 }
 
+// check computation of nodes below
+func TestNodesBelow(t * testing.T) {
+	// var q Quadtree
+	var c Coord
+	c.setLevel( 1)
+	c.setXHexa(1, 1)
+	c.setYHexa(1, 1)
+	
+	if ! c.checkIntegrity() { t.Errorf("invalid input %s", &c) }
+	
+	// coordNW, coordNE, coordSW, coordSE := q.NodesBelow( c)
+	// fmt.Printf("\nTestNodesBelow\nin %s\nnw %s\nne %s\nsw %s\nse %s", &c, &coordNW, &coordNE, &coordSW, &coordSE)
+
+	// n_coordNW, coordNE, coordSW, coordSE := q.NodesBelow( coordNW)
+	// fmt.Printf("\nTestNodesBelow\n\nin %s\nnw %s\nne %s\nsw %s\nse %s", &coordNW, &n_coordNW, &coordNE, &coordSW, &coordSE)
+}
+
 func TestUpdateNodesCOM(t * testing.T) {
 	
 	var q Quadtree
@@ -132,15 +149,15 @@ func TestUpdateNodesCOM(t * testing.T) {
 	
 	var bodies []Body	
 	
-	fmt.Printf("TestUpdateNodesCOM before initQuadtree\n")
+	// fmt.Printf("TestUpdateNodesCOM before initQuadtree\n")
 	initQuadtree( &q, &bodies, 10000)
 
-	fmt.Printf("TestUpdateNodesCOM before updateNodesList\n")
+	// fmt.Printf("TestUpdateNodesCOM before updateNodesList\n")
 	q.updateNodesList( bodies)
 	
-	fmt.Printf("TestUpdateNodesCOM before updateNodesCOM\n")
-	q.updateNodesCOM()
-	fmt.Printf("TestUpdateNodesCOM end\n")
+	// fmt.Printf("TestUpdateNodesCOM before updateNodesCOM\n")
+	// q.updateNodesCOM()
+	// fmt.Printf("TestUpdateNodesCOM end\n")
 }
 	
 func TestInitCoord(t * testing.T) {
@@ -171,8 +188,8 @@ func TestUpdateNodeCOM(t * testing.T) {
 	
 	var c Coord
 	c.setLevel(8)
-	c.setX(0x010)
-	c.setY(0x001)
+	c.setXHexaLevel8(0x010)
+	c.setYHexaLevel8(0x001)
 	
 	n := q[c]
 	b1 := Body{ X:0.5, Y:0.0, M:1.0, prev:n.first, next:nil}
@@ -206,26 +223,28 @@ func TestGetCoord8(t * testing.T) {
 	}
 }
 
-// check computation of nodes below
-func TestNodesBelow(t * testing.T) {
-	var q Quadtree
-	var c Coord
-	c.setLevel( 1)
-	c.setX(128)
-	c.setY(128)
-	
-	if ! c.checkIntegrity() { t.Errorf("invalid input %s", &c) }
-	
-	coordNW, coordNE, coordSW, coordSE := q.NodesBelow( c)
-	fmt.Printf("\nin %s\nnw %s\nne %s\nsw %s\nse %s", &c, &coordNW, &coordNE, &coordSW, &coordSE)
 
-	n_coordNW, coordNE, coordSW, coordSE := q.NodesBelow( coordNW)
-	fmt.Printf("\n\nin %s\nnw %s\nne %s\nsw %s\nse %s", &coordNW, &n_coordNW, &coordNE, &coordSW, &coordSE)
-}
 
 
 func TestSetupNodesLinks(t * testing.T) {
 	var q Quadtree
 		
-	q.SetupNodesLinks()	
+	q.SetupNodesLinks()
+	// t.Errorf("TestSetupNodesLinks")
+	var c Coord
+	c.setLevel( 1)
+	c.setXHexaLevel8(128)
+	c.setYHexaLevel8(128)
+	
+	// coordNW, coordNE, coordSW, coordSE := q.NodesBelow( c)
+	
+	n := &(q[c])
+	b := n.first
+					
+	// fmt.Printf("%8x\n", c)
+	if b == nil {
+		t.Errorf("first is nil")
+	} else if( b.next == nil) {
+		t.Errorf("first body of node has no next")
+	}
 }
