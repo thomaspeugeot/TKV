@@ -9,11 +9,15 @@ func BenchmarkSetLevel(b * testing.B) {
 	for i := 0; i<b.N;i++ {		var c Coord;	c.setLevel(6) }
 }
 
-func BenchmarkSetX(b * testing.B) {
+func BenchmarkSetXHexaLevel8(b * testing.B) {
 	for i := 0; i<b.N;i++ {		var c Coord;	c.setXHexaLevel8(6) }
 }
 
-func BenchmarkSetY(b * testing.B) {
+func BenchmarkSetXHexa(b * testing.B) {
+	for i := 0; i<b.N;i++ {		var c Coord;	c.setXHexa(6, 5) }
+}
+
+func BenchmarkSetYHexaLevel8(b * testing.B) {
 	for i := 0; i<b.N;i++ {		var c Coord;	c.setYHexaLevel8(6) }
 }
 
@@ -21,22 +25,25 @@ func BenchmarkGetCoord8(b * testing.B) {
 	for i := 0; i<b.N;i++ {		var b Body; b.getCoord8()}
 }
 
-func BenchmarkUpdateNodesList(b * testing.B) {
+func BenchmarkUpdateNodesList_10M(b * testing.B) {
 	var q Quadtree
 	var bodies []Body
 		
-	initQuadtree( &q, &bodies, 1000000)
+	initQuadtree( &q, &bodies, 10000000)
+	b.ResetTimer()
 	
 	for i := 0; i<b.N;i++ {	q.updateNodesList( bodies)}
 }
 
-func BenchmarkUpdateNodesCOM(b * testing.B) {
+func BenchmarkUpdateNodesCOM_10M(b * testing.B) {
 	var q Quadtree
 	var bodies []Body
 		
-	initQuadtree( &q, &bodies, 1000000)
+	initQuadtree( &q, &bodies, 10000000)
 	q.InitCoord()
 	q.updateNodesList( bodies)
+	
+	b.ResetTimer()
 	
 	for i := 0; i<b.N;i++ {	q.updateNodesCOM()}
 }

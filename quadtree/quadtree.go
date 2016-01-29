@@ -334,7 +334,7 @@ func (q * Quadtree) updateNodesList (bodies []Body) {
 func (q * Quadtree) updateNodesCOM () {
 
 	// compute is bottom up
-	for level := 7; level >= 0; level-- {
+	for level := 8; level >= 0; level-- {
 	
 		// nb of nodes for the current level
 		nbNodesX := 1 << uint(level)

@@ -118,10 +118,10 @@ func TestUpdateNodesList(t * testing.T) {
 	
 	var bodies []Body	
 	
-	fmt.Printf("TestUpdateNodesList before initQuadtree\n")
+	// fmt.Printf("TestUpdateNodesList before initQuadtree\n")
 	initQuadtree( &q, &bodies, 1000000)
 
-	fmt.Printf("TestUpdateNodesList before updateNodesList\n")
+	// fmt.Printf("TestUpdateNodesList before updateNodesList\n")
 	q.updateNodesList( bodies)
 }
 
