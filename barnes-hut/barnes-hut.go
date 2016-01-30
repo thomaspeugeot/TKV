@@ -51,5 +51,6 @@ func (r * Run) Init( bodies * ([]Body)) {
 
 func (r * Run) oneStep( bodies * ([]Body)) {
 
+	r.updateNodesListsAndCOM()
 	
 }
