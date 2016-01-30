@@ -59,7 +59,13 @@ type Body struct {
 	X float64
 	Y float64
 	M float64
-	prev, next * Body // bodies of a node are linked together
+	// bodies of a node are linked together
+	// Some quadtree use an alternative choice : store bodies of a node in a slice attached
+	// to the node. This alternative implies memory allocation which one tries to avoid.
+	// number of memory allocation are benchmaked with 
+	//	go test -bench=BenchmarkUpdateNodesList_10M -benchmem
+	prev, next * Body 
+	
 }
 
 // a node is a body (
@@ -272,11 +278,11 @@ func (q * Quadtree) SetupNodesLinks() {
 }
 
 // fill quadtree at level with bodies 
-func (q * Quadtree) updateNodesList (bodies []Body) {
+func (q * Quadtree) updateNodesList (bodies * []Body) {
 
-	for idx, _ := range bodies {
+	for idx, _ := range (*bodies) {
 	
-		b := &(bodies[idx])
+		b := &((*bodies)[idx])
 	
 		// link the next body to the previous one
 		if( b.next != nil) {
@@ -329,6 +335,13 @@ func (q * Quadtree) updateNodesCOM () {
 		}
 	}	
 }
+
+func (q * Quadtree) updateNodesListsAndCOM (bodies * []Body) {
+
+	q.updateNodesList( bodies)
+	q.updateNodesCOM()
+}
+
 
 // update COM of a node (reset the current COM before)
 func (n * Node) updateCOM() {

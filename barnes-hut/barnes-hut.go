@@ -10,7 +10,7 @@
 package barnes_hut
 
 import (
-	"github.com/thomaspeugeot/tkv/quadtree"
+	"tkv/quadtree"
 )
 
 //	Bodies's X,Y position coordinates are float64 between 0 & 1
@@ -46,6 +46,10 @@ type Run struct {
 
 func (r * Run) Init( bodies * ([]Body)) {
 	r.bodies = *bodies
-	r.q.SetupNodeLinks()
+	r.q.SetupNodesLinks()
 }
 
+func (r * Run) oneStep( bodies * ([]Body)) {
+
+	
+}

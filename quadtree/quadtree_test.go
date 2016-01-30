@@ -122,7 +122,7 @@ func TestUpdateNodesList(t * testing.T) {
 	initBodies( &bodies, 1000000)
 
 	// fmt.Printf("TestUpdateNodesList before updateNodesList\n")
-	q.updateNodesList( bodies)
+	q.updateNodesList( &bodies)
 }
 
 // check computation of nodes below
@@ -153,7 +153,7 @@ func TestUpdateNodesCOM(t * testing.T) {
 	initBodies( &bodies, 10000)
 
 	// fmt.Printf("TestUpdateNodesCOM before updateNodesList\n")
-	q.updateNodesList( bodies)
+	q.updateNodesList( &bodies)
 	
 	// fmt.Printf("TestUpdateNodesCOM before updateNodesCOM\n")
 	// q.updateNodesCOM()

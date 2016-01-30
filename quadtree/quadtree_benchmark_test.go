@@ -32,7 +32,7 @@ func BenchmarkUpdateNodesList_10M(b * testing.B) {
 	initBodies( &bodies, 10000000)
 	b.ResetTimer()
 	
-	for i := 0; i<b.N;i++ {	q.updateNodesList( bodies)}
+	for i := 0; i<b.N;i++ {	q.updateNodesList( &bodies)}
 }
 
 func BenchmarkUpdateNodesCOM_10M(b * testing.B) {
@@ -40,7 +40,7 @@ func BenchmarkUpdateNodesCOM_10M(b * testing.B) {
 	var bodies []Body
 		
 	initBodies( &bodies, 10000000)
-	q.updateNodesList( bodies)
+	q.updateNodesList( &bodies)
 	
 	b.ResetTimer()
 	
