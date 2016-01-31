@@ -2,11 +2,14 @@
 //
 // Caution : Work In Progress
 // 
-// 1st Goal is to support the Barnes Hut implementation for spreading bodies on a 2D square.
+// 1st Goal is to support a Barnes Hut algorithm implementation. 
+// This variation of the BH is not for cosmology but for the problem of bodies on a 2D square that you want 
+// to put the most apart (like dancers in a crowded night club).
 // 
 // 2nd Goal is to support more than 1 million bodies
 //
-// A quatree is a set of nodes holding bodies.
+// A quatree is a hierarchical set of nodes that divide the 2D space. 
+// Each node holds the bodies that are located in its area.
 //
 // This implementation put constraints on inputs :
 //
@@ -59,6 +62,7 @@ type Body struct {
 	X float64
 	Y float64
 	M float64
+	
 	// bodies of a node are linked together
 	// Some quadtree use an alternative choice : store bodies of a node in a slice attached
 	// to the node. This alternative implies memory allocation which one tries to avoid.

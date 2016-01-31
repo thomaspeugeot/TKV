@@ -51,6 +51,13 @@ func (r * Run) Init( bodies * ([]Body)) {
 
 func (r * Run) oneStep( bodies * ([]Body)) {
 
-	r.updateNodesListsAndCOM()
+	// compute the quadtree from the bodies
+	r.updateNodesListsAndCOM( bodies)
+	
+	// compute repulsive forces & acceleration
+	
+	// compute velocity
+	
+	// compute new position
 	
 }
