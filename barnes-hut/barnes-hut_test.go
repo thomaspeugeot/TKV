@@ -1,6 +1,7 @@
 package barnes_hut
 
 import (
+	"github.com/thomaspeugeot/tkv/quadtree"
 	"testing"
 	"fmt"
 )
@@ -10,7 +11,7 @@ import (
 // benchmark init
 func BenchmarkInitRun1000000(b * testing.B) {
 	
-	bodies := make([]Body, 1000000)
+	bodies := make([]quadtree.Body, 1000000)
 
 	fmt.Printf("\n%#v", bodies[0])
 	

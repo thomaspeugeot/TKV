@@ -10,7 +10,7 @@
 package barnes_hut
 
 import (
-	"tkv/quadtree"
+	"github.com/thomaspeugeot/tkv/quadtree"
 )
 
 //	Bodies's X,Y position coordinates are float64 between 0 & 1
@@ -40,19 +40,19 @@ type Body struct {
 
 // a simulation run
 type Run struct {
-	bodies []Body // nb of bodies
+	bodies []quadtree.Body // bodies
 	q quadtree.Quadtree // the supporting quadtree
 }
 
-func (r * Run) Init( bodies * ([]Body)) {
+func (r * Run) Init( bodies * ([]quadtree.Body)) {
 	r.bodies = *bodies
 	r.q.SetupNodesLinks()
 }
 
-func (r * Run) oneStep( bodies * ([]Body)) {
+func (r * Run) oneStep( bodies * ([]quadtree.Body)) {
 
 	// compute the quadtree from the bodies
-	r.updateNodesListsAndCOM( bodies)
+	r.q.UpdateNodesListsAndCOM( bodies)
 	
 	// compute repulsive forces & acceleration
 	

@@ -340,7 +340,7 @@ func (q * Quadtree) updateNodesCOM () {
 	}	
 }
 
-func (q * Quadtree) updateNodesListsAndCOM (bodies * []Body) {
+func (q * Quadtree) UpdateNodesListsAndCOM (bodies * []Body) {
 
 	q.updateNodesList( bodies)
 	q.updateNodesCOM()
