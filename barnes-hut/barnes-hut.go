@@ -51,12 +51,22 @@ const (
 
 // a simulation run
 type Run struct {
-	bodies * []quadtree.Body // bodies
+	bodies * []quadtree.Body // bodies position in the quatree
+	bodiesAccel * []Acc // bodies acceleration
+
 	q quadtree.Quadtree // the supporting quadtree
 }
 
+func (r * Run) getAcc(index int) Acc {
+
+	return (*r.bodiesAccel)[index]
+}
+
+// init the run with an array of quadtree bodies
 func (r * Run) Init( bodies * ([]quadtree.Body)) {
 	r.bodies = bodies
+	acc := make([]Acc, len(*bodies))
+	r.bodiesAccel = &acc
 	r.q.SetupNodesLinks()
 }
 
@@ -80,21 +90,45 @@ func (r * Run) ComputeRepulsiveForce() {
 		
 		body := (*r.bodies)[idx]
 		
-		// parse all repulsions
+		// reset acceleration
+		acc := &((*r.bodiesAccel)[idx])
+		acc.X = 0
+		acc.Y = 0
+		
+		// parse all other bodies for repulsions
+		// accumulate repulsion on acceleration
 		for idx2, _ := range (*r.bodies) {
 			body2 := (*r.bodies)[idx2]
 			
+			x, y := getRepulsionVector( &body, &body2)
+			acc.X += x
+			acc.Y += y
 		}
 	}
 }
 
+func (r * Run) UpdatePosition() {
 
-func (r * Run) outputGif(out io.Writer) {
+	// parse all bodies
+	for idx, _ := range (*r.bodies) {
+		
+		body := &((*r.bodies)[idx])
+		
+		// updatePos
+		acc := (*r.bodiesAccel)[idx]
+		body.X += acc.X / 10000
+		body.Y += acc.Y / 10000
+	}
+}
+
+// output position of bodies of the Run into a GIF representation
+func (r * Run) outputGif(out io.Writer, nbStep int) {
 	const (
 		size    = 500   // image canvas covers [-size..+size]
-		nframes = 1    // number of animation frames
-		delay   = 8     // delay between frames in 10ms units
+		delay   = 50     // delay between frames in 10ms units
 	)
+	var nframes = nbStep    // number of animation frames
+	
 	anim := gif.GIF{LoopCount: nframes}
 	for i := 0; i < nframes; i++ {
 		rect := image.Rect(0, 0, 2*size+1, 2*size+1)
@@ -113,6 +147,33 @@ func (r * Run) outputGif(out io.Writer) {
 		}
 		anim.Delay = append(anim.Delay, delay)
 		anim.Image = append(anim.Image, img)
+		
+		r.ComputeRepulsiveForce()
+		r.UpdatePosition()
+		
 	}
 	gif.EncodeAll(out, &anim) // NOTE: ignoring encoding errors
+}
+
+// compute repulsion force vector between body A and body B
+// applied to body A
+func getRepulsionVector( A, B *quadtree.Body) (x, y float64) {
+
+	x = getModuloDistance( B.X, A.X)
+	y = getModuloDistance( B.Y, A.Y)
+
+	return x, y
+}
+
+// get modulo distance between alpha and beta.
+//
+// alpha and beta are between 0.0 and 1.0
+// the modulo distance cannot be above 0.5
+func getModuloDistance( alpha, beta float64) (dist float64) {
+
+	dist = beta-alpha
+	if( dist > 0.5 ) { dist -= 1.0 }
+	if( dist < -0.5 ) { dist += 1.0 }
+	
+	return dist
 }
