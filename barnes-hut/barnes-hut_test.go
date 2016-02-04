@@ -52,12 +52,12 @@ func TestGetRepulsionVector(t *testing.T) {
 	}, 1)
 	
 	bodies := make([]quadtree.Body, 2)
-	bodies[1].X = 0.5
-	bodies[1].Y = 0.5
+	bodies[1].X = 0.4
+	bodies[1].Y = 0.3
 	
 	cases[0].B = bodies[1]
-	cases[0].wantX = -0.5
-	cases[0].wantY = -0.5
+	cases[0].wantX = -3.2
+	cases[0].wantY = -2.4
 	
 	for _, c := range cases {
 		gotX, gotY := getRepulsionVector( & c.A, & c.B)
@@ -75,17 +75,17 @@ func TestComputeRepulsiveForces(t *testing.T) {
 		want [2]Acc }, 1) // 1 case
 	
 	bodies := make([]quadtree.Body, 2)
-	bodies[1].X = 0.5
-	bodies[1].Y = 0.5
+	bodies[1].X = 0.4
+	bodies[1].Y = 0.3
 	cases[0].r.Init( & bodies)
 	
-	cases[0].want[0] = Acc{-0.5, -0.5}
-	cases[0].want[1] = Acc{0.5, 0.5}
+	cases[0].want[0] = Acc{-3.2, -2.4}
+	cases[0].want[1] = Acc{3.2, 2.4}
 	
 	for _, c := range cases {
 		c.r.ComputeRepulsiveForce()
-		if( c.r.getAcc(0) != c.want[0] && c.r.getAcc(1) != c.want[1]) {
-			t.Errorf("r %#v \nwant %#v %#v", c.r, c.want[0], c.want[1])
+		if( *(c.r.getAcc(0)) != c.want[0] && *(c.r.getAcc(1)) != c.want[1]) {
+			t.Errorf("\ngot %#v %#v\nwant %#v %#v", c.r.getAcc(0), c.r.getAcc(1), c.want[0], c.want[1])
 		}
 	}
 	
@@ -158,17 +158,17 @@ func spreadOnCircle(bodies * []quadtree.Body) {
 		
 		body := &((*bodies)[idx])
 		
-		radius := 0.6 * rand.Float64()
+		radius := rand.Float64()
 		angle := 2.0 * math.Pi * rand.Float64()
 		
 		if idx%2 == 0 {
-			body.X += 0.4
-			body.Y += 0.7
-			radius *= 0.5
+			body.X = 0.2
+			body.Y = 0.7
+			radius *= 0.15
 		} else {
-			body.X -= 0.2
-			body.Y -= 0.1
-			radius *= 1.3
+			body.X = 0.6
+			body.Y = 0.4
+			radius *= 0.25
 		}
 		
 		body.M =0.1000000

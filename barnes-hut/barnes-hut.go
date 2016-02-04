@@ -16,6 +16,7 @@ import (
 	"image/gif"
 	"io"
 	"fmt"
+	"math"
 )
 
 //	Bodies's X,Y position coordinates are float64 between 0 & 1
@@ -36,12 +37,6 @@ type Acc struct {
 	Y float64
 }
 
-// definition of a body
-type Body struct {
-	Pos
-	Vel
-	Acc
-}
 
 var palette = []color.Color{color.White, color.Black}
 const (
@@ -53,20 +48,26 @@ const (
 type Run struct {
 	bodies * []quadtree.Body // bodies position in the quatree
 	bodiesAccel * []Acc // bodies acceleration
+	bodiesVel * []Vel // bodies velocity
 
 	q quadtree.Quadtree // the supporting quadtree
 }
 
-func (r * Run) getAcc(index int) Acc {
+func (r * Run) getAcc(index int) (* Acc) {
+	return & (*r.bodiesAccel)[index]
+}
 
-	return (*r.bodiesAccel)[index]
+func (r * Run) getVel(index int) (* Vel) {
+	return & (*r.bodiesVel)[index]
 }
 
 // init the run with an array of quadtree bodies
 func (r * Run) Init( bodies * ([]quadtree.Body)) {
 	r.bodies = bodies
 	acc := make([]Acc, len(*bodies))
+	vel := make([]Vel, len(*bodies))
 	r.bodiesAccel = &acc
+	r.bodiesVel = &vel
 	r.q.SetupNodesLinks()
 }
 
@@ -98,12 +99,34 @@ func (r * Run) ComputeRepulsiveForce() {
 		// parse all other bodies for repulsions
 		// accumulate repulsion on acceleration
 		for idx2, _ := range (*r.bodies) {
-			body2 := (*r.bodies)[idx2]
 			
-			x, y := getRepulsionVector( &body, &body2)
-			acc.X += x
-			acc.Y += y
+			if( idx2 != idx) {
+				body2 := (*r.bodies)[idx2]
+				
+				x, y := getRepulsionVector( &body, &body2)
+				
+				acc.X += x
+				acc.Y += y
+			}
+			
 		}
+	}
+}
+
+func (r * Run) UpdateVelocity() {
+
+	// parse all bodies
+	for idx, _ := range (*r.bodies) {
+
+		// update velocity (to be completed with dt)
+		acc := r.getAcc(idx)
+		vel := r.getVel(idx)
+		vel.X += acc.X / 10000000
+		vel.Y += acc.Y / 10000000
+		
+		// put some drag
+		vel.X *= 0.9
+		vel.Y *= 0.9
 	}
 }
 
@@ -115,16 +138,33 @@ func (r * Run) UpdatePosition() {
 		body := &((*r.bodies)[idx])
 		
 		// updatePos
-		acc := (*r.bodiesAccel)[idx]
-		body.X += acc.X / 10000
-		body.Y += acc.Y / 10000
+		vel := r.getVel(idx)
+		body.X += vel.X
+		body.Y += vel.Y
+		
+		if body.X > 1.0 { 
+			body.X = 1.0 - (body.X - 1.0) 
+			vel.X = -vel.X
+		}
+		if body.X < 0.0 { 
+			body.X = - body.X 
+			vel.X = -vel.X
+		}
+		if body.Y > 1.0 { 
+			body.Y = 1.0 - (body.Y - 1.0) 
+			vel.Y = -vel.Y
+		}
+		if body.Y < 0.0 { 
+			body.Y = - body.Y 
+			vel.Y = -vel.Y
+		}
 	}
 }
 
 // output position of bodies of the Run into a GIF representation
 func (r * Run) outputGif(out io.Writer, nbStep int) {
 	const (
-		size    = 500   // image canvas covers [-size..+size]
+		size    = 200   // image canvas covers [-size..+size]
 		delay   = 50     // delay between frames in 10ms units
 	)
 	var nframes = nbStep    // number of animation frames
@@ -145,10 +185,20 @@ func (r * Run) outputGif(out io.Writer, nbStep int) {
 				size+int(body.Y*size+0.5),
 				blackIndex)
 		}
+		
+		// encode time step into the image
+		for j:= 0; j< i; j++ {
+			img.SetColorIndex(
+				j+1, 
+				10,
+				blackIndex)
+		}
+		
 		anim.Delay = append(anim.Delay, delay)
 		anim.Image = append(anim.Image, img)
 		
 		r.ComputeRepulsiveForce()
+		r.UpdateVelocity()
 		r.UpdatePosition()
 		
 	}
@@ -157,12 +207,16 @@ func (r * Run) outputGif(out io.Writer, nbStep int) {
 
 // compute repulsion force vector between body A and body B
 // applied to body A
+// proportional to the inverse of the distance squared
 func getRepulsionVector( A, B *quadtree.Body) (x, y float64) {
 
 	x = getModuloDistance( B.X, A.X)
 	y = getModuloDistance( B.Y, A.Y)
 
-	return x, y
+	distQuared := (x*x + y*y)
+	distPow3 := math.Pow( distQuared, 1.5)
+	
+	return x/distPow3, y/distPow3
 }
 
 // get modulo distance between alpha and beta.
