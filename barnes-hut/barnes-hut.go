@@ -84,19 +84,22 @@ func (r * Run) oneStep() {
 	
 }
 
-var done chan struct{}
+
 
 func (r * Run) ComputeRepulsiveForceConcurrent(nbRoutine int) {
 
 	sliceLen := len(*r.bodies)
-	done = make( chan struct{})
+	done := make( chan struct{})
 
 	// breakdown slice
 	for i:=0; i<nbRoutine; i++ {
 	
 		startIndex := (i*sliceLen)/nbRoutine
 		endIndex := ((i+1)*sliceLen)/nbRoutine -1
-		go r.ComputeRepulsiveForceSubSet( startIndex, endIndex, true)
+		go func() { 
+			r.ComputeRepulsiveForceSubSet( startIndex, endIndex)
+			done <- struct{}{} 
+		}()
 	}
 
 	// wait for return
@@ -106,13 +109,14 @@ func (r * Run) ComputeRepulsiveForceConcurrent(nbRoutine int) {
 
 }
 
+// compute repulsive forces
 func (r * Run) ComputeRepulsiveForce() {
 	
-	r.ComputeRepulsiveForceSubSet( 0, len(*r.bodies), false)
+	r.ComputeRepulsiveForceSubSet( 0, len(*r.bodies))
 }
 
 // compute repulsive forces for a sub part of the bodies
-func (r * Run) ComputeRepulsiveForceSubSet( startIndex, endIndex int, concurrent bool) {
+func (r * Run) ComputeRepulsiveForceSubSet( startIndex, endIndex int) {
 
 	// parse all bodies
 	bodiesSubSet := (*r.bodies)[startIndex:endIndex]
@@ -140,10 +144,8 @@ func (r * Run) ComputeRepulsiveForceSubSet( startIndex, endIndex int, concurrent
 				acc.X += x
 				acc.Y += y
 			}
-			
 		}
 	}
-	if concurrent { done <- struct{}{} }
 }
 
 func (r * Run) UpdateVelocity() {

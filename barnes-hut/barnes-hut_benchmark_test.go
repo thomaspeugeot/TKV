@@ -36,7 +36,7 @@ func BenchmarkComputeRepulsiveForcesOnHalfSet_1K(b * testing.B ) {
 	r.Init( & bodies)
 	endIndex := len(bodies)/2
 	for i := 0; i<b.N;i++ { 
-		r.ComputeRepulsiveForceSubSet(0, endIndex, false)
+		r.ComputeRepulsiveForceSubSet(0, endIndex)
 	}
 }
 
