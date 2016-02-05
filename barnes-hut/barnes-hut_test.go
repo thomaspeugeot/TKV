@@ -4,7 +4,6 @@ import (
 	"os"
 	"github.com/thomaspeugeot/tkv/quadtree"
 	"testing"
-	"fmt"
 	"math"
 	"math/rand"
 )
@@ -12,7 +11,7 @@ import (
 // init 
 func TestOutputGif(t *testing.T) {
 
-	bodies := make([]quadtree.Body, 1000)
+	bodies := make([]quadtree.Body, 100)
 	spreadOnCircle( & bodies)
 	
 	var r Run
@@ -21,7 +20,7 @@ func TestOutputGif(t *testing.T) {
 	var output *os.File
 	output, _ = os.Create("essai.gif")
 	
-	r.outputGif( output, 100)
+	r.outputGif( output, 10)
 	// visual verification
 }
 
@@ -88,69 +87,33 @@ func TestComputeRepulsiveForces(t *testing.T) {
 			t.Errorf("\ngot %#v %#v\nwant %#v %#v", c.r.getAcc(0), c.r.getAcc(1), c.want[0], c.want[1])
 		}
 	}
-	
 }
 
-func BenchmarkComputeRepulsiveForces_1K(b * testing.B ) {
-
-	bodies := make([]quadtree.Body, 1000)
+// func test the concurrent version is the same as the serial version
+func TestComputeRepulsiveForcesConcurrent(t *testing.T) {
+	
+	bodies := make([]quadtree.Body, 10 * 10)
+	bodies2 := make([]quadtree.Body, 10 * 10)
 	spreadOnCircle( & bodies)
-	var r Run
+	copy( bodies2, bodies)
+	var r, r2 Run
 	r.Init( & bodies)
-	for i := 0; i<b.N;i++ { 
-		r.ComputeRepulsiveForce()
+	r2.Init( & bodies2)
+	r.ComputeRepulsiveForce()
+	r2.ComputeRepulsiveForceConcurrent(13)
+
+	same := true
+	for idx, _ := range *r.bodies {
+		if (*r.bodies)[idx].X != (*r2.bodies)[idx].X { same = false}
+		if (*r.bodies)[idx].Y != (*r2.bodies)[idx].Y { same = false}
 	}
-}
-func BenchmarkComputeRepulsiveForces_10K(b * testing.B ) {
-
-	bodies := make([]quadtree.Body, 10000)
-	spreadOnCircle( & bodies)
-	var r Run
-	r.Init( & bodies)
-	for i := 0; i<b.N;i++ { 
-		r.ComputeRepulsiveForce()
+	if ! same {
+		t.Errorf("different results")
 	}
+	
+	
+	
 }
-
-
-func BenchmarkGetModuleDistance(b * testing.B ) {
-	
-	x := rand.Float64()
-	y := rand.Float64()
-		
-	b.ResetTimer()
-		
-	for i := 0; i<b.N;i++ { 
-		getModuloDistance( x, y)
-	}
-}
-
-func BenchmarkGetRepulsionVector(b * testing.B ) {
-	
-	bodies := make([]quadtree.Body, 2)
-	bodies[1].X = 0.5
-	bodies[1].Y = 0.5
-		
-	for i := 0; i<b.N;i++ { 
-		getRepulsionVector( &(bodies[0]), &(bodies[1]))
-	}
-}
-
-// benchmark init
-func BenchmarkInitRun1000000(b * testing.B) {
-	
-	bodies := make([]quadtree.Body, 1000000)
-
-	if false { fmt.Printf("\n%#v", bodies[0]) }
-	
-	spreadOnCircle( & bodies)
-	
-	var r Run
-	for i := 0; i<b.N;i++ {
-		r.Init( & bodies)
-	}
-}
-
 // function used to spread bodies randomly on 
 // the unit square
 func spreadOnCircle(bodies * []quadtree.Body) {
