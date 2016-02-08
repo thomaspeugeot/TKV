@@ -40,9 +40,9 @@ func BenchmarkComputeRepulsiveForcesOnHalfSet_1K(b * testing.B ) {
 	}
 }
 
-func BenchmarkComputeRepulsiveForcesConcurrent20_10K(b * testing.B ) {
+func BenchmarkComputeRepulsiveForcesConcurrent20_30K(b * testing.B ) {
 
-	bodies := make([]quadtree.Body, 10000)
+	bodies := make([]quadtree.Body, 30000)
 	spreadOnCircle( & bodies)
 	var r Run
 	r.Init( & bodies)

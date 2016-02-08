@@ -156,8 +156,8 @@ func (r * Run) UpdateVelocity() {
 		// update velocity (to be completed with dt)
 		acc := r.getAcc(idx)
 		vel := r.getVel(idx)
-		vel.X += acc.X / 10000000
-		vel.Y += acc.Y / 10000000
+		vel.X += acc.X / 100000000
+		vel.Y += acc.Y / 100000000
 		
 		// put some drag
 		vel.X *= 0.9
@@ -199,14 +199,14 @@ func (r * Run) UpdatePosition() {
 // output position of bodies of the Run into a GIF representation
 func (r * Run) outputGif(out io.Writer, nbStep int) {
 	const (
-		size    = 200   // image canvas covers [-size..+size]
-		delay   = 50     // delay between frames in 10ms units
+		size    = 600   // image canvas 
+		delay   = 4    // delay between frames in 10ms units
 	)
 	var nframes = nbStep    // number of animation frames
 	
 	anim := gif.GIF{LoopCount: nframes}
 	for i := 0; i < nframes; i++ {
-		rect := image.Rect(0, 0, 2*size+1, 2*size+1)
+		rect := image.Rect(0, 0, size+1, size+1)
 		img := image.NewPaletted(rect, palette)
 
 		for idx, _ := range (*r.bodies) {
@@ -216,13 +216,14 @@ func (r * Run) outputGif(out io.Writer, nbStep int) {
 			if false { fmt.Printf("Encoding body %d %f %f\n", idx, body.X, body.Y) }
 		
 			img.SetColorIndex(
-				size+int(body.X*size+0.5), 
-				size+int(body.Y*size+0.5),
+				int(body.X*size+0.5), 
+				int(body.Y*size+0.5),
 				blackIndex)
 		}
 		
 		// encode time step into the image
-		for j:= 0; j< i; j++ {
+		progress := float32(i) / float32 (nframes)
+		for j:= 0; j < int( size*progress); j++ {
 			img.SetColorIndex(
 				j+1, 
 				10,

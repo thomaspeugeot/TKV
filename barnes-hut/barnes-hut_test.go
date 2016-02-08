@@ -11,7 +11,7 @@ import (
 // init 
 func TestOutputGif(t *testing.T) {
 
-	bodies := make([]quadtree.Body, 100)
+	bodies := make([]quadtree.Body, 1000)
 	spreadOnCircle( & bodies)
 	
 	var r Run
@@ -20,7 +20,7 @@ func TestOutputGif(t *testing.T) {
 	var output *os.File
 	output, _ = os.Create("essai.gif")
 	
-	r.outputGif( output, 10)
+	r.outputGif( output, 2000)
 	// visual verification
 }
 
