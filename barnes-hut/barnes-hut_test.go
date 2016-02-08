@@ -8,10 +8,10 @@ import (
 	"math/rand"
 )
 
-// init 
+// test gif output
 func TestOutputGif(t *testing.T) {
 
-	bodies := make([]quadtree.Body, 1000)
+	bodies := make([]quadtree.Body, 100)
 	spreadOnCircle( & bodies)
 	
 	var r Run
@@ -20,7 +20,7 @@ func TestOutputGif(t *testing.T) {
 	var output *os.File
 	output, _ = os.Create("essai.gif")
 	
-	r.outputGif( output, 2000)
+	r.outputGif( output, 20)
 	// visual verification
 }
 
@@ -33,7 +33,8 @@ func TestGetModuloDistance(t *testing.T) {
 	cases := []struct {
 		x1, x2, want float64
 	}{
-		{0.0, 0.0, 0.0},
+		{0.0, 0.1, 0.1},
+		{0.0, 0.0, ETA},
 	}
 	for _, c := range cases {
 		got := getModuloDistance( c.x1, c.x2)

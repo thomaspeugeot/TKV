@@ -4,6 +4,7 @@ import (
 	"github.com/thomaspeugeot/tkv/quadtree"
 	"testing"
 	"fmt"
+	"os"
 	"math/rand"
 )
 
@@ -87,5 +88,22 @@ func BenchmarkInitRun_1M(b * testing.B) {
 	var r Run
 	for i := 0; i<b.N;i++ {
 		r.Init( & bodies)
+	}
+}
+
+// benchmark gif output
+func BenchmarkOutputGif_1KBody_2KSteps(b * testing.B) {
+
+	bodies := make([]quadtree.Body, 1000)
+	spreadOnCircle( & bodies)
+	
+	var r Run
+	r.Init( & bodies)
+	
+	var output *os.File
+	output, _ = os.Create("essai1Kbody_1Ksteps.gif")
+	
+	for i := 0; i<b.N;i++ {
+		r.outputGif( output, 2000)
 	}
 }
