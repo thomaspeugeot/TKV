@@ -92,8 +92,8 @@ func TestComputeRepulsiveForces(t *testing.T) {
 // func test the concurrent version is the same as the serial version
 func TestComputeRepulsiveForcesConcurrent(t *testing.T) {
 	
-	bodies := make([]quadtree.Body, 100 * 100)
-	bodies2 := make([]quadtree.Body, 100 * 100)
+	bodies := make([]quadtree.Body, 10 * 10)
+	bodies2 := make([]quadtree.Body, 10 * 10)
 	spreadOnCircle( & bodies)
 	copy( bodies2, bodies)
 	var r, r2 Run

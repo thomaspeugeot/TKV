@@ -249,9 +249,17 @@ func getRepulsionVector( A, B *quadtree.Body) (x, y float64) {
 	y = getModuloDistance( B.Y, A.Y)
 
 	distQuared := (x*x + y*y)
-	distPow3 := math.Pow( distQuared, 1.5)
+	
+	distPow3 := distQuared * math.Sqrt( distQuared )
+	
+	if false { 
+		distPow3 := math.Pow( distQuared, 1.5) 
+		distQuared /= distPow3
+	}
 	
 	return x/distPow3, y/distPow3
+
+	// return x / distQuared, y / distQuared
 }
 
 // get modulo distance between alpha and beta.
