@@ -34,7 +34,7 @@ func TestGetModuloDistance(t *testing.T) {
 		x1, x2, want float64
 	}{
 		{0.0, 0.1, 0.1},
-		{0.0, 0.0, ETA},
+		{0.0, 0.0, 0.0},
 	}
 	for _, c := range cases {
 		got := getModuloDistance( c.x1, c.x2)
@@ -44,7 +44,7 @@ func TestGetModuloDistance(t *testing.T) {
 	}
 }
 
-func TestGetRepulsionVector(t *testing.T) {
+func TesGetRepulsionVector(t *testing.T) {
 	
 	cases := make( []struct {
 		A, B quadtree.Body
@@ -68,7 +68,7 @@ func TestGetRepulsionVector(t *testing.T) {
 }
 
 // test the step
-func TestComputeRepulsiveForces(t *testing.T) {
+func TesComputeRepulsiveForces(t *testing.T) {
 	
 	cases := make( []struct {
 		r Run
