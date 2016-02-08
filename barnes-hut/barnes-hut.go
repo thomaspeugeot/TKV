@@ -25,7 +25,7 @@ import (
 // in order to compute repulsion (avoid near infinite repulsion force)
 var	ETA float64
 func init() {
-	ETA = 0.01
+	ETA = 0.001
 }
 
 //	Bodies's X,Y position coordinates are float64 between 0 & 1
@@ -258,7 +258,7 @@ func getRepulsionVector( A, B *quadtree.Body) (x, y float64) {
 	x = getModuloDistance( B.X, A.X)
 	y = getModuloDistance( B.Y, A.Y)
 
-	distQuared := (x*x + y*y)
+	distQuared := (x*x + y*y) + ETA
 	
 	distPow3 := distQuared * math.Sqrt( distQuared )
 	
@@ -281,12 +281,6 @@ func getModuloDistance( alpha, beta float64) (dist float64) {
 	dist = beta-alpha
 	if( dist > 0.5 ) { dist -= 1.0 }
 	if( dist < -0.5 ) { dist += 1.0 }
-	
-	// check for minimal value
-	if( math.Abs( dist) < ETA) { 
-		if dist >= 0.0 { dist = ETA }
-		if dist < 0.0 { dist = -ETA }
-	}
-	
+		
 	return dist
 }
