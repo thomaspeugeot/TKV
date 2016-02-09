@@ -92,9 +92,9 @@ func BenchmarkInitRun_1M(b * testing.B) {
 }
 
 // benchmark gif output
-func BenchmarkOutputGif_1KBody_2KSteps(b * testing.B) {
+func BenchmarkOutputGif_10KBody_2KSteps(b * testing.B) {
 
-	bodies := make([]quadtree.Body, 1000)
+	bodies := make([]quadtree.Body, 20000)
 	spreadOnCircle( & bodies)
 	
 	var r Run
@@ -104,6 +104,6 @@ func BenchmarkOutputGif_1KBody_2KSteps(b * testing.B) {
 	output, _ = os.Create("essai1Kbody_1Ksteps.gif")
 	
 	for i := 0; i<b.N;i++ {
-		r.outputGif( output, 2000)
+		r.outputGif( output, 200)
 	}
 }

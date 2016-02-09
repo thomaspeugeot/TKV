@@ -171,8 +171,8 @@ func (r * Run) UpdateVelocity() {
 		vel.Y += acc.Y / G
 		
 		// put some drag
-		vel.X *= 0.9
-		vel.Y *= 0.9
+		vel.X *= 0.75
+		vel.Y *= 0.75
 	}
 }
 
@@ -244,7 +244,7 @@ func (r * Run) outputGif(out io.Writer, nbStep int) {
 		anim.Delay = append(anim.Delay, delay)
 		anim.Image = append(anim.Image, img)
 		
-		r.ComputeRepulsiveForce()
+		r.ComputeRepulsiveForceConcurrent( 20)
 		r.UpdateVelocity()
 		r.UpdatePosition()
 		
