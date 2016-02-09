@@ -104,6 +104,6 @@ func BenchmarkOutputGif_10KBody_2KSteps(b * testing.B) {
 	output, _ = os.Create("essai1Kbody_1Ksteps.gif")
 	
 	for i := 0; i<b.N;i++ {
-		r.outputGif( output, 200)
+		r.outputGif( output, 50)
 	}
 }

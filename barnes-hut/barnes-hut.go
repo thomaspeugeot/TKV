@@ -240,6 +240,7 @@ func (r * Run) outputGif(out io.Writer, nbStep int) {
 				10,
 				blackIndex)
 		}
+		 fmt.Printf("\rProgress %f", progress)
 		
 		anim.Delay = append(anim.Delay, delay)
 		anim.Image = append(anim.Image, img)
