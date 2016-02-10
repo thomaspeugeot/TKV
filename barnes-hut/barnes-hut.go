@@ -341,7 +341,6 @@ func (r * Run) outputGif(out io.Writer, nbStep int) {
 		anim.Image = append(anim.Image, img)
 		
 		r.oneStep()
-		
 	}
 	gif.EncodeAll(out, &anim) // NOTE: ignoring encoding errors
 }

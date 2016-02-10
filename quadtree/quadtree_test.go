@@ -116,6 +116,16 @@ func TestUpdateNodesList(t * testing.T) {
 	var q Quadtree
 	q.SetupNodesLinks()
 	
+	var coord Coord = 0x0007546e
+	if( q[coord].coord != coord) {
+		t.Errorf("coord not set up want %s, got %s", coord.String(), q[coord].coord.String())
+	}
+	
+	coord = 0x00069430
+	if( q[coord].coord != coord) {
+		t.Errorf("coord not set up want %s, got %s", coord.String(), q[coord].coord.String())
+	}
+	
 	var bodies []Body	
 	
 	// fmt.Printf("TestUpdateNodesList before initQuadtree\n")
@@ -171,9 +181,9 @@ func TestUpdateNodeCOM(t * testing.T) {
 	c.setYHexaLevel8(0x001)
 	
 	n := q[c]
-	b1 := Body{ X:0.5, Y:0.0, M:1.0, prev:n.first, next:nil}
+	b1 := Body{ X:0.5, Y:0.0, M:1.0, coord:0, prev:n.first, next:nil}
 	n.first = &b1
-	b2 := Body{ -0.5, 0.0, 1.0, &b1, nil}
+	b2 := Body{ -0.5, 0.0, 1.0, 0x00, &b1, nil}
 	b1.next = &b2
 		
 	want := Body{ X:0.0, Y:0.0, M:2.0, prev:nil, next:n.Body.next}
@@ -189,8 +199,8 @@ func TestGetCoord8(t * testing.T) {
 		in Body
 		want Coord
 	}{
-		{ Body{0.0, 0.0, 0.0, nil, nil}, 0x00080000 }, 
-		{ Body{0.0, 255.999, 255.999, nil, nil}, 0x0008FFFF }, 
+		{ Body{0.0, 0.0, 0.0, 0x0, nil, nil}, 0x00080000 }, 
+		{ Body{0.0, 255.999, 255.999, 0x0, nil, nil}, 0x0008FFFF }, 
 	}
 	for _, c := range cases {
 		got := c.in.getCoord8()

@@ -11,7 +11,7 @@ import (
 // test gif output
 func TestOutputGif(t *testing.T) {
 
-	bodies := make([]quadtree.Body, 100)
+	bodies := make([]quadtree.Body, 2000)
 	spreadOnCircle( & bodies)
 	
 	var r Run

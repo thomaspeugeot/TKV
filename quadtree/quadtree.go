@@ -62,8 +62,12 @@ type Body struct {
 	X float64
 	Y float64
 	M float64
+
+	// coordinate in the quadtree
+	coord Coord
 	
-	prev, next * Body 
+	prev, next * Body
+	
 }
 // bodies of a node are linked together
 // Some quadtree use an alternative choice : store bodies of a node in a slice attached
@@ -72,7 +76,7 @@ type Body struct {
 //	go test -bench=BenchmarkUpdateNodesList_10M -benchmem
 func (b * Body) Next() * Body { return b.next }
 
-// a node is a body (
+// a node is a body
 type Node struct {
 	// bodies of the node 
 	//  at level 8, this is the list of bodies pertaining in the bounding box of the node
@@ -82,6 +86,7 @@ type Node struct {
 	// this body is linked with the bodies at his level in the node
 	Body 
 	first * Body  // link to the bodies below
+	coord Coord // the coordinate of the Node
 }
 // link to the first body of the bodies chain belonging to the node 
 func (n * Node) First() * Body { return n.first }
@@ -148,6 +153,12 @@ func ( b Body) getCoord8() Coord {
 	c.SetLevel( 8)
 	c.setXHexaLevel8( int(b.X * 256.0) )
 	c.setYHexaLevel8( int(b.Y * 256.0) )
+	
+	if c.checkIntegrity() == false {
+		s := fmt.Sprintf("getCoord8 invalid coord %s", c.String())
+		panic( s)
+	}
+	
 	return c
 }
 
@@ -245,8 +256,39 @@ func (c * Coord) String() string {
 
 }
 
+// setup node coord
+func (q * Quadtree) SetupNodesCoord() {
+	for level := 8; level >= 0; level-- {
+	
+		// nb of nodes for the current level
+		nbNodesX := 1 << uint(level)
+		nbNodesY := 1 << uint(level)
+
+		// parse nodes of level
+		for i := 0; i < nbNodesX; i++ {
+			for j := 0; j < nbNodesY; j++ {
+				
+				var coord Coord 
+				coord.SetLevel( level)
+				coord.setXHexa(i, level)
+				coord.setYHexa(j, level)
+				
+				node := &(q[coord])
+				node.coord = coord
+				
+				// s := fmt.Sprintf("SetupNodesCoord level %8d i %8d j %8d coord %s", 
+					// level, i, j, q[coord].coord.String())
+				// fmt.Println(s)
+
+			}
+		}
+	}
+}
+
 // setup quadtree Nodes for levels from 7 to 0
 func (q * Quadtree) SetupNodesLinks() {
+	
+	q.SetupNodesCoord()
 	
 	for level := 7; level >= 0; level-- {
 	
@@ -264,6 +306,11 @@ func (q * Quadtree) SetupNodesLinks() {
 				coord.setYHexa(j, level)
 				
 				node := &(q[coord])
+				
+				// s := fmt.Sprintf("SetupNodesLinks level %8d i %8d j %8d coord %s", 
+					// level, i, j, node.coord.String())
+				// fmt.Println(s)
+				
 				coordNW, coordNE, coordSW, coordSE := q.NodesBelow(coord)
 				
 				nodeNW := &q[coordNW]
@@ -288,22 +335,24 @@ func (q * Quadtree) updateNodesList (bodies * []Body) {
 	for idx, _ := range (*bodies) {
 	
 		b := &((*bodies)[idx])
-	
+		
+		// compute coord of body (this is direct access)
+		coord := b.getCoord8()
+
+		// relink body if coordinate has changed
 		// link the next body to the previous one
 		if( b.next != nil) {
 			b.next.prev = b.prev
 		}
 		// link the previous body to the next one
 		if (b.prev != nil) {
-			b.prev = b.next
+			b.prev.next = b.next
 		}
 		
-		// get coord of body (this is direct access)
-		coord := b.getCoord8()
 
 		// put body as the first body of the node
 		// shift the first body if it is already there
-		if( q[coord].first != nil) {
+		if( (q[coord].first != nil) && (q[coord].first != b)) {
 			// double link body to the current node's first
 			b.next = q[coord].first
 			q[coord].first.prev = b
@@ -311,7 +360,15 @@ func (q * Quadtree) updateNodesList (bodies * []Body) {
 		
 		// body b is the new node's first
 		q[coord].first = b
-		b.prev = q[coord].first
+		b.prev = nil
+		
+		// setup coord for debug purposes
+		b.coord = coord
+		
+		if( b.next == b) { 	
+			s := fmt.Sprintf("updateNodesList: Node linked to itself coord : idx %d, %s", idx, b.coord.String())
+			panic(s)
+		}
 	}		
 }
 
@@ -335,6 +392,11 @@ func (q * Quadtree) updateNodesCOM () {
 				coord.setYHexa(j, level)
 				
 				node := &(q[coord])
+				
+				// fmt.Println("updateNodesCOM ", q[coord].coord.String())
+				// s := fmt.Sprintf("updateNodesCOM level %8d i %8d j %8d coord %s", 
+					// level, i, j, node.coord.String())
+				// fmt.Println(s)
 				node.updateCOM()
 			}
 		}
@@ -355,14 +417,23 @@ func (n * Node) updateCOM() {
 	n.X = 0.0
 	n.Y = 0.0
 	
+	// fmt.Println("updateCOM ", n.coord.String())
+	
 	// parse bodies of the node
+	rank := 0
 	for b := n.first ; b != nil; b = b.next {
+	
 		// fmt.Printf("updateCOM body adress %x\n", &b)
-		if( b.next == b) { panic("linked to itself")}
+		if( b.next == b) { 	
+			s := fmt.Sprintf("Node linked to itself coord : rank %d, %s", rank, n.coord.String())
+			panic(s)
+		}
 		
 		n.M += b.M
 		n.X += b.X*b.M
 		n.Y += b.Y*b.M
+		
+		rank++
 	}	
 	
 	// divide by total mass to get the barycenter
