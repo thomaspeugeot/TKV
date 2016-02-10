@@ -27,11 +27,15 @@ var	ETA float64
 
 // pseudo gravitational constant to compute 
 var	G float64
-var dt float64 // time step
+var Dt float64 // time step
+var MaxVelocity float64
+
+// max velocity
 func init() {
 	ETA = 0.00001
 	G = 0.000001
-	dt = 0.1 // 0.1 second
+	Dt = 1.0 // 1 second
+	MaxVelocity = 0.001 // cannot make more that 1/1000 th of the unit square per second
 }
 
 //	Bodies's X,Y position coordinates are float64 between 0 & 1
@@ -168,15 +172,23 @@ func (r * Run) UpdateVelocity() {
 	// parse all bodies
 	for idx, _ := range (*r.bodies) {
 
-		// update velocity (to be completed with dt)
+		// update velocity (to be completed with Dt)
 		acc := r.getAcc(idx)
 		vel := r.getVel(idx)
-		vel.X += acc.X * G * dt
-		vel.Y += acc.Y * G * dt
+		vel.X += acc.X * G * Dt
+		vel.Y += acc.Y * G * Dt
 		
 		// put some drag
 		vel.X *= 0.75
 		vel.Y *= 0.75
+		
+		// if velocity is above
+		velocity := math.Sqrt( vel.X*vel.X + vel.Y*vel.Y)
+		
+		if velocity > MaxVelocity { 
+			vel.X *= MaxVelocity/velocity
+			vel.Y *= MaxVelocity/velocity
+		}
 	}
 }
 
@@ -189,8 +201,8 @@ func (r * Run) UpdatePosition() {
 		
 		// updatePos
 		vel := r.getVel(idx)
-		body.X += vel.X
-		body.Y += vel.Y
+		body.X += vel.X * Dt
+		body.Y += vel.Y * Dt
 		
 		if body.X >= 1.0 { 
 			body.X = 1.0 - (body.X - 1.0) 
@@ -237,7 +249,7 @@ func (r * Run) outputGif(out io.Writer, nbStep int) {
 		}
 		
 		// encode time step into the image
-		progress := float32(i) / float32 (nframes)
+		progress := float64(i) / float64 (nframes)
 		for j:= 0; j < int( size*progress); j++ {
 			img.SetColorIndex(
 				j+1, 
