@@ -24,10 +24,14 @@ import (
 // constant to be added to the distance between bodies
 // in order to compute repulsion (avoid near infinite repulsion force)
 var	ETA float64
+
+// pseudo gravitational constant to compute 
 var	G float64
+var dt float64 // time step
 func init() {
-	ETA = 0.0001
-	G = 50000000
+	ETA = 0.00001
+	G = 0.000001
+	dt = 0.1 // 0.1 second
 }
 
 //	Bodies's X,Y position coordinates are float64 between 0 & 1
@@ -167,8 +171,8 @@ func (r * Run) UpdateVelocity() {
 		// update velocity (to be completed with dt)
 		acc := r.getAcc(idx)
 		vel := r.getVel(idx)
-		vel.X += acc.X / G
-		vel.Y += acc.Y / G
+		vel.X += acc.X * G * dt
+		vel.Y += acc.Y * G * dt
 		
 		// put some drag
 		vel.X *= 0.75
@@ -188,19 +192,19 @@ func (r * Run) UpdatePosition() {
 		body.X += vel.X
 		body.Y += vel.Y
 		
-		if body.X > 1.0 { 
+		if body.X >= 1.0 { 
 			body.X = 1.0 - (body.X - 1.0) 
 			vel.X = -vel.X
 		}
-		if body.X < 0.0 { 
+		if body.X <= 0.0 { 
 			body.X = - body.X 
 			vel.X = -vel.X
 		}
-		if body.Y > 1.0 { 
+		if body.Y >= 1.0 { 
 			body.Y = 1.0 - (body.Y - 1.0) 
 			vel.Y = -vel.Y
 		}
-		if body.Y < 0.0 { 
+		if body.Y <= 0.0 { 
 			body.Y = - body.Y 
 			vel.Y = -vel.Y
 		}
