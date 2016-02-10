@@ -129,7 +129,7 @@ func TestUpdateNodesList(t * testing.T) {
 func TestNodesBelow(t * testing.T) {
 	// var q Quadtree
 	var c Coord
-	c.setLevel( 1)
+	c.SetLevel( 1)
 	c.setXHexa(1, 1)
 	c.setYHexa(1, 1)
 	
@@ -166,7 +166,7 @@ func TestUpdateNodeCOM(t * testing.T) {
 	q.SetupNodesLinks()
 	
 	var c Coord
-	c.setLevel(8)
+	c.SetLevel(8)
 	c.setXHexaLevel8(0x010)
 	c.setYHexaLevel8(0x001)
 	
@@ -211,7 +211,7 @@ func TestSetupNodesLinks(t * testing.T) {
 	q.SetupNodesLinks()
 	// t.Errorf("TestSetupNodesLinks")
 	var c Coord
-	c.setLevel( 1)
+	c.SetLevel( 1)
 	c.setXHexaLevel8(128)
 	c.setYHexaLevel8(128)
 	

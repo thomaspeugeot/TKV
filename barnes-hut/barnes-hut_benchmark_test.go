@@ -92,9 +92,9 @@ func BenchmarkInitRun_1M(b * testing.B) {
 }
 
 // benchmark gif output
-func BenchmarkOutputGif_10KBody_2KSteps(b * testing.B) {
+func BenchmarkOutputGif_1KBody_2KSteps(b * testing.B) {
 
-	bodies := make([]quadtree.Body, 500)
+	bodies := make([]quadtree.Body, 1000)
 	spreadOnCircle( & bodies)
 	
 	var r Run

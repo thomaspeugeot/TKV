@@ -6,7 +6,7 @@ import (
 )
 
 func BenchmarkSetLevel(b * testing.B) {
-	for i := 0; i<b.N;i++ {		var c Coord;	c.setLevel(6) }
+	for i := 0; i<b.N;i++ {		var c Coord;	c.SetLevel(6) }
 }
 
 func BenchmarkSetXHexaLevel8(b * testing.B) {

@@ -63,14 +63,14 @@ type Body struct {
 	Y float64
 	M float64
 	
-	// bodies of a node are linked together
-	// Some quadtree use an alternative choice : store bodies of a node in a slice attached
-	// to the node. This alternative implies memory allocation which one tries to avoid.
-	// number of memory allocation are benchmaked with 
-	//	go test -bench=BenchmarkUpdateNodesList_10M -benchmem
 	prev, next * Body 
-	
 }
+// bodies of a node are linked together
+// Some quadtree use an alternative choice : store bodies of a node in a slice attached
+// to the node. This alternative implies memory allocation which one tries to avoid.
+// number of memory allocation are benchmaked with 
+//	go test -bench=BenchmarkUpdateNodesList_10M -benchmem
+func (b * Body) Next() * Body { return b.next }
 
 // a node is a body (
 type Node struct {
@@ -83,7 +83,8 @@ type Node struct {
 	Body 
 	first * Body  // link to the bodies below
 }
-
+// link to the first body of the bodies chain belonging to the node 
+func (n * Node) First() * Body { return n.first }
 
 // a Quadtree store Nodes. It is a an array with direct access to the Nodes with the Nodes coordinate
 // see Coord
@@ -98,7 +99,7 @@ func init() {
 // node level of a node coord c
 // is between 0 and 8 and coded on 2nd byte of the Coord c
 func (c Coord) Level() int { return int( c >> 16) }
-func (c * Coord) setLevel(level int) { 
+func (c * Coord) SetLevel(level int) { 
 	
 	*c = *c & 0x0000FFFF // reset level but bytes for x & y are preserved
 	var pad uint32
@@ -144,7 +145,7 @@ func (c * Coord) setYHexa(y int, level int) {
 func ( b Body) getCoord8() Coord {
 	var c Coord
 	
-	c.setLevel( 8)
+	c.SetLevel( 8)
 	c.setXHexaLevel8( int(b.X * 256.0) )
 	c.setYHexaLevel8( int(b.Y * 256.0) )
 	return c
@@ -164,7 +165,7 @@ func ( c * Coord) checkIntegrity() bool {
 	}
 	
 	// check x coord is encoded acoording to the level
-	if (false) { fmt.Printf( "y (0xFF >> uint( setLevel(%d))) %08b\n", c.Level(), 0xFF >> uint( c.Level())) }
+	if (false) { fmt.Printf( "y (0xFF >> uint( SetLevel(%d))) %08b\n", c.Level(), 0xFF >> uint( c.Level())) }
 	if (0xFF >> uint( c.Level())) & c.X() != 0x00 {
 		return false
 	}
@@ -199,7 +200,7 @@ func (q * Quadtree) updateNodesCOMAbove8() {
 			for j := 0; j < nbNodesY; j++ {
 				
 				var coord Coord 
-				coord.setLevel( level)
+				coord.SetLevel( level)
 				coord.setXHexa(i, level)
 				coord.setYHexa(j, level)
 				
@@ -258,7 +259,7 @@ func (q * Quadtree) SetupNodesLinks() {
 			for j := 0; j < nbNodesY; j++ {
 				
 				var coord Coord 
-				coord.setLevel( level)
+				coord.SetLevel( level)
 				coord.setXHexa(i, level)
 				coord.setYHexa(j, level)
 				
@@ -329,7 +330,7 @@ func (q * Quadtree) updateNodesCOM () {
 			for j := 0; j < nbNodesY; j++ {
 				
 				var coord Coord 
-				coord.setLevel(level)
+				coord.SetLevel(level)
 				coord.setXHexa(i, level)
 				coord.setYHexa(j, level)
 				

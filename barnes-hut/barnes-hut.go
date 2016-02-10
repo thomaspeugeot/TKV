@@ -28,14 +28,24 @@ var	ETA float64
 // pseudo gravitational constant to compute 
 var	G float64
 var Dt float64 // time step
+
+// velocity cannot be too high in order to stop bodies from overtaking
+// each others
 var MaxVelocity float64
+
+// the barnes hut criteria 
+var BN_THETA float64
+
+// used to compute speed up
+var nbComputationPerStep int
 
 // max velocity
 func init() {
-	ETA = 0.00001
+	ETA = 0.0000001
 	G = 0.000001
 	Dt = 1.0 // 1 second
 	MaxVelocity = 0.001 // cannot make more that 1/1000 th of the unit square per second
+	BN_THETA = 0.2
 }
 
 //	Bodies's X,Y position coordinates are float64 between 0 & 1
@@ -96,15 +106,18 @@ func (r * Run) oneStep() {
 	r.q.UpdateNodesListsAndCOM( r.bodies)
 	
 	// compute repulsive forces & acceleration
+	r.ComputeRepulsiveForceConcurrent( 20)
 	
 	// compute velocity
-	
+	r.UpdateVelocity()
+		
 	// compute new position
-	
+	r.UpdatePosition()
 }
 
 
-
+// compute repulsive forces by spreading the calculus
+// among nbRoutine go routines
 func (r * Run) ComputeRepulsiveForceConcurrent(nbRoutine int) {
 
 	sliceLen := len(*r.bodies)
@@ -144,24 +157,90 @@ func (r * Run) ComputeRepulsiveForceSubSet( startIndex, endIndex int) {
 		// index in the original slice
 		origIndex := idx+startIndex
 		
-		body := (*r.bodies)[origIndex]
+		r.computeAccelerationOnBody( origIndex)
+	}
+}
+
+// parse all other bodies to compute acceleration
+func (r * Run) computeAccelerationOnBody(origIndex int) {
+
+	body := (*r.bodies)[origIndex]
+
+	// reset acceleration
+	acc := &((*r.bodiesAccel)[origIndex])
+	acc.X = 0
+	acc.Y = 0
+	
+	// parse all other bodies for repulsions
+	// accumulate repulsion on acceleration
+	for idx2, _ := range (*r.bodies) {
 		
-		// reset acceleration
-		acc := &((*r.bodiesAccel)[origIndex])
-		acc.X = 0
-		acc.Y = 0
-		
-		// parse all other bodies for repulsions
-		// accumulate repulsion on acceleration
-		for idx2, _ := range (*r.bodies) {
+		if( idx2 != origIndex) {
+			body2 := (*r.bodies)[idx2]
 			
-			if( idx2 != idx) {
-				body2 := (*r.bodies)[idx2]
-				
-				x, y := getRepulsionVector( &body, &body2)
-				
-				acc.X += x
-				acc.Y += y
+			x, y := getRepulsionVector( &body, &body2)
+			
+			acc.X += x
+			acc.Y += y
+		}
+	}
+	
+}
+
+// parse all other bodies to compute acceleration
+// with the barnes-hut algorithm
+func (r * Run) computeAccelerationOnBodyBarnesHut(idx int) {
+
+	// reset acceleration
+	acc := &((*r.bodiesAccel)[idx])
+	acc.X = 0
+	acc.Y = 0
+	
+	// Coord is initialized at the Root coord
+	var rootCoord quadtree.Coord
+	
+	r.computeAccelationWithNodeRecursive( idx, rootCoord)
+}
+
+// given a body and a node in the quadtree, compute the repulsive force
+func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord) {
+
+	body := (*r.bodies)[idx]
+	acc := &((*r.bodiesAccel)[idx])
+	
+	// compute the node box size
+	level := coord.Level()
+	boxSize := 1.0 / math.Pow( 2.0, float64(level)) // if level = 0, this is 1.0
+	
+	node := & (r.q[coord])
+	dist := getModuloDistanceBetweenBodies( &body, &(node.Body))
+	
+	// check if the COM of the node can be used
+	if (boxSize / dist) < BN_THETA {
+	
+		x, y := getRepulsionVector( &body, &(node.Body))
+			
+		acc.X += x
+		acc.Y += y
+	} else {
+		
+		if( level > 8) {
+			// parse sub nodes
+			coordNW, coordNE, coordSW, coordSE := r.q.NodesBelow( coord)
+			r.computeAccelationWithNodeRecursive( idx, coordNW)
+			r.computeAccelationWithNodeRecursive( idx, coordNE)
+			r.computeAccelationWithNodeRecursive( idx, coordSW)
+			r.computeAccelationWithNodeRecursive( idx, coordSE)		
+		} else {
+		
+			// parse bodies of the node
+			for b := node.First() ; b != nil; b = b.Next() {
+				if( *b != body) {
+					x, y := getRepulsionVector( &body, b)
+			
+					acc.X += x
+					acc.Y += y
+				}
 			}
 		}
 	}
@@ -261,12 +340,21 @@ func (r * Run) outputGif(out io.Writer, nbStep int) {
 		anim.Delay = append(anim.Delay, delay)
 		anim.Image = append(anim.Image, img)
 		
-		r.ComputeRepulsiveForceConcurrent( 20)
-		r.UpdateVelocity()
-		r.UpdatePosition()
+		r.oneStep()
 		
 	}
 	gif.EncodeAll(out, &anim) // NOTE: ignoring encoding errors
+}
+
+// compute modulo distance
+func getModuloDistanceBetweenBodies( A, B *quadtree.Body) float64 {
+
+	x := getModuloDistance( B.X, A.X)
+	y := getModuloDistance( B.Y, A.Y)
+
+	distQuared := (x*x + y*y)
+	
+	return math.Sqrt( distQuared )
 }
 
 // compute repulsion force vector between body A and body B
