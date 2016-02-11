@@ -23,30 +23,25 @@ import (
 	
 // constant to be added to the distance between bodies
 // in order to compute repulsion (avoid near infinite repulsion force)
-var	ETA float64
+// note : declaring those variable as constant has no impact on benchmarks results
+var	ETA float64 = 0.0000001
 
 // pseudo gravitational constant to compute 
-var	G float64
-var Dt float64 // time step
+var	G float64 = 0.000001
+var Dt float64  = 1.0 // 1 second, time step
 
 // velocity cannot be too high in order to stop bodies from overtaking
 // each others
-var MaxVelocity float64
+var MaxVelocity float64  = 0.001 // cannot make more that 1/1000 th of the unit square per second
 
 // the barnes hut criteria 
-var BN_THETA float64
+var BN_THETA float64 = 0.02 // can use barnes if distance to COM is 5 times side of the node's box
 
 // used to compute speed up
 var nbComputationPerStep int
 
-// max velocity
-func init() {
-	ETA = 0.0000001
-	G = 0.000001
-	Dt = 1.0 // 1 second
-	MaxVelocity = 0.001 // cannot make more that 1/1000 th of the unit square per second
-	BN_THETA = 0.2
-}
+// if true, Barnes-Hut algo is used
+var UseBarnesHut bool = true
 
 //	Bodies's X,Y position coordinates are float64 between 0 & 1
 type Pos struct {
@@ -157,7 +152,11 @@ func (r * Run) ComputeRepulsiveForceSubSet( startIndex, endIndex int) {
 		// index in the original slice
 		origIndex := idx+startIndex
 		
-		r.computeAccelerationOnBody( origIndex)
+		if( UseBarnesHut ) {
+			r.computeAccelerationOnBodyBarnesHut( origIndex)
+		} else {
+			r.computeAccelerationOnBody( origIndex)
+		}
 	}
 }
 
