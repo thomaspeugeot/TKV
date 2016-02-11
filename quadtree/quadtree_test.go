@@ -114,25 +114,32 @@ func TestSetYHexaLevel8(t * testing.T) {
 func TestUpdateNodesList(t * testing.T) {
 	
 	var q Quadtree
-	q.SetupNodesLinks()
-	
-	var coord Coord = 0x0007546e
-	if( q[coord].coord != coord) {
-		t.Errorf("coord not set up want %s, got %s", coord.String(), q[coord].coord.String())
-	}
-	
-	coord = 0x00069430
-	if( q[coord].coord != coord) {
-		t.Errorf("coord not set up want %s, got %s", coord.String(), q[coord].coord.String())
-	}
-	
 	var bodies []Body	
 	
 	// fmt.Printf("TestUpdateNodesList before initQuadtree\n")
 	initBodies( &bodies, 1000000)
+	q.Init( &bodies)
+
+	
+	var coord Coord = 0x0007546e
+	if( q.Nodes[coord].coord != coord) {
+		t.Errorf("coord not set up want %s, got %s", coord.String(), q.Nodes[coord].coord.String())
+	}
+	
+	coord = 0x00069430
+	if( q.Nodes[coord].coord != coord) {
+		t.Errorf("coord not set up want %s, got %s", coord.String(), q.Nodes[coord].coord.String())
+	}
+	
+
 
 	// fmt.Printf("TestUpdateNodesList before updateNodesList\n")
-	q.updateNodesList( &bodies)
+	q.updateNodesList()
+	q.CheckIntegrity(t)
+	q.updateNodesList()
+	q.CheckIntegrity(t)
+	q.updateNodesList()
+	q.CheckIntegrity(t)
 }
 
 // check computation of nodes below
@@ -155,7 +162,6 @@ func TestNodesBelow(t * testing.T) {
 func TestUpdateNodesCOM(t * testing.T) {
 	
 	var q Quadtree
-	q.SetupNodesLinks()
 	
 	var bodies []Body	
 	
@@ -163,24 +169,27 @@ func TestUpdateNodesCOM(t * testing.T) {
 	initBodies( &bodies, 10000)
 
 	// fmt.Printf("TestUpdateNodesCOM before updateNodesList\n")
-	q.updateNodesList( &bodies)
+	q.Init( &bodies)
 	
-	// fmt.Printf("TestUpdateNodesCOM before updateNodesCOM\n")
-	// q.updateNodesCOM()
-	// fmt.Printf("TestUpdateNodesCOM end\n")
+	q.updateNodesList()
+	q.updateNodesCOM()
+	
+	q.CheckIntegrity(t)	
 }
 	
 func TestUpdateNodeCOM(t * testing.T) {
 	
 	var q Quadtree
-	q.SetupNodesLinks()
+	var bodies []Body	
+	initBodies( &bodies, 10000)
+	q.Init(&bodies)
 	
 	var c Coord
 	c.SetLevel(8)
 	c.setXHexaLevel8(0x010)
 	c.setYHexaLevel8(0x001)
 	
-	n := q[c]
+	n := q.Nodes[c]
 	b1 := Body{ X:0.5, Y:0.0, M:1.0, coord:0, prev:n.first, next:nil}
 	n.first = &b1
 	b2 := Body{ -0.5, 0.0, 1.0, 0x00, &b1, nil}
@@ -218,7 +227,6 @@ func TestGetCoord8(t * testing.T) {
 func TestSetupNodesLinks(t * testing.T) {
 	var q Quadtree
 		
-	q.SetupNodesLinks()
 	// t.Errorf("TestSetupNodesLinks")
 	var c Coord
 	c.SetLevel( 1)
@@ -227,7 +235,8 @@ func TestSetupNodesLinks(t * testing.T) {
 	
 	// coordNW, coordNE, coordSW, coordSE := q.NodesBelow( c)
 	
-	n := &(q[c])
+	q.setupNodesLinks()
+	n := &(q.Nodes[c])
 	b := n.first
 					
 	// fmt.Printf("%8x\n", c)

@@ -24,8 +24,19 @@ func TestOutputGif(t *testing.T) {
 	// visual verification
 }
 
-func Test20Steps(t *testing.T) {
+func TestOneStep(t *testing.T) {
+	bodies := make([]quadtree.Body, 2000)
+	spreadOnCircle( & bodies)
 	
+	var r Run
+	r.Init( & bodies)
+	// r.q.CheckIntegrity( t)
+	r.oneStep()
+	// r.q.CheckIntegrity( t)
+	r.q.UpdateNodesLists()
+	r.q.CheckIntegrity( t)
+	r.oneStep()
+	r.q.CheckIntegrity( t)
 }
 
 func TestGetModuloDistance(t *testing.T) {

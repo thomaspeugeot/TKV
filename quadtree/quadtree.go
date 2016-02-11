@@ -25,6 +25,7 @@ package quadtree
 import (
 	"fmt"
 	"bytes"
+	"testing"
 )
 
 // 
@@ -93,7 +94,10 @@ func (n * Node) First() * Body { return n.first }
 
 // a Quadtree store Nodes. It is a an array with direct access to the Nodes with the Nodes coordinate
 // see Coord
-type Quadtree [1<<20]Node
+type Quadtree struct {
+	Nodes [1<<20]Node
+	bodies * []Body // pointer to the body slice
+}
 
 var optim bool
 
@@ -197,6 +201,14 @@ const (
 	SE = 0x0101
 )
 
+// init quadtree
+func (q * Quadtree) Init( bodies * []Body) {
+	q.bodies = bodies
+	q.setupNodesCoord()
+	q.setupNodesLinks()
+	q.updateNodesList()
+}
+
 // compute quadtree Nodes for levels from 0 to 7
 func (q * Quadtree) updateNodesCOMAbove8() {
 	
@@ -215,7 +227,7 @@ func (q * Quadtree) updateNodesCOMAbove8() {
 				coord.setXHexa(i, level)
 				coord.setYHexa(j, level)
 				
-				node := &(q[coord])
+				node := &(q.Nodes[coord])
 				node.updateCOM()
 			}
 		}
@@ -257,7 +269,7 @@ func (c * Coord) String() string {
 }
 
 // setup node coord
-func (q * Quadtree) SetupNodesCoord() {
+func (q * Quadtree) setupNodesCoord() {
 	for level := 8; level >= 0; level-- {
 	
 		// nb of nodes for the current level
@@ -273,11 +285,11 @@ func (q * Quadtree) SetupNodesCoord() {
 				coord.setXHexa(i, level)
 				coord.setYHexa(j, level)
 				
-				node := &(q[coord])
+				node := &(q.Nodes[coord])
 				node.coord = coord
 				
 				// s := fmt.Sprintf("SetupNodesCoord level %8d i %8d j %8d coord %s", 
-					// level, i, j, q[coord].coord.String())
+					// level, i, j, q.Nodes[coord].coord.String())
 				// fmt.Println(s)
 
 			}
@@ -286,9 +298,7 @@ func (q * Quadtree) SetupNodesCoord() {
 }
 
 // setup quadtree Nodes for levels from 7 to 0
-func (q * Quadtree) SetupNodesLinks() {
-	
-	q.SetupNodesCoord()
+func (q * Quadtree) setupNodesLinks() {
 	
 	for level := 7; level >= 0; level-- {
 	
@@ -305,7 +315,7 @@ func (q * Quadtree) SetupNodesLinks() {
 				coord.setXHexa(i, level)
 				coord.setYHexa(j, level)
 				
-				node := &(q[coord])
+				node := &(q.Nodes[coord])
 				
 				// s := fmt.Sprintf("SetupNodesLinks level %8d i %8d j %8d coord %s", 
 					// level, i, j, node.coord.String())
@@ -313,10 +323,10 @@ func (q * Quadtree) SetupNodesLinks() {
 				
 				coordNW, coordNE, coordSW, coordSE := q.NodesBelow(coord)
 				
-				nodeNW := &q[coordNW]
-				nodeNE := &q[coordNE]
-				nodeSW := &q[coordSW]
-				nodeSE := &q[coordSE]
+				nodeNW := &q.Nodes[coordNW]
+				nodeNE := &q.Nodes[coordNE]
+				nodeSW := &q.Nodes[coordSW]
+				nodeSE := &q.Nodes[coordSE]
 	
 				// bodies of the nodes below are chained
 				// fmt.Printf("%8x\n", coord)
@@ -329,17 +339,14 @@ func (q * Quadtree) SetupNodesLinks() {
 	}
 }
 
-// fill quadtree at level with bodies 
-func (q * Quadtree) updateNodesList (bodies * []Body) {
+// fill quadtree at level 8 with bodies 
+func (q * Quadtree) updateNodesList() {
 
-	for idx, _ := range (*bodies) {
+	for idx, _ := range (*q.bodies) {
 	
-		b := &((*bodies)[idx])
+		b := &((*q.bodies)[idx])
 		
-		// compute coord of body (this is direct access)
-		coord := b.getCoord8()
-
-		// relink body if coordinate has changed
+		// 1st phase, remove the body from its current double linked list
 		// link the next body to the previous one
 		if( b.next != nil) {
 			b.next.prev = b.prev
@@ -347,22 +354,35 @@ func (q * Quadtree) updateNodesList (bodies * []Body) {
 		// link the previous body to the next one
 		if (b.prev != nil) {
 			b.prev.next = b.next
+		} else {
+			// if body prev is nil, 
+			// it can be either the current first of a node or it has not been initialized
+			// if it is the current first of the node,
+			// the first of the node shall point to the next of the body
+			if( (q.Nodes[b.coord]).first == b) {
+				(q.Nodes[b.coord]).first = b.next
+			}
 		}
 		
-
+		
+		// 2nd Phase
 		// put body as the first body of the node
 		// shift the first body if it is already there
-		if( (q[coord].first != nil) && (q[coord].first != b)) {
+		// compute coord of body (this is direct access)
+		coord := b.getCoord8()
+		node := & (q.Nodes[coord])
+		initialFirstBody := node.first
+		if( ( initialFirstBody != nil) && (initialFirstBody != b)) {
 			// double link body to the current node's first
-			b.next = q[coord].first
-			q[coord].first.prev = b
+			b.next = initialFirstBody
+			initialFirstBody.prev = b
 		}
 		
 		// body b is the new node's first
-		q[coord].first = b
+		node.first = b
 		b.prev = nil
 		
-		// setup coord for debug purposes
+		// setup new coord 
 		b.coord = coord
 		
 		if( b.next == b) { 	
@@ -373,7 +393,7 @@ func (q * Quadtree) updateNodesList (bodies * []Body) {
 }
 
 // compute COM of quadtree from level 8 to level 0
-func (q * Quadtree) updateNodesCOM () {
+func (q * Quadtree) updateNodesCOM() {
 
 	// compute is bottom up
 	for level := 8; level >= 0; level-- {
@@ -391,9 +411,9 @@ func (q * Quadtree) updateNodesCOM () {
 				coord.setXHexa(i, level)
 				coord.setYHexa(j, level)
 				
-				node := &(q[coord])
+				node := &(q.Nodes[coord])
 				
-				// fmt.Println("updateNodesCOM ", q[coord].coord.String())
+				// fmt.Println("updateNodesCOM ", q.Nodes[coord].coord.String())
 				// s := fmt.Sprintf("updateNodesCOM level %8d i %8d j %8d coord %s", 
 					// level, i, j, node.coord.String())
 				// fmt.Println(s)
@@ -403,10 +423,15 @@ func (q * Quadtree) updateNodesCOM () {
 	}	
 }
 
-func (q * Quadtree) UpdateNodesListsAndCOM (bodies * []Body) {
+func (q * Quadtree) UpdateNodesListsAndCOM() {
 
-	q.updateNodesList( bodies)
+	q.updateNodesList()
 	q.updateNodesCOM()
+}
+
+func (q * Quadtree) UpdateNodesLists() {
+
+	q.updateNodesList()
 }
 
 
@@ -442,3 +467,64 @@ func (n * Node) updateCOM() {
 		n.Y /= n.M
 	}
 }
+
+func (q *Quadtree)CheckIntegrity(t * testing.T) {
+
+	nbBodies := 0
+
+	// perform some tests on the links of each nodes
+	for level := 8; level >= 8; level-- {
+	
+		// nb of nodes for the current level
+		nbNodesX := 1 << uint(level)
+		nbNodesY := 1 << uint(level)
+
+		// parse nodes of level
+		for i := 0; i < nbNodesX; i++ {
+			for j := 0; j < nbNodesY; j++ {
+				
+				var coord Coord 
+				coord.SetLevel( level)
+				coord.setXHexa(i, level)
+				coord.setYHexa(j, level)
+				
+				node := &(q.Nodes[coord])
+
+				// test that the node coord is corred
+				if q.Nodes[coord].coord != coord {
+					s := fmt.Sprintf("node coord = %s, want %s", 
+						q.Nodes[coord].coord.String(), coord.String())
+					t.Errorf(s)
+				}
+				
+				// test that the node first body
+				// has a nil previous body
+				if( node.first != nil && node.first.prev != nil) {
+					s := fmt.Sprintf("node coord = %s, has first body with non nil prev", 
+						q.Nodes[coord].coord.String())
+					t.Errorf(s)
+				}
+				
+				// test for each body of the chain of bodies
+				// - that the next body previous body is the body
+				rank := 0
+				for b := node.first ; b != nil; b = b.next {
+				
+					if( b.next != nil && b.next.prev != b) {
+						s := fmt.Sprintf("node coord = %s, has %d nth body with next body not point to him for prev", 
+							q.Nodes[coord].coord.String(), rank)
+						t.Errorf(s)
+					}
+					nbBodies++
+					rank++
+				}
+			}
+		}
+	}
+	
+	// check that all bodies are accounted for
+	if nbBodies != len(*q.bodies) {
+		t.Errorf("Nb bodies do not match expected %d, got %d", len(*q.bodies), nbBodies)
+	}
+}
+

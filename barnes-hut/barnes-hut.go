@@ -97,13 +97,13 @@ func (r * Run) Init( bodies * ([]quadtree.Body)) {
 	vel := make([]Vel, len(*bodies))
 	r.bodiesAccel = &acc
 	r.bodiesVel = &vel
-	r.q.SetupNodesLinks()
+	r.q.Init(bodies)
 }
 
 func (r * Run) oneStep() {
 
 	// compute the quadtree from the bodies
-	r.q.UpdateNodesListsAndCOM( r.bodies)
+	r.q.UpdateNodesListsAndCOM()
 	
 	// compute repulsive forces & acceleration
 	r.ComputeRepulsiveForceConcurrent( 20)
@@ -212,7 +212,7 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 	level := coord.Level()
 	boxSize := 1.0 / math.Pow( 2.0, float64(level)) // if level = 0, this is 1.0
 	
-	node := & (r.q[coord])
+	node := & (r.q.Nodes[coord])
 	dist := getModuloDistanceBetweenBodies( &body, &(node.Body))
 	
 	// check if the COM of the node can be used
@@ -335,7 +335,7 @@ func (r * Run) outputGif(out io.Writer, nbStep int) {
 				10,
 				blackIndex)
 		}
-		 fmt.Printf("\rProgress %f", progress)
+		fmt.Printf("\rProgress %f", progress)
 		
 		anim.Delay = append(anim.Delay, delay)
 		anim.Image = append(anim.Image, img)
