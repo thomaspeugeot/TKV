@@ -122,10 +122,34 @@ func TestComputeRepulsiveForcesConcurrent(t *testing.T) {
 	if ! same {
 		t.Errorf("different results")
 	}
+}
+
+// test that the barnes hut computation of repulsive
+// forces is close to the classic computation 
+func TestComputeAccelerationOnBodyBarnesHut(t *testing.T) {
+
+	bodies := make([]quadtree.Body, 2)
+	spreadOnCircle( & bodies)
+	var r Run
+	r.Init( & bodies)
 	
+	r.computeAccelerationOnBody( 0)
+	accReference := (*r.bodiesAccel)[0]
 	
+	r.computeAccelerationOnBodyBarnesHut( 0)
+	accBH := (*r.bodiesAccel)[0]
+
+	// measure the difference between reference and BH
+	diff := math.Hypot( (accReference.X - accBH.X), (accReference.Y - accBH.Y))
+	
+	// tolerance is arbitrary set
+	tolerance := 0.00001
+	if( diff > tolerance) {
+		t.Errorf("different results, expected less than %f, got %f", tolerance, diff)
+	}
 	
 }
+
 // function used to spread bodies randomly on 
 // the unit square
 func spreadOnCircle(bodies * []quadtree.Body) {

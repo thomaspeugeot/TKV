@@ -35,7 +35,7 @@ var Dt float64  = 1.0 // 1 second, time step
 var MaxVelocity float64  = 0.001 // cannot make more that 1/1000 th of the unit square per second
 
 // the barnes hut criteria 
-var BN_THETA float64 = 0.02 // can use barnes if distance to COM is 5 times side of the node's box
+var BN_THETA float64 = 0.0000000 // can use barnes if distance to COM is 5 times side of the node's box
 
 // used to compute speed up
 var nbComputationPerStep int
@@ -217,12 +217,12 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 	// check if the COM of the node can be used
 	if (boxSize / dist) < BN_THETA {
 	
+		fmt.Printf("computeAccelationWithNodeRecursive at node %#v\n", node)
 		x, y := getRepulsionVector( &body, &(node.Body))
 			
 		acc.X += x
 		acc.Y += y
-	} else {
-		
+	} else {		
 		if( level > 8) {
 			// parse sub nodes
 			coordNW, coordNE, coordSW, coordSE := r.q.NodesBelow( coord)
@@ -235,6 +235,7 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 			// parse bodies of the node
 			for b := node.First() ; b != nil; b = b.Next() {
 				if( *b != body) {
+					fmt.Printf("computeAccelationWithNodeRecursive at leaf %#v\n", b)
 					x, y := getRepulsionVector( &body, b)
 			
 					acc.X += x
