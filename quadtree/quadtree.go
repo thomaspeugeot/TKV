@@ -207,6 +207,7 @@ func (q * Quadtree) Init( bodies * []Body) {
 	q.setupNodesCoord()
 	q.setupNodesLinks()
 	q.updateNodesList()
+	q.updateNodesCOM()
 }
 
 // compute quadtree Nodes for levels from 0 to 7

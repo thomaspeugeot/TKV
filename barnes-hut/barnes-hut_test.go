@@ -128,7 +128,7 @@ func TestComputeRepulsiveForcesConcurrent(t *testing.T) {
 // forces is close to the classic computation 
 func TestComputeAccelerationOnBodyBarnesHut(t *testing.T) {
 
-	bodies := make([]quadtree.Body, 2)
+	bodies := make([]quadtree.Body, 2000)
 	spreadOnCircle( & bodies)
 	var r Run
 	r.Init( & bodies)
@@ -139,13 +139,19 @@ func TestComputeAccelerationOnBodyBarnesHut(t *testing.T) {
 	r.computeAccelerationOnBodyBarnesHut( 0)
 	accBH := (*r.bodiesAccel)[0]
 
+	r.q.CheckIntegrity(t)
+	
 	// measure the difference between reference and BH
+	accReferenceLength := math.Hypot( accReference.X, accReference.Y)
 	diff := math.Hypot( (accReference.X - accBH.X), (accReference.Y - accBH.Y))
 	
+	relativeError := diff/accReferenceLength
+	
 	// tolerance is arbitrary set
-	tolerance := 0.00001
-	if( diff > tolerance) {
-		t.Errorf("different results, expected less than %f, got %f", tolerance, diff)
+	tolerance := 0.05 // 5%
+	if( relativeError > tolerance) {
+		t.Errorf("different results, accel ref x %f y %f, got x %f y %f", accReference.X, accReference.Y, accBH.X, accBH.Y)	
+		t.Errorf("different results, expected less than %f, got %f", tolerance, relativeError)
 	}
 	
 }
