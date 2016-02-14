@@ -26,6 +26,8 @@ import (
 	"fmt"
 	"bytes"
 	"testing"
+	"sort"
+	"math"
 )
 
 // 
@@ -88,6 +90,7 @@ type Node struct {
 	Body 
 	first * Body  // link to the bodies below
 	coord Coord // the coordinate of the Node
+	nbBodies int // number of bodies in the node
 }
 // link to the first body of the bodies chain belonging to the node 
 func (n * Node) First() * Body { return n.first }
@@ -529,3 +532,44 @@ func (q *Quadtree)CheckIntegrity(t * testing.T) {
 	}
 }
 
+// compute number of bodies per node 
+// and compute the gini of body density par node at level 8
+func (q* Quadtree) ComputeQuadtreeGini() (nbBodiesInPoorTencile, nbBodiesInRichTencile int) {
+	
+	// var bodyCount []int
+	bodyCount := make([]int, 256*256)
+	
+	rank := 0
+	// parse nodes of level
+	for i := 0; i < 256; i++ {
+		for j := 0; j < 256; j++ {
+			
+			nbBodies := int(0)
+			var coord Coord 
+			coord.SetLevel( 8)
+			coord.setXHexa(i, 8)
+			coord.setYHexa(j, 8)
+			
+			node := &(q.Nodes[coord])
+			for b := node.first ; b != nil; b = b.next {
+				nbBodies++
+			}
+			bodyCount[rank] = nbBodies
+			rank++
+		}
+	}
+	sort.Ints(bodyCount)
+	
+	nbBodiesInPoorTencile = 0
+	for _, nbBodies := range bodyCount[0:int((256*256)/10)] {
+		nbBodiesInPoorTencile += nbBodies
+	}
+	
+	nbBodiesInRichTencile = 0
+	highIndex := int(math.Abs(256.0*256.0*9.0/10.0))
+	for _, nbBodies := range bodyCount[highIndex:] {
+		nbBodiesInRichTencile += nbBodies
+	}
+	
+	return nbBodiesInPoorTencile, nbBodiesInRichTencile
+}

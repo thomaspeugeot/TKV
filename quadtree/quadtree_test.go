@@ -177,6 +177,30 @@ func TestUpdateNodesCOM(t * testing.T) {
 	q.CheckIntegrity(t)	
 }
 	
+	
+func TestComputeGini(t * testing.T) {
+	
+	var q Quadtree
+	var bodies []Body	
+	initBodies( &bodies, 10000)
+
+	// fmt.Printf("TestUpdateNodesCOM before updateNodesList\n")
+	q.Init( &bodies)
+	
+	q.updateNodesList()
+	q.updateNodesCOM()	
+	q.CheckIntegrity(t)
+
+	nbBodiesInPoorTencile, nbBodiesInRichTencile := q.ComputeQuadtreeGini()
+	if( nbBodiesInPoorTencile < 0) {
+		t.Errorf("negative value for poor tencile")
+	}
+	if( nbBodiesInRichTencile == 0) {
+		t.Errorf("zero value for poor tencile")
+	}
+	
+}
+	
 func TestUpdateNodeCOM(t * testing.T) {
 	
 	var q Quadtree

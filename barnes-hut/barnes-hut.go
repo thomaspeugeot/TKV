@@ -347,8 +347,13 @@ func (r * Run) outputGif(out io.Writer, nbStep int) {
 				10,
 				blackIndex)
 		}
-		fmt.Printf("\rProgress %f speedup %f", progress, 
-			float64(len(*r.bodies)*len(*r.bodies))/float64(nbComputationPerStep))
+		nbBodies := float64(len(*r.bodies))
+		nbBodiesInPoorTencile, nbBodiesInRichTencile := r.q.ComputeQuadtreeGini()
+		fmt.Printf("\rProgress %f speedup %f low 10 %f high 10 %f",
+			progress, 
+			nbBodies*nbBodies/float64(nbComputationPerStep),
+			float64(nbBodiesInPoorTencile)/nbBodies,
+			float64(nbBodiesInRichTencile)/nbBodies)
 		
 		anim.Delay = append(anim.Delay, delay)
 		anim.Image = append(anim.Image, img)
@@ -405,3 +410,6 @@ func getModuloDistance( alpha, beta float64) (dist float64) {
 		
 	return dist
 }
+
+// compute pseudo gini indice on the quadtree
+// it is the ratio between the 10% most densified quadtree and the 10% least densified
