@@ -28,6 +28,7 @@ import (
 	"testing"
 	"sort"
 	"math"
+	"math/rand"
 )
 
 // 
@@ -556,7 +557,7 @@ func (q* Quadtree) ComputeQuadtreeGini() (nbBodiesInPoorTencile, nbBodiesInRichT
 			}
 			bodyCount[rank] = nbBodies
 			rank++
-			fmt.Println("i %d j %d: %d", i, j, nbBodies)
+			// fmt.Println( fmt.Sprintf("i %d j %d: %d", i, j, nbBodies))
 		}
 	}
 	sort.Ints(bodyCount)
@@ -575,4 +576,18 @@ func (q* Quadtree) ComputeQuadtreeGini() (nbBodiesInPoorTencile, nbBodiesInRichT
 	}
 	
 	return nbBodiesInPoorTencile, nbBodiesInRichTencile
+}
+
+// init a quadtree with random position
+func InitBodiesUniform( bodies * []Body, nbBodies int) {
+	
+	// var q Quadtree
+	*bodies = make([]Body, nbBodies)
+	
+	// init bodies
+	for idx, _ := range(*bodies) {
+		(*bodies)[idx].X = rand.Float64()
+		(*bodies)[idx].Y = rand.Float64()
+		(*bodies)[idx].M = rand.Float64()
+	}
 }

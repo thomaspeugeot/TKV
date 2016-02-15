@@ -117,7 +117,7 @@ func TestUpdateNodesList(t * testing.T) {
 	var bodies []Body	
 	
 	// fmt.Printf("TestUpdateNodesList before initQuadtree\n")
-	initBodies( &bodies, 1000000)
+	InitBodiesUniform( &bodies, 1000000)
 	q.Init( &bodies)
 
 	
@@ -131,8 +131,6 @@ func TestUpdateNodesList(t * testing.T) {
 		t.Errorf("coord not set up want %s, got %s", coord.String(), q.Nodes[coord].coord.String())
 	}
 	
-
-
 	// fmt.Printf("TestUpdateNodesList before updateNodesList\n")
 	q.updateNodesList()
 	q.CheckIntegrity(t)
@@ -166,7 +164,7 @@ func TestUpdateNodesCOM(t * testing.T) {
 	var bodies []Body	
 	
 	// fmt.Printf("TestUpdateNodesCOM before initQuadtree\n")
-	initBodies( &bodies, 10000)
+	InitBodiesUniform( &bodies, 10000)
 
 	// fmt.Printf("TestUpdateNodesCOM before updateNodesList\n")
 	q.Init( &bodies)
@@ -182,7 +180,7 @@ func TestComputeGini(t * testing.T) {
 	
 	var q Quadtree
 	var bodies []Body	
-	initBodies( &bodies, 100000)
+	InitBodiesUniform( &bodies, 1000000)
 
 	// fmt.Printf("TestUpdateNodesCOM before updateNodesList\n")
 	q.Init( &bodies)
@@ -205,7 +203,7 @@ func TestUpdateNodeCOM(t * testing.T) {
 	
 	var q Quadtree
 	var bodies []Body	
-	initBodies( &bodies, 10000)
+	InitBodiesUniform( &bodies, 10000)
 	q.Init(&bodies)
 	
 	var c Coord

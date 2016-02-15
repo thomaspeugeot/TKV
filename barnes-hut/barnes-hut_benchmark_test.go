@@ -94,8 +94,10 @@ func BenchmarkInitRun_1M(b * testing.B) {
 // benchmark gif output
 func BenchmarkOutputGif_1MBody_1KSteps(b * testing.B) {
 
-	bodies := make([]quadtree.Body, 30000)
-	spreadOnCircle( & bodies)
+	var bodies []quadtree.Body
+	quadtree.InitBodiesUniform( &bodies, 30000)
+
+	// spreadOnCircle( & bodies)
 	
 	var r Run
 	r.Init( & bodies)
