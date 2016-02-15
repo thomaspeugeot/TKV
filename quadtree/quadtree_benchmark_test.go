@@ -56,10 +56,10 @@ func initBodies( bodies * []Body, nbBodies int) {
 	*bodies = make([]Body, nbBodies)
 	
 	// init bodies
-	for i := 0; i < nbBodies; i++ {
-		(*bodies)[i].X = rand.Float64()
-		(*bodies)[i].Y = rand.Float64()
-		(*bodies)[i].M = rand.Float64()
+	for _, b := range(*bodies) {
+		b.X = rand.Float64()
+		b.Y = rand.Float64()
+		b.M = rand.Float64()
 	}
 }
 

@@ -556,17 +556,20 @@ func (q* Quadtree) ComputeQuadtreeGini() (nbBodiesInPoorTencile, nbBodiesInRichT
 			}
 			bodyCount[rank] = nbBodies
 			rank++
+			fmt.Println("i %d j %d: %d", i, j, nbBodies)
 		}
 	}
 	sort.Ints(bodyCount)
 	
+	lowIndex := int(math.Floor(256.0*256.0*1.0/10.0))
 	nbBodiesInPoorTencile = 0
-	for _, nbBodies := range bodyCount[0:int((256*256)/10)] {
+	for _, nbBodies := range bodyCount[0:lowIndex] {
 		nbBodiesInPoorTencile += nbBodies
 	}
 	
 	nbBodiesInRichTencile = 0
-	highIndex := int(math.Abs(256.0*256.0*9.0/10.0))
+	
+	highIndex := int(math.Floor(256.0*256.0*9.0/10.0))
 	for _, nbBodies := range bodyCount[highIndex:] {
 		nbBodiesInRichTencile += nbBodies
 	}
