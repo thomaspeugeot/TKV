@@ -17,14 +17,13 @@ import (
 	"io"
 	"fmt"
 	"math"
+	"math/rand"
 )
 
-
-	
 // constant to be added to the distance between bodies
 // in order to compute repulsion (avoid near infinite repulsion force)
 // note : declaring those variable as constant has no impact on benchmarks results
-var	ETA float64 = 0.0000001
+var	ETA float64 = 0.00000001
 
 // pseudo gravitational constant to compute 
 var	G float64 = 0.000001
@@ -68,6 +67,13 @@ const (
 	blackIndex = 1 // next color in palette
 )
 
+type State int
+
+const (
+	STOPPED State = iota
+	RUNNING
+)
+
 // a simulation run
 type Run struct {
 	bodies * []quadtree.Body // bodies position in the quatree
@@ -75,6 +81,7 @@ type Run struct {
 	bodiesVel * []Vel // bodies velocity
 
 	q quadtree.Quadtree // the supporting quadtree
+	state State
 }
 
 func (r * Run) getAcc(index int) (* Acc) {
@@ -83,6 +90,21 @@ func (r * Run) getAcc(index int) (* Acc) {
 
 func (r * Run) getVel(index int) (* Vel) {
 	return & (*r.bodiesVel)[index]
+}
+
+func (r * Run) GetState() State{
+	return r.state
+}
+
+func (t State) String() string {
+
+	switch t {
+	case STOPPED :
+		return "STOPPED"
+	case RUNNING :
+		return "RUNNING"
+	}
+	return "unknown state"
 }
 
 // init the run with an array of quadtree bodies
@@ -411,5 +433,28 @@ func getModuloDistance( alpha, beta float64) (dist float64) {
 	return dist
 }
 
-// compute pseudo gini indice on the quadtree
-// it is the ratio between the 10% most densified quadtree and the 10% least densified
+// function used to spread bodies randomly on 
+// the unit square
+func SpreadOnCircle(bodies * []quadtree.Body) {
+	for idx, _ := range *bodies {
+		
+		body := &((*bodies)[idx])
+		
+		radius := rand.Float64()
+		angle := 2.0 * math.Pi * rand.Float64()
+		
+		if idx%2 == 0 {
+			body.X = 0.2
+			body.Y = 0.7
+			radius *= 0.15
+		} else {
+			body.X = 0.6
+			body.Y = 0.4
+			radius *= 0.25
+		}
+		
+		body.M =0.1000000
+		body.X += math.Cos( angle) * radius
+		body.Y += math.Sin( angle) * radius
+	}
+}

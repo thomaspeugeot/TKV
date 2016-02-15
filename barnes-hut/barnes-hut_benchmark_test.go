@@ -11,7 +11,7 @@ import (
 func BenchmarkComputeRepulsiveForces_1K(b * testing.B ) {
 
 	bodies := make([]quadtree.Body, 1000)
-	spreadOnCircle( & bodies)
+	SpreadOnCircle( & bodies)
 	var r Run
 	r.Init( & bodies)
 	for i := 0; i<b.N;i++ { 
@@ -21,7 +21,7 @@ func BenchmarkComputeRepulsiveForces_1K(b * testing.B ) {
 func BenchmarkComputeRepulsiveForces_10K(b * testing.B ) {
 
 	bodies := make([]quadtree.Body, 10000)
-	spreadOnCircle( & bodies)
+	SpreadOnCircle( & bodies)
 	var r Run
 	r.Init( & bodies)
 	for i := 0; i<b.N;i++ { 
@@ -32,7 +32,7 @@ func BenchmarkComputeRepulsiveForces_10K(b * testing.B ) {
 func BenchmarkComputeRepulsiveForcesOnHalfSet_1K(b * testing.B ) {
 
 	bodies := make([]quadtree.Body, 1000)
-	spreadOnCircle( & bodies)
+	SpreadOnCircle( & bodies)
 	var r Run
 	r.Init( & bodies)
 	endIndex := len(bodies)/2
@@ -44,7 +44,7 @@ func BenchmarkComputeRepulsiveForcesOnHalfSet_1K(b * testing.B ) {
 func BenchmarkComputeRepulsiveForcesConcurrent20_30K(b * testing.B ) {
 
 	bodies := make([]quadtree.Body, 30000)
-	spreadOnCircle( & bodies)
+	SpreadOnCircle( & bodies)
 	var r Run
 	r.Init( & bodies)
 	for i := 0; i<b.N;i++ { 
@@ -83,7 +83,7 @@ func BenchmarkInitRun_1M(b * testing.B) {
 
 	if false { fmt.Printf("\n%#v", bodies[0]) }
 	
-	spreadOnCircle( & bodies)
+	SpreadOnCircle( & bodies)
 	
 	var r Run
 	for i := 0; i<b.N;i++ {
@@ -95,17 +95,17 @@ func BenchmarkInitRun_1M(b * testing.B) {
 func BenchmarkOutputGif_1MBody_1KSteps(b * testing.B) {
 
 	var bodies []quadtree.Body
-	quadtree.InitBodiesUniform( &bodies, 30000)
+	quadtree.InitBodiesUniform( &bodies, 200000)
 
-	// spreadOnCircle( & bodies)
+	SpreadOnCircle( & bodies)
 	
 	var r Run
 	r.Init( & bodies)
 	
 	var output *os.File
-	output, _ = os.Create("essai30Kbody_3Ksteps.gif")
+	output, _ = os.Create("essai30Kbody_6Ksteps.gif")
 	
 	for i := 0; i<b.N;i++ {
-		r.outputGif( output, 3000)
+		r.outputGif( output, 6000)
 	}
 }

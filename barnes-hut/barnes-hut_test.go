@@ -12,7 +12,7 @@ import (
 func TestOutputGif(t *testing.T) {
 
 	bodies := make([]quadtree.Body, 2000)
-	spreadOnCircle( & bodies)
+	SpreadOnCircle( & bodies)
 	
 	var r Run
 	r.Init( & bodies)
@@ -26,7 +26,7 @@ func TestOutputGif(t *testing.T) {
 
 func TestOneStep(t *testing.T) {
 	bodies := make([]quadtree.Body, 2000)
-	spreadOnCircle( & bodies)
+	SpreadOnCircle( & bodies)
 	
 	var r Run
 	r.Init( & bodies)
@@ -106,7 +106,7 @@ func TestComputeRepulsiveForcesConcurrent(t *testing.T) {
 	
 	bodies := make([]quadtree.Body, 10 * 10)
 	bodies2 := make([]quadtree.Body, 10 * 10)
-	spreadOnCircle( & bodies)
+	SpreadOnCircle( & bodies)
 	copy( bodies2, bodies)
 	var r, r2 Run
 	r.Init( & bodies)
@@ -129,7 +129,7 @@ func TestComputeRepulsiveForcesConcurrent(t *testing.T) {
 func TestComputeAccelerationOnBodyBarnesHut(t *testing.T) {
 
 	bodies := make([]quadtree.Body, 2000)
-	spreadOnCircle( & bodies)
+	SpreadOnCircle( & bodies)
 	var r Run
 	r.Init( & bodies)
 	
@@ -156,28 +156,4 @@ func TestComputeAccelerationOnBodyBarnesHut(t *testing.T) {
 	
 }
 
-// function used to spread bodies randomly on 
-// the unit square
-func spreadOnCircle(bodies * []quadtree.Body) {
-	for idx, _ := range *bodies {
-		
-		body := &((*bodies)[idx])
-		
-		radius := rand.Float64()
-		angle := 2.0 * math.Pi * rand.Float64()
-		
-		if idx%2 == 0 {
-			body.X = 0.2
-			body.Y = 0.7
-			radius *= 0.15
-		} else {
-			body.X = 0.6
-			body.Y = 0.4
-			radius *= 0.25
-		}
-		
-		body.M =0.1000000
-		body.X += math.Cos( angle) * radius
-		body.Y += math.Sin( angle) * radius
-	}
-}
+
