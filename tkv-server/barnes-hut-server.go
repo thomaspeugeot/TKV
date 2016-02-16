@@ -30,11 +30,11 @@ func main() {
 }
 
 func status(w http.ResponseWriter, req *http.Request) {
-	fmt.Fprintf(w, "Run status %s\n", r.GetState().String())
+	fmt.Fprintf(w, "Run status %s\n", r.GetState())
 }
 
 func render(w http.ResponseWriter, req *http.Request) {
-	fmt.Fprintf(w, "Run status %s\n", r.GetState().String())
+	fmt.Fprintf(w, "Run status %s\n", r.GetState())
 }
 
 //!-main

@@ -67,11 +67,11 @@ const (
 	blackIndex = 1 // next color in palette
 )
 
-type State int
+type State string
 
 const (
-	STOPPED State = iota
-	RUNNING
+	STOPPED = "STOPPED"
+	RUNNING = "RUNNING"
 )
 
 // a simulation run
@@ -96,17 +96,6 @@ func (r * Run) GetState() State{
 	return r.state
 }
 
-func (t State) String() string {
-
-	switch t {
-	case STOPPED :
-		return "STOPPED"
-	case RUNNING :
-		return "RUNNING"
-	}
-	return "unknown state"
-}
-
 // init the run with an array of quadtree bodies
 func (r * Run) Init( bodies * ([]quadtree.Body)) {
 	r.bodies = bodies
@@ -115,6 +104,7 @@ func (r * Run) Init( bodies * ([]quadtree.Body)) {
 	r.bodiesAccel = &acc
 	r.bodiesVel = &vel
 	r.q.Init(bodies)
+	r.state = STOPPED
 }
 
 func (r * Run) oneStep() {
