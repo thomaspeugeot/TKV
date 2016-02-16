@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
+	"time"
 )
 
 // constant to be added to the distance between bodies
@@ -94,6 +95,10 @@ func (r * Run) getVel(index int) (* Vel) {
 
 func (r * Run) GetState() State{
 	return r.state
+}
+
+func (r * Run) SetState(s State) {
+	r.state = s
 }
 
 // init the run with an array of quadtree bodies
@@ -326,8 +331,34 @@ func (r * Run) UpdatePosition() {
 	}
 }
 
+func (r * Run) RenderGif(out io.Writer) {
+	const (
+		size    = 600   // image canvas 
+		delay   = 4    // delay between frames in 10ms units
+		nframes = 0
+	)
+	anim := gif.GIF{LoopCount: nframes}
+	rect := image.Rect(0, 0, size+1, size+1)
+	img := image.NewPaletted(rect, palette)
+		
+	for idx, _ := range (*r.bodies) {
+	
+		body := (*r.bodies)[idx]
+	
+		if false { fmt.Printf("Encoding body %d %f %f\n", idx, body.X, body.Y) }
+	
+		img.SetColorIndex(
+			int(body.X*size+0.5), 
+			int(body.Y*size+0.5),
+			blackIndex)
+	}
+	anim.Delay = append(anim.Delay, delay)
+	anim.Image = append(anim.Image, img)
+	gif.EncodeAll(out, &anim)
+}
+
 // output position of bodies of the Run into a GIF representation
-func (r * Run) outputGif(out io.Writer, nbStep int) {
+func (r * Run) OutputGif(out io.Writer, nbStep int) {
 	const (
 		size    = 600   // image canvas 
 		delay   = 4    // delay between frames in 10ms units
@@ -339,6 +370,12 @@ func (r * Run) outputGif(out io.Writer, nbStep int) {
 		rect := image.Rect(0, 0, size+1, size+1)
 		img := image.NewPaletted(rect, palette)
 
+		// if state is STOPPED, pause
+		for r.state == STOPPED {
+			time.Sleep(100 * time.Millisecond)
+		}
+		
+		
 		for idx, _ := range (*r.bodies) {
 		
 			body := (*r.bodies)[idx]

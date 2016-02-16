@@ -20,7 +20,7 @@ func TestOutputGif(t *testing.T) {
 	var output *os.File
 	output, _ = os.Create("essai.gif")
 	
-	r.outputGif( output, 20)
+	r.OutputGif( output, 20)
 	// visual verification
 }
 
