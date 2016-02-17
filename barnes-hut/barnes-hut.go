@@ -83,6 +83,7 @@ type Run struct {
 
 	q quadtree.Quadtree // the supporting quadtree
 	state State
+	step int
 }
 
 func (r * Run) getAcc(index int) (* Acc) {
@@ -95,6 +96,10 @@ func (r * Run) getVel(index int) (* Vel) {
 
 func (r * Run) GetState() State{
 	return r.state
+}
+
+func (r * Run) GetStep() int{
+	return r.step
 }
 
 func (r * Run) SetState(s State) {
@@ -366,7 +371,7 @@ func (r * Run) OutputGif(out io.Writer, nbStep int) {
 	var nframes = nbStep    // number of animation frames
 	
 	anim := gif.GIF{LoopCount: nframes}
-	for i := 0; i < nframes; i++ {
+	for r.step = 0; r.step < nframes; r.step++ {
 		rect := image.Rect(0, 0, size+1, size+1)
 		img := image.NewPaletted(rect, palette)
 
@@ -389,7 +394,7 @@ func (r * Run) OutputGif(out io.Writer, nbStep int) {
 		}
 		
 		// encode time step into the image
-		progress := float64(i) / float64 (nframes)
+		progress := float64(r.step) / float64 (nframes)
 		for j:= 0; j < int( size*progress); j++ {
 			img.SetColorIndex(
 				j+1, 
@@ -398,10 +403,11 @@ func (r * Run) OutputGif(out io.Writer, nbStep int) {
 		}
 		nbBodies := float64(len(*r.bodies))
 		r.q.ComputeQuadtreeGini()
-		fmt.Printf("\rProgress %f speedup %f low 10 %f high 10 %f",
+		fmt.Printf("Progress %f speedup %f low 10 %f high 5 %f high 10 %f\n",
 			progress, 
 			nbBodies*nbBodies/float64(nbComputationPerStep),
 			r.q.BodyCountGini[8][0],
+			r.q.BodyCountGini[8][5],
 			r.q.BodyCountGini[8][9])
 		
 		// anim.Delay = append(anim.Delay, delay)

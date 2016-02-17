@@ -17,7 +17,7 @@ var r barnes_hut.Run
 func main() {
 	
 	var bodies []quadtree.Body
-	quadtree.InitBodiesUniform( &bodies, 20000)
+	quadtree.InitBodiesUniform( &bodies, 200000)
 
 	barnes_hut.SpreadOnCircle( & bodies)
 	
@@ -25,7 +25,7 @@ func main() {
 
 	output, _ := os.Create("essai200Kbody_6Ksteps.gif")
 
-	go r.OutputGif( output, 6000)
+	go r.OutputGif( output, 15000)
 	
 	mux := http.NewServeMux()
 	mux.HandleFunc("/status", status)
@@ -38,7 +38,7 @@ func main() {
 //!-main
 
 func status(w http.ResponseWriter, req *http.Request) {
-	fmt.Fprintf(w, "Run status %s\n", r.GetState())
+	fmt.Fprintf(w, "Run status %s step %d\n", r.GetState(), r.GetStep())
 }
 
 func play(w http.ResponseWriter, req *http.Request) {
