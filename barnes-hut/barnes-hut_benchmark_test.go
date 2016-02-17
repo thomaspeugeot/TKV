@@ -95,7 +95,7 @@ func BenchmarkInitRun_1M(b * testing.B) {
 func BenchmarkOutputGif_1MBody_1KSteps(b * testing.B) {
 
 	var bodies []quadtree.Body
-	quadtree.InitBodiesUniform( &bodies, 200000)
+	quadtree.InitBodiesUniform( &bodies, 2000)
 
 	SpreadOnCircle( & bodies)
 	
@@ -106,6 +106,7 @@ func BenchmarkOutputGif_1MBody_1KSteps(b * testing.B) {
 	output, _ = os.Create("essai30Kbody_6Ksteps.gif")
 	
 	for i := 0; i<b.N;i++ {
-		r.OutputGif( output, 6000)
+		r.SetState( RUNNING)
+		r.OutputGif( output, 600)
 	}
 }

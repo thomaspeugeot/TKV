@@ -5,7 +5,6 @@ import (
 	"github.com/thomaspeugeot/tkv/quadtree"
 	"testing"
 	"math"
-	"math/rand"
 )
 
 // test gif output
@@ -20,6 +19,7 @@ func TestOutputGif(t *testing.T) {
 	var output *os.File
 	output, _ = os.Create("essai.gif")
 	
+	r.SetState( RUNNING)
 	r.OutputGif( output, 20)
 	// visual verification
 }

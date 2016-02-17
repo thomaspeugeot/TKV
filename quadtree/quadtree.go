@@ -24,77 +24,14 @@ package quadtree
 
 import (
 	"fmt"
-	"bytes"
 	"testing"
 	"sort"
 	"math"
-	"math/rand"
+
 )
 
-// 
-// Coordinate system of a node
-//
-// Situation : most quadtree implementation are dynamic (the nodes can be created and deleted after the quadtree initialisation). 
-// This is an optimal solution if bodies are sparesely located (as in cosmology). Access to node is in (log(n)) 
-// 
-// Current case is different because bodies are uniformly spread on a 2D square.
-//
-// Problem : the dynamic implementation is not necessary for uniformly spread bodies
-//
-// Solution : a static quadtree with the following requirements 
-//
-//	Node coordinates are their rank in a direct access table. 
-//	Node coordinates of a body are computed directly from body's X,Y position
-// 
-// Coordinates of a node are coded as follow
-//
-//	byte 0 : 0x00 (unused) 
-// 	byte 1 : level (root = 0, max depth = 7) 
-// 	byte 2 : X coordinate 
-// 	byte 3 : Y coordinate : coded on 
-//
-// the X coordinate code depends on the level
-//	level 0: there is no coordinate
-//	level 1: west if 0, east is 128 (0x80)
-//	level 2: node coordinates are 0, 64 (0x40), 128 (0x80), 192 (0x84)
-//	...
-//	level 8: node coordinates are encoded on the full 8 bits, from 0 to 0xFF (255)
-type Coord uint32
 
-// a body is a position & a mass
-type Body struct {
-	X float64
-	Y float64
-	M float64
 
-	// coordinate in the quadtree
-	coord Coord
-	
-	prev, next * Body
-	
-}
-// bodies of a node are linked together
-// Some quadtree use an alternative choice : store bodies of a node in a slice attached
-// to the node. This alternative implies memory allocation which one tries to avoid.
-// number of memory allocation are benchmaked with 
-//	go test -bench=BenchmarkUpdateNodesList_10M -benchmem
-func (b * Body) Next() * Body { return b.next }
-
-// a node is a body
-type Node struct {
-	// bodies of the node 
-	//  at level 8, this is the list of bodies pertaining in the bounding box of the node
-	// for level 7 to 0, this is the list of the four bodies of the nodes at the level below (or +1)
-	
-	// Barycenter with mass of all the bodies of the node
-	// this body is linked with the bodies at his level in the node
-	Body 
-	first * Body  // link to the bodies below
-	coord Coord // the coordinate of the Node
-	nbBodies int // number of bodies in the node
-}
-// link to the first body of the bodies chain belonging to the node 
-func (n * Node) First() * Body { return n.first }
 
 // a Quadtree store Nodes. It is a an array with direct access to the Nodes with the Nodes coordinate
 // see Coord
@@ -108,94 +45,6 @@ var optim bool
 func init() {
 	optim = true
 } 
-
-// node level of a node coord c
-// is between 0 and 8 and coded on 2nd byte of the Coord c
-func (c Coord) Level() int { return int( c >> 16) }
-func (c * Coord) SetLevel(level int) { 
-	
-	*c = *c & 0x0000FFFF // reset level but bytes for x & y are preserved
-	var pad uint32
-	pad = (uint32(level) << 16) 
-	*c = *c | Coord(pad) // set level
-	
-}
-
-// x coord
-func (c Coord) X() int { return int((c & 0x0000FFFF) >> 8) }
-// set X coordinate of node in Hexa from 0 to 255
-func (c * Coord) setXHexaLevel8(x int) { 
-
-	*c = *c & 0x00FF00FF // reset x bytes
-	
-	var pad uint32
-	pad = (uint32(x) << 8) 
-
-	*c = *c | Coord(pad)
-}
-// set X coordinate in Hexa according to level
-// x is between 0 and 1<<(level-1)
-func (c * Coord) setXHexa(x int, level int) {
-	c.setXHexaLevel8( x << (8- uint(level)))
-}
-
-// y coord
-func (c Coord) Y() int { return int( c & 0x000000FF) }
-func (c * Coord) setYHexaLevel8(y int) { 
-	*c = *c & 0x00FFFF00 // reset y bytes
-	
-	var pad uint32
-	pad = uint32(y) 
-	*c = *c | Coord(pad)
-}
-// set Y coordinate in Hexa according to level
-// y is between 0 and 1<<(level-1)
-func (c * Coord) setYHexa(y int, level int) {
-	c.setYHexaLevel8( y << (8-uint(level)))
-}
-
-// get Node coordinates at level 8
-func ( b Body) getCoord8() Coord {
-	var c Coord
-	
-	c.SetLevel( 8)
-	c.setXHexaLevel8( int(b.X * 256.0) )
-	c.setYHexaLevel8( int(b.Y * 256.0) )
-	
-	if c.checkIntegrity() == false {
-		s := fmt.Sprintf("getCoord8 invalid coord %s", c.String())
-		panic( s)
-	}
-	
-	return c
-}
-
-// check encoding of c
-func ( c * Coord) checkIntegrity() bool {
-	
-	//	byte 0 is null
-	if res := 0xFF000000 & (*c); res != 0x00 {
-		return false
-	}
-	
-	// check level is below or equal to 8
-	if c.Level() > 8 {
-		return false
-	}
-	
-	// check x coord is encoded acoording to the level
-	if (false) { fmt.Printf( "y (0xFF >> uint( SetLevel(%d))) %08b\n", c.Level(), 0xFF >> uint( c.Level())) }
-	if (0xFF >> uint( c.Level())) & c.X() != 0x00 {
-		return false
-	}
-
-	// check y coord
-	if (0xFF >> uint( c.Level())) & c.Y() != 0x00 {
-		return false
-	}
-	
-	return true
-}
 
 // constants used to navigate from one node to the other
 const (
@@ -254,23 +103,6 @@ func (q * Quadtree) NodesBelow(c Coord)  (coordNW, coordNE, coordSW, coordSE Coo
 	coordSE = Coord( uint(levelBelow)<<16 | uint(i)<<8 | uint(j) | SE << shift)
 	
 	return coordNW, coordNE, coordSW, coordSE
-}
-
-// print a coord
-func (c * Coord) String() string {
-	var buf bytes.Buffer
-	buf.WriteByte('{')
-		
-	fmt.Fprintf(&buf, "|%8b|%8b|%8b|%8b| %8x",
-		0x000000FF & (*c >> 24), 
-		0x000000FF & (*c >> 16), 
-		0x000000FF & (*c >> 8), 
-		0x000000FF & *c, 
-		*c)
-	
-	buf.WriteByte('}')
-	return buf.String()
-
 }
 
 // setup node coord
@@ -440,38 +272,6 @@ func (q * Quadtree) UpdateNodesLists() {
 }
 
 
-// update COM of a node (reset the current COM before)
-func (n * Node) updateCOM() {
-	
-	n.M = 0.0
-	n.X = 0.0
-	n.Y = 0.0
-	
-	// fmt.Println("updateCOM ", n.coord.String())
-	
-	// parse bodies of the node
-	rank := 0
-	for b := n.first ; b != nil; b = b.next {
-	
-		// fmt.Printf("updateCOM body adress %x\n", &b)
-		if( b.next == b) { 	
-			s := fmt.Sprintf("Node linked to itself coord : rank %d, %s", rank, n.coord.String())
-			panic(s)
-		}
-		
-		n.M += b.M
-		n.X += b.X*b.M
-		n.Y += b.Y*b.M
-		
-		rank++
-	}	
-	
-	// divide by total mass to get the barycenter
-	if n.M > 0 {
-		n.X /= n.M
-		n.Y /= n.M
-	}
-}
 
 func (q *Quadtree)CheckIntegrity(t * testing.T) {
 
@@ -578,16 +378,3 @@ func (q* Quadtree) ComputeQuadtreeGini() (nbBodiesInPoorTencile, nbBodiesInRichT
 	return nbBodiesInPoorTencile, nbBodiesInRichTencile
 }
 
-// init a quadtree with random position
-func InitBodiesUniform( bodies * []Body, nbBodies int) {
-	
-	// var q Quadtree
-	*bodies = make([]Body, nbBodies)
-	
-	// init bodies
-	for idx, _ := range(*bodies) {
-		(*bodies)[idx].X = rand.Float64()
-		(*bodies)[idx].Y = rand.Float64()
-		(*bodies)[idx].M = rand.Float64()
-	}
-}

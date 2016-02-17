@@ -2,7 +2,6 @@ package quadtree
 
 import (
 	"testing"
-	"math/rand"
 )
 
 func BenchmarkSetLevel(b * testing.B) {
