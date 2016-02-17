@@ -57,7 +57,7 @@ func render(w http.ResponseWriter, req *http.Request) {
 }
 
 func stats(w http.ResponseWriter, req *http.Request) {
-	stats, _ := json.MarshalIndent( r.BodyCountGini()[8], "", "	")
+	stats, _ := json.MarshalIndent( r.BodyCountGini(), "", "	")
 	fmt.Fprintf(w, "%s", stats)
 }
 

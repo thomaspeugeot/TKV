@@ -307,7 +307,7 @@ func (q *Quadtree)CheckIntegrity(t * testing.T) {
 func (q* Quadtree) ComputeNbBodiesPerNode() {
 
 	// perform some tests on the links of each nodes
-	for level := 8; level >= 8; level-- {
+	for level := 8; level >= 0; level-- {
 	
 		// nb of nodes for the current level
 		nbNodesX := 1 << uint(level)
@@ -331,7 +331,7 @@ func (q* Quadtree) ComputeQuadtreeGini() {
 	q.ComputeNbBodiesPerNode() 
 	
 	// perform some tests on the links of each nodes
-	for level := 8; level >= 8; level-- {
+	for level := 8; level >= 0; level-- {
 	
 		rank := 0
 	
@@ -356,8 +356,8 @@ func (q* Quadtree) ComputeQuadtreeGini() {
 		sort.Ints(bodyCountPerLevel)
 		
 		for tencile := 0; tencile< 10; tencile ++ {
-			lowIndex := int(math.Floor(256.0*256.0*float64(tencile)/10.0))
-			highIndex := int(math.Floor(256.0*256.0*float64(tencile+1)/10.0))
+			lowIndex  := int(math.Floor(float64(nbNodesX*nbNodesY) * float64(tencile)/10.0))
+			highIndex := int(math.Floor(float64(nbNodesX*nbNodesY) * float64(tencile+1)/10.0))
 			
 			nbBodiesInTencile := 0
 			for _, nbBodies := range bodyCountPerLevel[lowIndex:highIndex] {
