@@ -107,6 +107,15 @@ func ( c * Coord) checkIntegrity() bool {
 	return true
 }
 
+func GetCoord( level, i, j int) Coord {
+	var coord Coord 
+	coord.SetLevel( level)
+	coord.setXHexa(i, level)
+	coord.setYHexa(j, level)
+
+	return coord
+}
+
 // print a coord
 func (c * Coord) String() string {
 	var buf bytes.Buffer

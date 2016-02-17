@@ -8,7 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
-	// "math/rand"
+	"encoding/json"
 )
 
 //!+main
@@ -17,7 +17,7 @@ var r barnes_hut.Run
 func main() {
 	
 	var bodies []quadtree.Body
-	quadtree.InitBodiesUniform( &bodies, 200000)
+	quadtree.InitBodiesUniform( &bodies, 20000)
 
 	barnes_hut.SpreadOnCircle( & bodies)
 	
@@ -32,6 +32,7 @@ func main() {
 	mux.HandleFunc("/play", play)
 	mux.HandleFunc("/pause", pause)
 	mux.HandleFunc("/render", render)
+	mux.HandleFunc("/stats", stats)
 	log.Fatal(http.ListenAndServe("localhost:8000", mux))
 }
 //!-main
@@ -51,9 +52,13 @@ func pause(w http.ResponseWriter, req *http.Request) {
 }
 
 func render(w http.ResponseWriter, req *http.Request) {
-
 	r.RenderGif( w)
 	fmt.Fprintf(w, "Run status %s\n", r.GetState())
+}
+
+func stats(w http.ResponseWriter, req *http.Request) {
+	stats, _ := json.MarshalIndent( r.BodyCountGini()[8], "", "	")
+	fmt.Fprintf(w, "%s", stats)
 }
 
 

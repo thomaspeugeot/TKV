@@ -150,10 +150,10 @@ func TestNodesBelow(t * testing.T) {
 	
 	if ! c.checkIntegrity() { t.Errorf("invalid input %s", &c) }
 	
-	// coordNW, coordNE, coordSW, coordSE := q.NodesBelow( c)
+	// coordNW, coordNE, coordSW, coordSE := NodesBelow( c)
 	// fmt.Printf("\nTestNodesBelow\nin %s\nnw %s\nne %s\nsw %s\nse %s", &c, &coordNW, &coordNE, &coordSW, &coordSE)
 
-	// n_coordNW, coordNE, coordSW, coordSE := q.NodesBelow( coordNW)
+	// n_coordNW, coordNE, coordSW, coordSE := NodesBelow( coordNW)
 	// fmt.Printf("\nTestNodesBelow\n\nin %s\nnw %s\nne %s\nsw %s\nse %s", &coordNW, &n_coordNW, &coordNE, &coordSW, &coordSE)
 }
 
@@ -255,7 +255,7 @@ func TestSetupNodesLinks(t * testing.T) {
 	c.setXHexaLevel8(128)
 	c.setYHexaLevel8(128)
 	
-	// coordNW, coordNE, coordSW, coordSE := q.NodesBelow( c)
+	// coordNW, coordNE, coordSW, coordSE := NodesBelow( c)
 	
 	q.setupNodesLinks()
 	n := &(q.Nodes[c])

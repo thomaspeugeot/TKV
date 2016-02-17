@@ -29,15 +29,14 @@ import (
 	"math"
 
 )
-
-
-
+type QuadtreeGini [9][10]float64
 
 // a Quadtree store Nodes. It is a an array with direct access to the Nodes with the Nodes coordinate
 // see Coord
 type Quadtree struct {
 	Nodes [1<<20]Node
 	bodies * []Body // pointer to the body slice
+	BodyCountGini QuadtreeGini // for each of the 9 levels, tencentile of bodies
 }
 
 var optim bool
@@ -75,12 +74,7 @@ func (q * Quadtree) updateNodesCOMAbove8() {
 		// parse nodes of level
 		for i := 0; i < nbNodesX; i++ {
 			for j := 0; j < nbNodesY; j++ {
-				
-				var coord Coord 
-				coord.SetLevel( level)
-				coord.setXHexa(i, level)
-				coord.setYHexa(j, level)
-				
+				coord := GetCoord( level, i, j)
 				node := &(q.Nodes[coord])
 				node.updateCOM()
 			}
@@ -89,7 +83,7 @@ func (q * Quadtree) updateNodesCOMAbove8() {
 }
 
 // get nodes coords below
-func (q * Quadtree) NodesBelow(c Coord)  (coordNW, coordNE, coordSW, coordSE Coord) {
+func NodesBelow(c Coord)  (coordNW, coordNE, coordSW, coordSE Coord) {
 
 	levelBelow := c.Level() + 1
 	i := c.X()
@@ -116,19 +110,9 @@ func (q * Quadtree) setupNodesCoord() {
 		// parse nodes of level
 		for i := 0; i < nbNodesX; i++ {
 			for j := 0; j < nbNodesY; j++ {
-				
-				var coord Coord 
-				coord.SetLevel( level)
-				coord.setXHexa(i, level)
-				coord.setYHexa(j, level)
-				
+				coord := GetCoord( level, i, j)
 				node := &(q.Nodes[coord])
 				node.coord = coord
-				
-				// s := fmt.Sprintf("SetupNodesCoord level %8d i %8d j %8d coord %s", 
-					// level, i, j, q.Nodes[coord].coord.String())
-				// fmt.Println(s)
-
 			}
 		}
 	}
@@ -147,18 +131,14 @@ func (q * Quadtree) setupNodesLinks() {
 		for i := 0; i < nbNodesX; i++ {
 			for j := 0; j < nbNodesY; j++ {
 				
-				var coord Coord 
-				coord.SetLevel( level)
-				coord.setXHexa(i, level)
-				coord.setYHexa(j, level)
-				
+				coord := GetCoord( level, i, j)
 				node := &(q.Nodes[coord])
 				
 				// s := fmt.Sprintf("SetupNodesLinks level %8d i %8d j %8d coord %s", 
 					// level, i, j, node.coord.String())
 				// fmt.Println(s)
 				
-				coordNW, coordNE, coordSW, coordSE := q.NodesBelow(coord)
+				coordNW, coordNE, coordSW, coordSE := NodesBelow(coord)
 				
 				nodeNW := &q.Nodes[coordNW]
 				nodeNE := &q.Nodes[coordNE]
@@ -243,11 +223,7 @@ func (q * Quadtree) updateNodesCOM() {
 		for i := 0; i < nbNodesX; i++ {
 			for j := 0; j < nbNodesY; j++ {
 				
-				var coord Coord 
-				coord.SetLevel(level)
-				coord.setXHexa(i, level)
-				coord.setYHexa(j, level)
-				
+				coord := GetCoord( level, i, j)
 				node := &(q.Nodes[coord])
 				
 				// fmt.Println("updateNodesCOM ", q.Nodes[coord].coord.String())
@@ -260,19 +236,16 @@ func (q * Quadtree) updateNodesCOM() {
 	}	
 }
 
+// updates nodes according to bodies locations
+// this function should be called when bodies have been moved
 func (q * Quadtree) UpdateNodesListsAndCOM() {
 
 	q.updateNodesList()
 	q.updateNodesCOM()
 }
 
-func (q * Quadtree) UpdateNodesLists() {
-
-	q.updateNodesList()
-}
-
-
-
+// check integrity of the quadtree by performing
+// all kinds of test
 func (q *Quadtree)CheckIntegrity(t * testing.T) {
 
 	nbBodies := 0
@@ -288,14 +261,10 @@ func (q *Quadtree)CheckIntegrity(t * testing.T) {
 		for i := 0; i < nbNodesX; i++ {
 			for j := 0; j < nbNodesY; j++ {
 				
-				var coord Coord 
-				coord.SetLevel( level)
-				coord.setXHexa(i, level)
-				coord.setYHexa(j, level)
-				
+				coord := GetCoord( level, i, j)
 				node := &(q.Nodes[coord])
 
-				// test that the node coord is corred
+				// test that the node coord is correct
 				if q.Nodes[coord].coord != coord {
 					s := fmt.Sprintf("node coord = %s, want %s", 
 						q.Nodes[coord].coord.String(), coord.String())
@@ -334,47 +303,92 @@ func (q *Quadtree)CheckIntegrity(t * testing.T) {
 }
 
 // compute number of bodies per node 
-// and compute the gini of body density par node at level 8
-func (q* Quadtree) ComputeQuadtreeGini() (nbBodiesInPoorTencile, nbBodiesInRichTencile int) {
+// update the counting of bodies per node for all levels
+func (q* Quadtree) ComputeNbBodiesPerNode() {
+
+	// perform some tests on the links of each nodes
+	for level := 8; level >= 8; level-- {
 	
-	// var bodyCount []int
-	bodyCount := make([]int, 256*256)
-	
-	rank := 0
-	// parse nodes of level
-	for i := 0; i < 256; i++ {
-		for j := 0; j < 256; j++ {
-			
-			nbBodies := int(0)
-			var coord Coord 
-			coord.SetLevel( 8)
-			coord.setXHexa(i, 8)
-			coord.setYHexa(j, 8)
-			
-			node := &(q.Nodes[coord])
-			for b := node.first ; b != nil; b = b.next {
-				nbBodies++
+		// nb of nodes for the current level
+		nbNodesX := 1 << uint(level)
+		nbNodesY := 1 << uint(level)
+
+		// parse nodes of level
+		for i := 0; i < nbNodesX; i++ {
+			for j := 0; j < nbNodesY; j++ {
+				
+				coord := GetCoord( level, i, j)
+				node := &(q.Nodes[coord])
+				q.updateBodiesNb( node)
 			}
-			bodyCount[rank] = nbBodies
-			rank++
-			// fmt.Println( fmt.Sprintf("i %d j %d: %d", i, j, nbBodies))
 		}
 	}
-	sort.Ints(bodyCount)
-	
-	lowIndex := int(math.Floor(256.0*256.0*1.0/10.0))
-	nbBodiesInPoorTencile = 0
-	for _, nbBodies := range bodyCount[0:lowIndex] {
-		nbBodiesInPoorTencile += nbBodies
-	}
-	
-	nbBodiesInRichTencile = 0
-	
-	highIndex := int(math.Floor(256.0*256.0*9.0/10.0))
-	for _, nbBodies := range bodyCount[highIndex:] {
-		nbBodiesInRichTencile += nbBodies
-	}
-	
-	return nbBodiesInPoorTencile, nbBodiesInRichTencile
 }
 
+// compute the gini of body density par node at level 8
+func (q* Quadtree) ComputeQuadtreeGini() {
+	
+	q.ComputeNbBodiesPerNode() 
+	
+	// perform some tests on the links of each nodes
+	for level := 8; level >= 8; level-- {
+	
+		rank := 0
+	
+		// nb of nodes for the current level
+		nbNodesX := 1 << uint(level)
+		nbNodesY := 1 << uint(level)
+
+		// var bodyCount []int
+		bodyCountPerLevel := make([]int, nbNodesX*nbNodesY)
+
+		// parse nodes of level
+		for i := 0; i < nbNodesX; i++ {
+			for j := 0; j < nbNodesY; j++ {
+			
+				coord := GetCoord( level, i, j)
+				node := &(q.Nodes[coord])
+				bodyCountPerLevel[rank] += node.nbBodies
+				rank++
+				// fmt.Println( fmt.Sprintf("i %d j %d: %d", i, j, nbBodies))
+			}
+		}
+		sort.Ints(bodyCountPerLevel)
+		
+		for tencile := 0; tencile< 10; tencile ++ {
+			lowIndex := int(math.Floor(256.0*256.0*float64(tencile)/10.0))
+			highIndex := int(math.Floor(256.0*256.0*float64(tencile+1)/10.0))
+			
+			nbBodiesInTencile := 0
+			for _, nbBodies := range bodyCountPerLevel[lowIndex:highIndex] {
+				nbBodiesInTencile += nbBodies
+			}
+			q.BodyCountGini[level][tencile] = float64(nbBodiesInTencile)/float64(len(*q.bodies))
+		}
+	}
+}
+
+// consolidate the number of bodies attached to the node
+// at level 8, this is the number of bodies
+// above level 8, this is an aggregate of the number of bodies at the level below
+func (q * Quadtree) updateBodiesNb(n * Node) {
+	n.nbBodies = 0
+	
+	if n.coord.Level() == 8 {
+		for b := n.first ; b != nil; b = b.next {
+			n.nbBodies++
+		}
+	} else {
+		coordNW, coordNE, coordSW, coordSE := NodesBelow(n.coord)
+				
+		nodeNW := &q.Nodes[coordNW]
+		nodeNE := &q.Nodes[coordNE]
+		nodeSW := &q.Nodes[coordSW]
+		nodeSE := &q.Nodes[coordSE]
+		
+		n.nbBodies += nodeNW.nbBodies
+		n.nbBodies += nodeNE.nbBodies
+		n.nbBodies += nodeSW.nbBodies
+		n.nbBodies += nodeSE.nbBodies
+	}
+}

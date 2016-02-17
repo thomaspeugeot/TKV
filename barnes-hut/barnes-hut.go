@@ -252,7 +252,7 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 		if( level < 8) {
 			// parse sub nodes
 			// fmt.Printf("computeAccelationWithNodeRecursive go down at node %#v\n", node)
-			coordNW, coordNE, coordSW, coordSE := r.q.NodesBelow( coord)
+			coordNW, coordNE, coordSW, coordSE := quadtree.NodesBelow( coord)
 			r.computeAccelationWithNodeRecursive( idx, coordNW)
 			r.computeAccelationWithNodeRecursive( idx, coordNE)
 			r.computeAccelationWithNodeRecursive( idx, coordSW)
@@ -397,12 +397,12 @@ func (r * Run) OutputGif(out io.Writer, nbStep int) {
 				blackIndex)
 		}
 		nbBodies := float64(len(*r.bodies))
-		nbBodiesInPoorTencile, nbBodiesInRichTencile := r.q.ComputeQuadtreeGini()
+		r.q.ComputeQuadtreeGini()
 		fmt.Printf("\rProgress %f speedup %f low 10 %f high 10 %f",
 			progress, 
 			nbBodies*nbBodies/float64(nbComputationPerStep),
-			float64(nbBodiesInPoorTencile)/nbBodies,
-			float64(nbBodiesInRichTencile)/nbBodies)
+			r.q.BodyCountGini[8][0],
+			r.q.BodyCountGini[8][9])
 		
 		anim.Delay = append(anim.Delay, delay)
 		anim.Image = append(anim.Image, img)
@@ -484,4 +484,8 @@ func SpreadOnCircle(bodies * []quadtree.Body) {
 		body.X += math.Cos( angle) * radius
 		body.Y += math.Sin( angle) * radius
 	}
+}
+
+func (r * Run) BodyCountGini() quadtree.QuadtreeGini {
+	return r.q.BodyCountGini
 }

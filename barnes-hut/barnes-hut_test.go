@@ -32,9 +32,6 @@ func TestOneStep(t *testing.T) {
 	r.Init( & bodies)
 	// r.q.CheckIntegrity( t)
 	r.oneStep()
-	// r.q.CheckIntegrity( t)
-	r.q.UpdateNodesLists()
-	r.q.CheckIntegrity( t)
 	r.oneStep()
 	r.q.CheckIntegrity( t)
 }

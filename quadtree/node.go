@@ -52,3 +52,4 @@ func (n * Node) updateCOM() {
 		n.Y /= n.M
 	}
 }
+
