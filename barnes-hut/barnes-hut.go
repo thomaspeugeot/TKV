@@ -404,8 +404,8 @@ func (r * Run) OutputGif(out io.Writer, nbStep int) {
 			r.q.BodyCountGini[8][0],
 			r.q.BodyCountGini[8][9])
 		
-		anim.Delay = append(anim.Delay, delay)
-		anim.Image = append(anim.Image, img)
+		// anim.Delay = append(anim.Delay, delay)
+		// anim.Image = append(anim.Image, img)
 		
 		r.oneStep()
 	}
