@@ -27,7 +27,7 @@ import (
 var	ETA float64 = 0.00000001
 
 // pseudo gravitational constant to compute 
-var	G float64 = 0.000001
+var	G float64 = 0.0001
 var Dt float64  = 1.0 // 1 second, time step
 
 // velocity cannot be too high in order to stop bodies from overtaking

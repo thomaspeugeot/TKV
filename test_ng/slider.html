@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html ng-app="MyApp">
+
+  <head>
+    <meta charset="utf-8" />
+    <title>Test slides</title>
+    <script>document.write('<base href="' + document.location + '" />');</script>
+    <link href="style.css" rel="stylesheet" />
+	<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/angular_material/1.0.0/angular-material.min.css">
+    <script data-semver="1.4.8" src="https://code.angularjs.org/1.4.8/angular.js" data-require="angular.js@1.4.x"></script>
+  <!-- Angular Material requires Angular.js Libraries -->
+  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-animate.min.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-aria.min.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-messages.min.js"></script>
+
+  <!-- Angular Material Library -->
+  <script src="http://ajax.googleapis.com/ajax/libs/angular_material/1.0.0/angular-material.min.js"></script>
+  
+  <script src="app.js"></script>
+  
+  
+  </head>
+  <div ng-app="MyApp" class="sliderdemoBasicUsage" ng-controller="AppCtrl" ng-cloak="">
+  <md-content style="margin: 16px; padding:16px">
+
+    <div layout="">
+      <div flex="10" layout="" layout-align="center center">
+        <span class="md-body-1">theta</span>
+      </div>
+      <md-slider flex="" min="0" max="255" ng-model="color.red" aria-label="red" id="red-slider" class="">
+      </md-slider>
+      <div flex="20" layout="" layout-align="center center">
+        <input flex="" ng-model="color.red" aria-label="red" aria-controls="red-slider" type="number">
+      </div>
+    </div>
+
+  </md-content>
+</div>
+
+<!--
+Copyright 2016 Google Inc. All Rights Reserved. 
+Use of this source code is governed by an MIT-style license that can be in foundin the LICENSE file at http://material.angularjs.org/license.
+-->
