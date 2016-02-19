@@ -363,7 +363,7 @@ func (q* Quadtree) ComputeQuadtreeGini() {
 			for _, nbBodies := range bodyCountPerLevel[lowIndex:highIndex] {
 				nbBodiesInTencile += nbBodies
 			}
-			q.BodyCountGini[level][tencile] = float64(nbBodiesInTencile)/float64(len(*q.bodies))
+			q.BodyCountGini[level][tencile] = float64(nbBodiesInTencile) // /float64(len(*q.bodies))
 		}
 	}
 }
