@@ -28,3 +28,7 @@ _testmain.go
 
 #log
 *.log
+
+#bower component
+bower_components
+
