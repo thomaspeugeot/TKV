@@ -38,26 +38,32 @@ func main() {
 //!-main
 
 func status(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	fmt.Fprintf(w, "Run status %s step %d\n", r.GetState(), r.GetStep())
 }
 
 func play(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	r.SetState( barnes_hut.RUNNING)
 	fmt.Fprintf(w, "Run status %s\n", r.GetState())
 }
 
 func pause(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	r.SetState( barnes_hut.STOPPED)
 	fmt.Fprintf(w, "Run status %s\n", r.GetState())
 }
 
 func render(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	r.RenderGif( w)
 	fmt.Fprintf(w, "Run status %s\n", r.GetState())
 }
 
 func stats(w http.ResponseWriter, req *http.Request) {
-	stats, _ := json.MarshalIndent( r.BodyCountGini(), "", "	")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	// stats, _ := json.MarshalIndent( r.BodyCountGini(), "", "	")
+	stats, _ := json.MarshalIndent( r.GiniOverTimeTransposed(), "", "	")
 	fmt.Fprintf(w, "%s", stats)
 }
 

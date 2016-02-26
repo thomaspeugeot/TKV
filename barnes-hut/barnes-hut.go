@@ -27,7 +27,7 @@ import (
 var	ETA float64 = 0.00000001
 
 // pseudo gravitational constant to compute 
-var	G float64 = 0.0001
+var	G float64 = 0.01
 var Dt float64  = 1.0 // 1 second, time step
 
 // velocity cannot be too high in order to stop bodies from overtaking
@@ -75,6 +75,9 @@ const (
 	RUNNING = "RUNNING"
 )
 
+//
+var ConcurrentRoutines int = 100
+
 // a simulation run
 type Run struct {
 	bodies * []quadtree.Body // bodies position in the quatree
@@ -84,6 +87,7 @@ type Run struct {
 	q quadtree.Quadtree // the supporting quadtree
 	state State
 	step int
+	giniOverTime [][]float64 // evolution of the gini distribution at level 8 over time 
 }
 
 func (r * Run) getAcc(index int) (* Acc) {
@@ -106,6 +110,14 @@ func (r * Run) SetState(s State) {
 	r.state = s
 }
 
+func (r * Run) GiniOverTimeTransposed() [][]float64 {
+
+	var giniOverTimeTransposed [][]float64 
+	// := r.giniOverTime
+	giniOverTimeTransposed = transposeFloat64( r.giniOverTime)
+	return giniOverTimeTransposed
+}
+
 // init the run with an array of quadtree bodies
 func (r * Run) Init( bodies * ([]quadtree.Body)) {
 	r.bodies = bodies
@@ -115,6 +127,8 @@ func (r * Run) Init( bodies * ([]quadtree.Body)) {
 	r.bodiesVel = &vel
 	r.q.Init(bodies)
 	r.state = STOPPED
+	// r.giniOverTime = make( [][10]float64, 1)
+
 }
 
 func (r * Run) oneStep() {
@@ -125,7 +139,7 @@ func (r * Run) oneStep() {
 	r.q.UpdateNodesListsAndCOM()
 	
 	// compute repulsive forces & acceleration
-	r.ComputeRepulsiveForceConcurrent( 20)
+	r.ComputeRepulsiveForceConcurrent( ConcurrentRoutines)
 	
 	// compute velocity
 	r.UpdateVelocity()
@@ -403,6 +417,10 @@ func (r * Run) OutputGif(out io.Writer, nbStep int) {
 		}
 		nbBodies := float64(len(*r.bodies))
 		r.q.ComputeQuadtreeGini()
+
+		// append the new gini elements
+		r.giniOverTime = append( r.giniOverTime, r.q.BodyCountGini[8][:])
+
 		fmt.Printf("Progress %f speedup %f low 10 %f high 5 %f high 10 %f\n",
 			progress, 
 			nbBodies*nbBodies/float64(nbComputationPerStep),
