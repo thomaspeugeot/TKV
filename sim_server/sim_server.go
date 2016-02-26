@@ -63,7 +63,9 @@ func render(w http.ResponseWriter, req *http.Request) {
 func stats(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	// stats, _ := json.MarshalIndent( r.BodyCountGini(), "", "	")
-	stats, _ := json.MarshalIndent( r.GiniOverTimeTransposed(), "", "	")
+	// stats, _ := json.MarshalIndent( r.GiniOverTimeTransposed(), "", "	")
+	stats, _ := json.MarshalIndent( r.GiniOverTime(), "","\t")
+	// fmt.Println( string( stats))
 	fmt.Fprintf(w, "%s", stats)
 }
 

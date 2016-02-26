@@ -118,6 +118,11 @@ func (r * Run) GiniOverTimeTransposed() [][]float64 {
 	return giniOverTimeTransposed
 }
 
+func (r * Run) GiniOverTime() [][]float64 {
+
+	return r.giniOverTime
+}
+
 // init the run with an array of quadtree bodies
 func (r * Run) Init( bodies * ([]quadtree.Body)) {
 	r.bodies = bodies
@@ -419,7 +424,12 @@ func (r * Run) OutputGif(out io.Writer, nbStep int) {
 		r.q.ComputeQuadtreeGini()
 
 		// append the new gini elements
-		r.giniOverTime = append( r.giniOverTime, r.q.BodyCountGini[8][:])
+		// create the array
+		giniArray := make( []float64, 10)
+		copy( giniArray, r.q.BodyCountGini[8][:])
+		r.giniOverTime = append( r.giniOverTime, giniArray)
+
+
 
 		fmt.Printf("Progress %f speedup %f low 10 %f high 5 %f high 10 %f\n",
 			progress, 
@@ -428,6 +438,24 @@ func (r * Run) OutputGif(out io.Writer, nbStep int) {
 			r.q.BodyCountGini[8][5],
 			r.q.BodyCountGini[8][9])
 		
+		// fmt.Printf("Progress %f speedup %f low 10 %f high 5 %f high 10 %f\n",
+		// 	progress, 
+		// 	nbBodies*nbBodies/float64(nbComputationPerStep),
+		// 	r.giniOverTime[ len(r.giniOverTime) -1][0],
+		// 	r.giniOverTime[ len(r.giniOverTime) -1][5],
+		// 	r.giniOverTime[ len(r.giniOverTime) -1][9])
+		
+		// for step :=0; step < len(r.giniOverTime); step++ {
+
+		// 	for i:= 0; i<=9; i++ {
+		// 		s := fmt.Sprintf( "%f ", r.giniOverTime[ step][ i])
+		// 		fmt.Printf( s)
+		// 	}
+		// 	fmt.Println()
+		// }
+	
+
+
 		// anim.Delay = append(anim.Delay, delay)
 		// anim.Image = append(anim.Image, img)
 		
