@@ -21,7 +21,7 @@ angular.module("app", ["chart.js"])
       $scope.labels.push( i )
     }
     $scope.series = [];
-    for (i = 0; i<=8; i++) {
+    for (i = 0; i<=9; i++) {
       $scope.series.push( i )
     }
     
@@ -33,23 +33,22 @@ angular.module("app", ["chart.js"])
       console.log('response ', response.data);
       //
       // create serie from step 0 to max step
-      var breakdown = [];
-      breakdown.push( response.data[0][8]);
+      for (j = 0; j<=9; j++) {
       
-      for (i = 1; i<=nbInterPolation; i++) {
-        var step = Math.floor( i*response.data.length/(nbInterPolation+1));
-        console.log('step ', step);
-        breakdown.push( response.data[ step][8]);
-        console.log('breakdown ', breakdown);
+        var breakdown = [];
+        breakdown.push( response.data[0][j]);
+        
+        for (i = 1; i<=nbInterPolation; i++) {
+          var step = Math.floor( i*response.data.length/(nbInterPolation+1));
+          breakdown.push( response.data[ step][j]);
+        }
+        breakdown.push( response.data[response.data.length -1 ][j]);        
+
+        $scope.data.push( breakdown);
       }
-      breakdown.push( response.data[response.data.length -1 ][8]);
-      //  for (j = 0; j<=8; j++) {
-      //    console.log('j ', response.data[ step ][j]);
-      //  }
-      $scope.data.push( breakdown);
-      console.log('scope data', $scope.data);
-      console.log('got response length', response.data.length);
-      console.log('got response [0] length', response.data[0].length);
+      // console.log('scope data', $scope.data);
+      // console.log('got response length', response.data.length);
+      // console.log('got response [0] length', response.data[0].length);
     }, function(errResponse) {
       console.error('Error while fetching stats');
     });
