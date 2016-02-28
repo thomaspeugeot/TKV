@@ -32,3 +32,4 @@ _testmain.go
 #bower component
 bower_components
 
+node_modules

@@ -1,5 +1,5 @@
 
-angular.module('MyApp',['ngMaterial', 'ngMessages'])
+angular.module('MyApp',['ngMaterial', 'ngMessages', 'material.svgAssetsCache'])
 
 .controller('AppCtrl', function($scope) {
 
@@ -17,6 +17,7 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
   $scope.disabled2 = 70;
 
 });
+
 
 
 /**

@@ -1,32 +1,19 @@
-<!DOCTYPE html>
-<html ng-app="MyApp">
-
   <head>
-    <meta charset="utf-8" />
-    <title>Test slides</title>
-    <script>document.write('<base href="' + document.location + '" />');</script>
-    <link href="style.css" rel="stylesheet" />
-	<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/angular_material/1.0.0/angular-material.min.css">
-    <script data-semver="1.4.8" src="https://code.angularjs.org/1.4.8/angular.js" data-require="angular.js@1.4.x"></script>
-  <!-- Angular Material requires Angular.js Libraries -->
-  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
-  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-animate.min.js"></script>
-  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-aria.min.js"></script>
-  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-messages.min.js"></script>
-
-  <!-- Angular Material Library -->
-  <script src="http://ajax.googleapis.com/ajax/libs/angular_material/1.0.0/angular-material.min.js"></script>
-  
-  <script src="app.js"></script>
-  
-  
+    <title>Test slider</title>
+   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic">
+   <link rel="stylesheet" href="style.css">
   </head>
-  <div ng-app="MyApp" class="sliderdemoBasicUsage" ng-controller="AppCtrl" ng-cloak="">
+
+<div ng-app="MyApp" class="sliderdemoBasicUsage" ng-controller="AppCtrl" ng-cloak="">
   <md-content style="margin: 16px; padding:16px">
+
+    <h3>
+      RGB <span ng-attr-style="border: 1px solid #333; background: rgb({{color.red}},{{color.green}},{{color.blue}})">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+    </h3>
 
     <div layout="">
       <div flex="10" layout="" layout-align="center center">
-        <span class="md-body-1">theta</span>
+        <span class="md-body-1">R</span>
       </div>
       <md-slider flex="" min="0" max="255" ng-model="color.red" aria-label="red" id="red-slider" class="">
       </md-slider>
@@ -35,10 +22,75 @@
       </div>
     </div>
 
+    <div layout="">
+      <div flex="10" layout="" layout-align="center center">
+        <span class="md-body-1">G</span>
+      </div>
+      <md-slider flex="" ng-model="color.green" min="0" max="255" aria-label="green" id="green-slider" class="md-accent">
+      </md-slider>
+      <div flex="20" layout="" layout-align="center center">
+        <input flex="" ng-model="color.green" aria-label="green" aria-controls="green-slider" type="number">
+      </div>
+    </div>
+
+    <div layout="">
+      <div flex="10" layout="" layout-align="center center">
+        <span class="md-body-1">B</span>
+      </div>
+      <md-slider flex="" ng-model="color.blue" min="0" max="255" aria-label="blue" id="blue-slider" class="md-primary">
+      </md-slider>
+      <div flex="20" layout="" layout-align="center center">
+        <input flex="" ng-model="color.blue" aria-label="blue" aria-controls="blue-slider" type="number">
+      </div>
+    </div>
+
+    <h3>Rating: {{rating}}/5 - demo of theming classes</h3>
+    <div layout="">
+      <div flex="10" layout="" layout-align="center center">
+        <span class="md-body-1">default</span>
+      </div>
+      <md-slider flex="" md-discrete="" ng-model="rating1" step="1" min="1" max="5" aria-label="rating">
+      </md-slider>
+    </div>
+    <div layout="">
+      <div flex="10" layout="" layout-align="center center">
+        <span class="md-body-1">md-warn</span>
+      </div>
+      <md-slider flex="" class="md-warn" md-discrete="" ng-model="rating2" step="1" min="1" max="5" aria-label="rating">
+      </md-slider>
+    </div>
+    <div layout="">
+      <div flex="10" layout="" layout-align="center center">
+        <span class="md-body-1">md-primary</span>
+      </div>
+      <md-slider flex="" class="md-primary" md-discrete="" ng-model="rating3" step="1" min="1" max="5" aria-label="rating">
+      </md-slider>
+    </div>
+
+    <h3>Disabled</h3>
+    <md-slider ng-model="disabled1" ng-disabled="true" aria-label="Disabled 1"></md-slider>
+    <md-slider ng-model="disabled2" ng-disabled="true" aria-label="Disabled 2"></md-slider>
+
+    <h3>Disabled, Discrete</h3>
+    <md-slider ng-model="disabled1" ng-disabled="true" step="3" md-discrete="" min="0" max="10" aria-label="Disabled discrete 1"></md-slider>
+    <md-slider ng-model="disabled2" ng-disabled="true" step="10" md-discrete="" aria-label="Disabled discrete 2"></md-slider>
+
   </md-content>
 </div>
 
-<!--
-Copyright 2016 Google Inc. All Rights Reserved. 
-Use of this source code is governed by an MIT-style license that can be in foundin the LICENSE file at http://material.angularjs.org/license.
--->
+<!--   <script src="bower_components/angular/angular.js"></script>
+  <script src="bower_components/angular/angular-animate.min.js"</script>
+  <script src="bower_components/angular/angular-route.min.js"></script>
+  <script src="bower_components/angular/angular-aria.min.js"></script>
+  <script src="bower_components/angular/angular-messages.min.j.js"></script>
+  <script src="http://ngmaterial.assets.s3.amazonaws.com/svg-assets-cache.js"></script>
+  <script src="https://cdn.gitcdn.xyz/cdn/angular/bower-material/v1.0.5/angular-material.js"></script>   -->
+
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-animate.min.js"</script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-route.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-aria.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-messages.min.js"></script>
+  <script src="http://ngmaterial.assets.s3.amazonaws.com/svg-assets-cache.js"></script>
+  <script src="https://cdn.gitcdn.xyz/cdn/angular/bower-material/v1.0.5/angular-material.js"></script>
+  <script src="app.js"></script>

@@ -30,7 +30,7 @@ angular.module("app", ["chart.js"])
 
     $http.get('http://localhost:8000/stats').then(function(response) {
       $scope.data = [];
-      console.log('response ', response.data);
+      // console.log('response ', response.data);
       //
       // create serie from step 0 to max step
       for (j = 0; j<=9; j++) {
