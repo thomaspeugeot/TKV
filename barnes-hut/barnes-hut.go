@@ -35,7 +35,7 @@ var Dt float64  = 1.0 // 1 second, time step
 var MaxVelocity float64  = 0.001 // cannot make more that 1/1000 th of the unit square per second
 
 // the barnes hut criteria 
-var BN_THETA float64 = 0.5 // can use barnes if distance to COM is 5 times side of the node's box
+var BN_THETA float64 = 0.1 // can use barnes if distance to COM is 5 times side of the node's box
 
 // used to compute speed up
 var nbComputationPerStep int
@@ -87,7 +87,8 @@ type Run struct {
 	q quadtree.Quadtree // the supporting quadtree
 	state State
 	step int
-	giniOverTime [][]float64 // evolution of the gini distribution at level 8 over time 
+	giniOverTime [][]float64 // evolution of the gini distribution over time 
+	xMin, xMax, yMin, yMax float64 // coordinates of the rendering windows
 }
 
 func (r * Run) getAcc(index int) (* Acc) {
@@ -110,6 +111,9 @@ func (r * Run) SetState(s State) {
 	r.state = s
 }
 
+func (r * Run) SetRenderingWindow( xMin, xMax, yMin, yMax float64) {
+	r.xMin, r.xMax, r.yMin, r.yMax = xMin, xMax, yMin, yMax
+}
 func (r * Run) GiniOverTimeTransposed() [][]float64 {
 
 	var giniOverTimeTransposed [][]float64 
@@ -132,6 +136,7 @@ func (r * Run) Init( bodies * ([]quadtree.Body)) {
 	r.bodiesVel = &vel
 	r.q.Init(bodies)
 	r.state = STOPPED
+	r.SetRenderingWindow( 0.0, 0.0, 1.0, 1.0)
 	// r.giniOverTime = make( [][10]float64, 1)
 
 }
@@ -437,27 +442,6 @@ func (r * Run) OutputGif(out io.Writer, nbStep int) {
 			r.q.BodyCountGini[8][0],
 			r.q.BodyCountGini[8][5],
 			r.q.BodyCountGini[8][9])
-		
-		// fmt.Printf("Progress %f speedup %f low 10 %f high 5 %f high 10 %f\n",
-		// 	progress, 
-		// 	nbBodies*nbBodies/float64(nbComputationPerStep),
-		// 	r.giniOverTime[ len(r.giniOverTime) -1][0],
-		// 	r.giniOverTime[ len(r.giniOverTime) -1][5],
-		// 	r.giniOverTime[ len(r.giniOverTime) -1][9])
-		
-		// for step :=0; step < len(r.giniOverTime); step++ {
-
-		// 	for i:= 0; i<=9; i++ {
-		// 		s := fmt.Sprintf( "%f ", r.giniOverTime[ step][ i])
-		// 		fmt.Printf( s)
-		// 	}
-		// 	fmt.Println()
-		// }
-	
-
-
-		// anim.Delay = append(anim.Delay, delay)
-		// anim.Image = append(anim.Image, img)
 		
 		r.oneStep()
 	}
