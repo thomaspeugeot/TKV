@@ -1,5 +1,5 @@
 
-angular.module('MyApp',['ngMaterial', 'ngMessages', 'material.svgAssetsCache'])
+angular.module('MyApp',['ngMaterial', 'ngMessages'])
 
 .controller('AppCtrl', function($scope) {
 
