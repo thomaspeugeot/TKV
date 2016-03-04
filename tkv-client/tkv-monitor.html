@@ -1,0 +1,48 @@
+<html>
+<head>
+	<title>TKV monitor</title>
+	<link rel="stylesheet" href="node_modules/angular-material/angular-material.css">
+	<link rel="stylesheet" href="style.css">
+</head>
+
+<body ng-app="MyApp" class="sliderdemoBasicUsage" ng-controller="AppCtrl" ng-cloak="">
+	<h2>Ten Kilo Villages Barnes Hut simulation monitoring</h2>
+	<table>
+		<tr>
+			<td colspan=2>
+				<div>
+				Simulation management <md-button>Run</md-button>
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<img ng-src="{{render}}">
+				</img>
+			</td>
+			<td>
+
+			    <div layout="">
+			      <div flex="10" layout="" layout-align="center center">
+			        <span class="md-body-1">X1</span>
+			      </div>
+			      <md-slider flex="100" min="0" step="0.01" max="1" ng-model="color.red" aria-label="red" id="red-slider" class="">
+			      </md-slider>
+			      <div flex="40" layout="" layout-align="center center">
+			        <input flex="" ng-model="color.red" aria-label="red" aria-controls="red-slider" type="number">
+			      </div>
+			    </div>
+
+			</td>
+		</tr>
+	</table>
+</body>
+
+  <script src="node_modules/angular.js"></script>
+  <script src="node_modules/angular-animate.min.js"</script>
+  <script src="node_modules/angular-route.min.js"></script>
+  <script src="node_modules/angular-aria.min.js"></script>
+  <script src="node_modules/angular-messages.min.js"></script>
+
+  <script src="node_modules/angular-material/angular-material.js"></script>
+  <script src="tkv-monitor.js"></script>
