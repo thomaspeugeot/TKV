@@ -57,7 +57,7 @@ func pause(w http.ResponseWriter, req *http.Request) {
 func render(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	r.RenderGif( w)
-	fmt.Fprintf(w, "Run status %s\n", r.GetState())
+	// fmt.Fprintf(w, "Run status %s\n", r.GetState())
 }
 
 func stats(w http.ResponseWriter, req *http.Request) {

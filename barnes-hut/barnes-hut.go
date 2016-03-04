@@ -19,6 +19,8 @@ import (
 	"math"
 	"math/rand"
 	"time"
+	"bytes"
+	"encoding/base64"
 )
 
 // constant to be added to the distance between bodies
@@ -35,7 +37,7 @@ var Dt float64  = 1.0 // 1 second, time step
 var MaxVelocity float64  = 0.001 // cannot make more that 1/1000 th of the unit square per second
 
 // the barnes hut criteria 
-var BN_THETA float64 = 0.1 // can use barnes if distance to COM is 5 times side of the node's box
+var BN_THETA float64 = 0.5// can use barnes if distance to COM is 5 times side of the node's box
 
 // used to compute speed up
 var nbComputationPerStep int
@@ -383,7 +385,11 @@ func (r * Run) RenderGif(out io.Writer) {
 	}
 	anim.Delay = append(anim.Delay, delay)
 	anim.Image = append(anim.Image, img)
-	gif.EncodeAll(out, &anim)
+	var b bytes.Buffer
+	gif.EncodeAll(&b, &anim)
+	encodedB64 := base64.StdEncoding.EncodeToString([]byte(b.Bytes()))
+	out.Write( []byte(encodedB64))
+
 }
 
 // output position of bodies of the Run into a GIF representation
