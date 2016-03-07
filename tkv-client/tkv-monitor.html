@@ -5,14 +5,14 @@
 	<link rel="stylesheet" href="style.css">
 </head>
 
-<body ng-app="MyApp" class="sliderdemoBasicUsage" ng-controller="AppCtrl" ng-cloak="">
+<body ng-app="MyApp" class="sliderdemoBasicUsage" ng-controller="RenderImage as areactrl" ng-cloak="">
 	<h2>Ten Kilo Villages Barnes Hut simulation monitoring</h2>
 
 	<table>
 		<tr>
 			<td colspan=2>
 				<div>
-				Simulation management <md-button>Run</md-button>
+				Simulation management <md-button>Run</md-button> {{status}}
 				</div>
 			</td>
 		</tr>
@@ -27,14 +27,55 @@
 			</td>
 			<td>
 
+
+
+				<div>
+					<button ng-click="areactrl.updateArea()">Update Area </button>
+			     </div>
+				<div>
+					<md-button ng-click="areactrl.updateArea()" class="md-raised"> Update Area </md-button>
+				</div>			     	
 			    <div layout="">
-			      <div flex="10" layout="" layout-align="center center">
-			        <span class="md-body-1">X1</span>
+					<div flex="10" layout="" layout-align="center center">
+			        <span class="md-body-1">x min</span>
 			      </div>
-			      <md-slider flex="100" min="0" step="0.01" max="1" ng-model="color.red" aria-label="red" id="red-slider" class="">
+			      <md-slider flex="100" min="0" step="0.01" max="1" ng-model="area.x1" aria-label="red" id="red-slider" class="">
 			      </md-slider>
 			      <div flex="40" layout="" layout-align="center center">
-			        <input flex="" ng-model="color.red" aria-label="red" aria-controls="red-slider" type="number">
+			        <input flex="" ng-model="area.x1" aria-label="red" aria-controls="red-slider" type="number">
+			      </div>
+			    </div>
+
+			    <div layout="">
+			      <div flex="10" layout="" layout-align="center center">
+			        <span class="md-body-1">x max</span>
+			      </div>
+			      <md-slider flex="100" min="0" step="0.01" max="1" ng-model="area.x2" aria-label="red" id="red-slider" class="">
+			      </md-slider>
+			      <div flex="40" layout="" layout-align="center center">
+			        <input flex="" ng-model="area.x2" aria-label="red" aria-controls="red-slider" type="number">
+			      </div>
+			    </div>
+
+			    <div layout="">
+			      <div flex="10" layout="" layout-align="center center">
+			        <span class="md-body-1">y min</span>
+			      </div>
+			      <md-slider flex="100" min="0" step="0.01" max="1" ng-model="area.y1" aria-label="red" id="red-slider" class="">
+			      </md-slider>
+			      <div flex="40" layout="" layout-align="center center">
+			        <input flex="" ng-model="area.y1" aria-label="red" aria-controls="red-slider" type="number">
+			      </div>
+			    </div>
+
+			    <div layout="">
+			      <div flex="10" layout="" layout-align="center center">
+			        <span class="md-body-1">y max</span>
+			      </div>
+			      <md-slider flex="100" min="0" step="0.01" max="1" ng-model="area.y2" aria-label="red" id="red-slider" class="">
+			      </md-slider>
+			      <div flex="40" layout="" layout-align="center center">
+			        <input flex="" ng-model="area.y2" aria-label="red" aria-controls="red-slider" type="number">
 			      </div>
 			    </div>
 
