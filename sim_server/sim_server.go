@@ -33,6 +33,7 @@ func main() {
 	mux.HandleFunc("/pause", pause)
 	mux.HandleFunc("/render", render)
 	mux.HandleFunc("/stats", stats)
+	mux.HandleFunc("/area", area)
 	log.Fatal(http.ListenAndServe("localhost:8000", mux))
 }
 //!-main
@@ -68,5 +69,29 @@ func stats(w http.ResponseWriter, req *http.Request) {
 	// fmt.Println( string( stats))
 	fmt.Fprintf(w, "%s", stats)
 }
+
+type test_struct struct {
+	x1, x2, y1, y2 float64
+}
+
+func area(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	fmt.Println( "Path ", req.URL.Path)
+	fmt.Println( "Header ", req.Header)
+	fmt.Println( "Form ", req.Form)
+	fmt.Println( "PostForm ", req.PostForm)
+	fmt.Println( "Body ",  req.Body)
+
+	decoder := json.NewDecoder( req.Body)
+	var t test_struct
+	err := decoder.Decode( &t)
+	if err != nil {
+		log.Println(err)
+	}
+	log.Println(t.x1)
+
+}
+
 
 

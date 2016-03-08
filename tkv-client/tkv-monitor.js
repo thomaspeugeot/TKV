@@ -30,12 +30,20 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 		}
 
 		this.updateArea = function() {
+
+			$http.post('http://localhost:8000/area', $scope.area).then(function(response) {
+		 
+		  			console.log('updating area');
+	  	   
+
+		  		}, function(errResponse) {
+	      			console.error('error while posting area');
+	      			console.error(errResponse);
+	  		});
+
 		  	console.log('updateArea called');
 	  	};
 
-		this.submit = function() {
-		  	console.log('Submit called');
-	  	};
 
 	  	// get the image
 	  	$http.get('http://localhost:8000/render', '').then(function(response) {
