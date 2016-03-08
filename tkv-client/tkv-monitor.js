@@ -1,7 +1,7 @@
 angular.module('MyApp',['ngMaterial', 'ngMessages'])
 
 	.controller('RenderImage', ['$scope', '$timeout', '$http', function ($scope, $timeout, $http) {
-
+	
 		var self = this;
 
 		// adjust values of x min compared to x max
@@ -31,7 +31,11 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 
 		this.updateArea = function() {
 
-			$http.post('http://localhost:8000/area', $scope.area).then(function(response) {
+			var jsonarea = JSON.stringify( $scope.area);
+			console.log( jsonarea);
+			
+		
+			$http.post('http://localhost:8000/area', jsonarea ).then(function(response) {
 		 
 		  			console.log('updating area');
 	  	   
