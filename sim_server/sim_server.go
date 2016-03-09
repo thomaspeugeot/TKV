@@ -34,6 +34,7 @@ func main() {
 	mux.HandleFunc("/render", render)
 	mux.HandleFunc("/stats", stats)
 	mux.HandleFunc("/area", area)
+	mux.Handle("/", http.FileServer(http.Dir("../tkv-client/")) )
 	log.Fatal(http.ListenAndServe("localhost:8000", mux))
 }
 //!-main
