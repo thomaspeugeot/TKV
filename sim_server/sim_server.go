@@ -34,6 +34,7 @@ func main() {
 	mux.HandleFunc("/render", render)
 	mux.HandleFunc("/stats", stats)
 	mux.HandleFunc("/area", area)
+	mux.HandleFunc("/dt", dt)
 	mux.Handle("/", http.FileServer(http.Dir("../tkv-client/")) )
 	log.Fatal(http.ListenAndServe("localhost:8000", mux))
 }
@@ -72,7 +73,7 @@ func stats(w http.ResponseWriter, req *http.Request) {
 }
 
 type test_struct struct {
-	x1, x2, y1, y2 float64
+	X1, X2, Y1, Y2 float64
 }
 
 func area(w http.ResponseWriter, req *http.Request) {
@@ -88,11 +89,26 @@ func area(w http.ResponseWriter, req *http.Request) {
 	var t test_struct
 	err := decoder.Decode( &t)
 	if err != nil {
-		log.Println(err)
+		log.Println("error decoding ", err)
 	}
-	log.Println(t.x1)
+	r.SetRenderingWindow( t.X1, t.X2, t.Y1, t.Y2)
+	log.Println(t.X1)
+	log.Println(t.X2)
+	log.Println(t.Y1)
+	log.Println(t.Y2)
 
 }
 
+func dt(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 
+	decoder := json.NewDecoder( req.Body)
+	var dtRequest float64
+	err := decoder.Decode( &dtRequest)
+	if err != nil {
+		log.Println("error decoding ", err)
+	} else {
+		barnes_hut.DtRequest = dtRequest
+	}
+}
 

@@ -31,6 +31,7 @@ var	ETA float64 = 0.00000001
 // pseudo gravitational constant to compute 
 var	G float64 = 0.01
 var Dt float64  = 1.0 // 1 second, time step
+var DtRequest = Dt // new value of Dt requested by the UI. The real Dt will be changed at the end of the current step.
 
 // velocity cannot be too high in order to stop bodies from overtaking
 // each others
@@ -146,6 +147,9 @@ func (r * Run) Init( bodies * ([]quadtree.Body)) {
 func (r * Run) oneStep() {
 
 	nbComputationPerStep =0
+
+	// update Dt according to request
+	Dt = DtRequest
 	
 	// compute the quadtree from the bodies
 	r.q.UpdateNodesListsAndCOM()
@@ -378,10 +382,17 @@ func (r * Run) RenderGif(out io.Writer) {
 	
 		if false { fmt.Printf("Encoding body %d %f %f\n", idx, body.X, body.Y) }
 	
-		img.SetColorIndex(
-			int(body.X*size+0.5), 
-			int(body.Y*size+0.5),
+		// take into account rendering window
+		if( (body.X > r.xMin) && (body.X < r.xMax) && (body.Y > r.yMin) && (body.Y < r.yMax) ) {
+
+			imX := (body.X - r.xMin)/(r.xMax-r.xMin)
+			imY := (body.Y - r.yMin)/(r.yMax-r.yMin)
+
+			img.SetColorIndex(
+			int(imX*size+0.5), 
+			int(imY*size+0.5),
 			blackIndex)
+		}
 	}
 	anim.Delay = append(anim.Delay, delay)
 	anim.Image = append(anim.Image, img)

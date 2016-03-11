@@ -12,7 +12,7 @@
 		<tr>
 			<td colspan=2>
 				<div>
-				Simulation management <md-button>Run</md-button> {{status}}
+				Simulation management <md-button ng-click="areactrl.run()">Run</md-button> <md-button ng-click="areactrl.pause()">Pause</md-button> {{status}}
 				</div>
 			</td>
 		</tr>
@@ -33,45 +33,45 @@
 
 			    <div layout="">
 					<div flex="10" layout="" layout-align="center center">
-			        <span class="md-body-1">x min</span>
+			        <span class="md-body-1">x center</span>
 			      </div>
-			      <md-slider flex="100" min="0" step="0.01" max="1" ng-model="area.x1" aria-label="red" id="red-slider" class="">
+			      <md-slider flex="100" min="0" step="0.01" max="1" ng-model="area.centerX" ng-change="areactrl.updateArea()" aria-label="red" id="red-slider" class="">
 			      </md-slider>
 			      <div flex="40" layout="" layout-align="center center">
-			        <input flex="" ng-model="area.x1" aria-label="red" aria-controls="red-slider" type="number">
+			        <input flex="" ng-model="area.centerX" step="0.01" ng-change="areactrl.updateArea()" aria-label="red" aria-controls="red-slider" type="number">
 			      </div>
 			    </div>
 
 			    <div layout="">
 			      <div flex="10" layout="" layout-align="center center">
-			        <span class="md-body-1">x max</span>
+			        <span class="md-body-1">y center</span>
 			      </div>
-			      <md-slider flex="100" min="0" step="0.01" max="1" ng-model="area.x2" aria-label="red" id="red-slider" class="">
+			      <md-slider flex="100" min="0" step="0.01" max="1" ng-model="area.centerY" ng-change="areactrl.updateArea()" aria-label="red" id="red-slider" class="">
 			      </md-slider>
 			      <div flex="40" layout="" layout-align="center center">
-			        <input flex="" ng-model="area.x2" aria-label="red" aria-controls="red-slider" type="number">
+			        <input flex="" ng-model="area.centerY" step="0.01" ng-change="areactrl.updateArea()" aria-label="red" aria-controls="red-slider" type="number">
 			      </div>
 			    </div>
 
 			    <div layout="">
 			      <div flex="10" layout="" layout-align="center center">
-			        <span class="md-body-1">y min</span>
+			        <span class="md-body-1">zoom</span>
 			      </div>
-			      <md-slider flex="100" min="0" step="0.01" max="1" ng-model="area.y1" aria-label="red" id="red-slider" class="">
+			      <md-slider flex="100" min="1" step="0.1" max="100" ng-model="area.zoom" ng-change="areactrl.updateArea()" aria-label="red" id="red-slider" class="">
 			      </md-slider>
 			      <div flex="40" layout="" layout-align="center center">
-			        <input flex="" ng-model="area.y1" aria-label="red" aria-controls="red-slider" type="number">
+			        <input flex="" ng-model="area.zoom" step="0.1" ng-change="areactrl.updateArea()" aria-label="red" aria-controls="red-slider" type="number">
 			      </div>
 			    </div>
 
 			    <div layout="">
 			      <div flex="10" layout="" layout-align="center center">
-			        <span class="md-body-1">y max</span>
+			        <span class="md-body-1">DT</span>
 			      </div>
-			      <md-slider flex="100" min="0" step="0.01" max="1" ng-model="area.y2" aria-label="red" id="red-slider" class="">
+			      <md-slider flex="100" min="-2" step="0.1" max="5" ng-model="DTpow10" ng-change="areactrl.updateDt()" aria-label="red" id="red-slider" class="">
 			      </md-slider>
 			      <div flex="40" layout="" layout-align="center center">
-			        <input flex="" ng-model="area.y2" aria-label="red" aria-controls="red-slider" type="number">
+			        <input flex="" ng-model="DTpow10" step="0.1" ng-change="areactrl.updateDt()" aria-label="red" aria-controls="red-slider" type="number">
 			      </div>
 			    </div>
 
