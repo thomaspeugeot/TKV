@@ -15,12 +15,15 @@ import (
 	"image/color"
 	"image/gif"
 	"io"
+	"os"
+	"log"
 	"fmt"
 	"math"
 	"math/rand"
 	"time"
 	"bytes"
 	"encoding/base64"
+	"encoding/json"
 )
 
 // constant to be added to the distance between bodies
@@ -30,7 +33,7 @@ var	ETA float64 = 0.00000001
 
 // pseudo gravitational constant to compute 
 var	G float64 = 0.01
-var Dt float64  = 1.0 // 1 second, time step
+var Dt float64  = 0.1 // 0.1 second, time step
 var DtRequest = Dt // new value of Dt requested by the UI. The real Dt will be changed at the end of the current step.
 
 // velocity cannot be too high in order to stop bodies from overtaking
@@ -39,6 +42,7 @@ var MaxVelocity float64  = 0.001 // cannot make more that 1/1000 th of the unit 
 
 // the barnes hut criteria 
 var BN_THETA float64 = 0.5// can use barnes if distance to COM is 5 times side of the node's box
+var ThetaRequest = BN_THETA // new value of theta requested by the UI. The real BN_THETA will be changed at the end of the current step.
 
 // used to compute speed up
 var nbComputationPerStep int
@@ -102,7 +106,7 @@ func (r * Run) getVel(index int) (* Vel) {
 	return & (*r.bodiesVel)[index]
 }
 
-func (r * Run) GetState() State{
+func (r * Run) State() State{
 	return r.state
 }
 
@@ -140,16 +144,15 @@ func (r * Run) Init( bodies * ([]quadtree.Body)) {
 	r.q.Init(bodies)
 	r.state = STOPPED
 	r.SetRenderingWindow( 0.0, 0.0, 1.0, 1.0)
-	// r.giniOverTime = make( [][10]float64, 1)
-
 }
 
-func (r * Run) oneStep() {
+func (r * Run) OneStep() {
 
 	nbComputationPerStep =0
 
 	// update Dt according to request
 	Dt = DtRequest
+	BN_THETA = ThetaRequest
 	
 	// compute the quadtree from the bodies
 	r.q.UpdateNodesListsAndCOM()
@@ -162,6 +165,17 @@ func (r * Run) oneStep() {
 		
 	// compute new position
 	r.UpdatePosition()
+
+	// update the step
+	r.step++
+
+	fmt.Printf("step %d speedup %f low 10 %f high 5 %f high 10 %f\n",
+		r.step, 
+		float64(len(*r.bodies)*len(*r.bodies))/float64(nbComputationPerStep),
+		r.q.BodyCountGini[8][0],
+		r.q.BodyCountGini[8][5],
+		r.q.BodyCountGini[8][9])
+		
 }
 
 
@@ -405,44 +419,13 @@ func (r * Run) RenderGif(out io.Writer) {
 
 // output position of bodies of the Run into a GIF representation
 func (r * Run) OutputGif(out io.Writer, nbStep int) {
-	const (
-		size    = 600   // image canvas 
-		delay   = 4    // delay between frames in 10ms units
-	)
-	var nframes = nbStep    // number of animation frames
-	
-	anim := gif.GIF{LoopCount: nframes}
-	for r.step = 0; r.step < nframes; r.step++ {
-		rect := image.Rect(0, 0, size+1, size+1)
-		img := image.NewPaletted(rect, palette)
+
+	for r.step < nbStep  {
 
 		// if state is STOPPED, pause
 		for r.state == STOPPED {
 			time.Sleep(100 * time.Millisecond)
 		}
-		
-		
-		for idx, _ := range (*r.bodies) {
-		
-			body := (*r.bodies)[idx]
-		
-			if false { fmt.Printf("Encoding body %d %f %f\n", idx, body.X, body.Y) }
-		
-			img.SetColorIndex(
-				int(body.X*size+0.5), 
-				int(body.Y*size+0.5),
-				blackIndex)
-		}
-		
-		// encode time step into the image
-		progress := float64(r.step) / float64 (nframes)
-		for j:= 0; j < int( size*progress); j++ {
-			img.SetColorIndex(
-				j+1, 
-				10,
-				blackIndex)
-		}
-		nbBodies := float64(len(*r.bodies))
 		r.q.ComputeQuadtreeGini()
 
 		// append the new gini elements
@@ -451,18 +434,29 @@ func (r * Run) OutputGif(out io.Writer, nbStep int) {
 		copy( giniArray, r.q.BodyCountGini[8][:])
 		r.giniOverTime = append( r.giniOverTime, giniArray)
 
-
-
-		fmt.Printf("Progress %f speedup %f low 10 %f high 5 %f high 10 %f\n",
-			progress, 
-			nbBodies*nbBodies/float64(nbComputationPerStep),
-			r.q.BodyCountGini[8][0],
-			r.q.BodyCountGini[8][5],
-			r.q.BodyCountGini[8][9])
-		
-		r.oneStep()
+		r.OneStep()
 	}
-	gif.EncodeAll(out, &anim) // NOTE: ignoring encoding errors
+}
+
+// serialize bodies's state vector into a file
+// convention is "step-xxxx.bod"
+// return true if operation was successfull 
+// works only if state is STOPPED
+func (r * Run) CaptureConfig() bool {
+	if r.state == STOPPED {
+		filename := fmt.Sprintf("conf-TST-%05d.bods", r.step)
+		file, err := os.Create(filename)
+		if( err != nil) {
+			log.Fatal(err)
+			return false
+		}
+		jsonBodies, _ := json.MarshalIndent( r.bodies, "","\t")
+		file.Write( jsonBodies)
+		file.Close()
+		return true
+	} else {
+		return false
+	}
 }
 
 // compute modulo distance

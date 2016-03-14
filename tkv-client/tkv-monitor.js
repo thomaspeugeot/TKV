@@ -32,7 +32,8 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 			zoom: 1.0
 		}
 
-		$scope.DTpow10 = 1.0;
+		$scope.DTpow10 = 0.0;
+		$scope.theta = 0.5;
 
 		this.updateDt = function() {
 
@@ -50,12 +51,33 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 	  				console.log('updating dt');
 	  			}, 
   				function(errResponse) { // error handler
-      					console.error('error while posting area');
+      					console.error('error while posting dt');
       					console.error(errResponse);
   				}
 
   			);
 		  	console.log('updateDt called');
+	  	};
+
+		this.updateTheta = function() {
+
+			console.log( $scope.theta);
+			var jsontheta = JSON.stringify( $scope.theta);
+			console.log( jsontheta);
+			
+			$http.post('http://localhost:8000/theta', jsontheta ).then
+			(
+				function(response) { // success handler
+	  				console.log(response.status);
+	  				console.log('updating theta');
+	  			}, 
+  				function(errResponse) { // error handler
+      					console.error('error while posting theta');
+      					console.error(errResponse);
+  				}
+
+  			);
+		  	console.log('updateTheta called');
 	  	};
 
 
@@ -69,6 +91,16 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 			)	
 		};
 
+		this.oneStep = function() {
+			$http.get('http://localhost:8000/oneStep').then(
+				function(response) { // success handler
+				},
+				function(errResponse) { // error handler
+      					console.error('error while request one');
+  				}
+			)	
+		};
+
 		this.pause = function() {
 			$http.get('http://localhost:8000/pause').then(
 				function(response) { // success handler
@@ -77,6 +109,11 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
       					console.error('error while request pause');
   				}
 			)	
+		};
+
+		this.captureConfig = function() {
+			$http.get('http://localhost:8000/captureConfig').then( function(response) {},
+				function(errResponse) { console.error('error while request captureConfig');})	
 		};
 
 		this.updateArea = function() {
