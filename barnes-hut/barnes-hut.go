@@ -41,7 +41,7 @@ var DtRequest = Dt // new value of Dt requested by the UI. The real Dt will be c
 var MaxVelocity float64  = 0.001 // cannot make more that 1/1000 th of the unit square per second
 
 // the barnes hut criteria 
-var BN_THETA float64 = 0.5// can use barnes if distance to COM is 5 times side of the node's box
+var BN_THETA float64 = 0.5 // can use barnes if distance to COM is 5 times side of the node's box
 var ThetaRequest = BN_THETA // new value of theta requested by the UI. The real BN_THETA will be changed at the end of the current step.
 
 // used to compute speed up
@@ -249,6 +249,8 @@ func (r * Run) computeAccelerationOnBody(origIndex int) {
 			
 			acc.X += x
 			acc.Y += y
+
+			// fmt.Printf("computeAccelerationOnBody idx2 %3d x %9.3f y %9.3f \n", idx2, x, y)
 		}
 	}
 	
@@ -282,25 +284,28 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 	node := & (r.q.Nodes[coord])
 	dist := getModuloDistanceBetweenBodies( &body, &(node.Body))
 
-	// fmt.Printf("computeAccelationWithNodeRecursive index %d at coord %#v level %d boxSize %f mass %f\n", idx, coord, level, boxSize, node.M)
-
+	
 	// avoid node with zero mass
 	if( node.M == 0) {
 		return
 	}
 	
+	// fmt.Printf("computeAccelationWithNodeRecursive index %d at coord %#v level %d boxSize %f mass %f\n", idx, coord, level, boxSize, node.M)
+
 	// check if the COM of the node can be used
 	if (boxSize / dist) < BN_THETA {
 	
-		// fmt.Printf("computeAccelationWithNodeRecursive at node %#v\n", node)
 		x, y := getRepulsionVector( &body, &(node.Body))
 			
 		acc.X += x
 		acc.Y += y
+
+		// fmt.Printf("computeAccelationWithNodeRecursive at node %#v x %9.3f y %9.3f\n", node.Coord(), x, y)
+
 	} else {		
 		if( level < 8) {
 			// parse sub nodes
-			// fmt.Printf("computeAccelationWithNodeRecursive go down at node %#v\n", node)
+			// fmt.Printf("computeAccelationWithNodeRecursive go down at node %#v\n", node.Coord())
 			coordNW, coordNE, coordSW, coordSE := quadtree.NodesBelow( coord)
 			r.computeAccelationWithNodeRecursive( idx, coordNW)
 			r.computeAccelationWithNodeRecursive( idx, coordNE)
@@ -312,12 +317,12 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 			rank := 0
 			for b := node.First() ; b != nil; b = b.Next() {
 				if( *b != body) {
-					// fmt.Printf("computeAccelationWithNodeRecursive at leaf %#v rank %d\n", b, rank)
 					x, y := getRepulsionVector( &body, b)
 			
 					acc.X += x
 					acc.Y += y
 					rank++
+					// fmt.Printf("computeAccelationWithNodeRecursive at leaf %#v rank %d x %9.3f y %9.3f\n", b.Coord(), rank, x, y)
 				}
 			}
 		}
@@ -487,6 +492,11 @@ func getRepulsionVector( A, B *quadtree.Body) (x, y float64) {
 		distQuared /= distPow3
 	}
 	
+	// repulsion is proportional to mass
+	massCombined := A.M * B.M
+	x *= massCombined
+	y *= massCombined
+
 	nbComputationPerStep++
 	
 	return x/distPow3, y/distPow3

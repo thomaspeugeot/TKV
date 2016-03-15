@@ -31,8 +31,8 @@ func TestOneStep(t *testing.T) {
 	var r Run
 	r.Init( & bodies)
 	// r.q.CheckIntegrity( t)
-	r.oneStep()
-	r.oneStep()
+	r.OneStep()
+	r.OneStep()
 	r.q.CheckIntegrity( t)
 }
 
@@ -125,8 +125,9 @@ func TestComputeRepulsiveForcesConcurrent(t *testing.T) {
 // forces is close to the classic computation 
 func TestComputeAccelerationOnBodyBarnesHut(t *testing.T) {
 
-	bodies := make([]quadtree.Body, 2000)
+	bodies := make([]quadtree.Body, 2000000)
 	SpreadOnCircle( & bodies)
+	// quadtree.InitBodiesUniform( &bodies, 200)
 	var r Run
 	r.Init( & bodies)
 	
@@ -145,7 +146,7 @@ func TestComputeAccelerationOnBodyBarnesHut(t *testing.T) {
 	relativeError := diff/accReferenceLength
 	
 	// tolerance is arbitrary set
-	tolerance := 0.05 // 5%
+	tolerance := 0.02 // 5%
 	if( relativeError > tolerance) {
 		t.Errorf("different results, accel ref x %f y %f, got x %f y %f", accReference.X, accReference.Y, accBH.X, accBH.Y)	
 		t.Errorf("different results, expected less than %f, got %f", tolerance, relativeError)

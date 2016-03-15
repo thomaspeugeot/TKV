@@ -20,6 +20,8 @@ type Node struct {
 // link to the first body of the bodies chain belonging to the node 
 func (n * Node) First() * Body { return n.first }
 
+func (n * Node) Coord() Coord { return n.coord }
+
 // update COM of a node (reset the current COM before)
 func (n * Node) updateCOM() {
 	

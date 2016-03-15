@@ -23,6 +23,7 @@ type Body struct {
 //	go test -bench=BenchmarkUpdateNodesList_10M -benchmem
 func (b * Body) Next() * Body { return b.next }
 
+func (b * Body) Coord() Coord { return b.coord }
 
 // get Node coordinates at level 8
 func ( b Body) getCoord8() Coord {
