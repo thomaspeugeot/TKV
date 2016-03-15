@@ -189,11 +189,12 @@ func TestComputeGini(t * testing.T) {
 	q.updateNodesCOM()	
 	q.CheckIntegrity(t)
 
-	nbBodiesInPoorTencile, nbBodiesInRichTencile := q.ComputeQuadtreeGini()
-	if( float32(nbBodiesInPoorTencile)/float32(len(bodies)) < 0.001) {
-		t.Errorf("too low value for poor tencile got : %f, want %f",  float32(nbBodiesInPoorTencile)/float32(len(bodies)), 0.001)
+	q.ComputeQuadtreeGini()
+	ratioPoor := float32(q.BodyCountGini[8][0])/float32(len(bodies))
+	if( ratioPoor < 0.001) {
+		t.Errorf("too low value for poor tencile got : %f, want %f",  ratioPoor, 0.001)
 	}
-	if( nbBodiesInRichTencile == 0) {
+	if( q.BodyCountGini[8][0] == 0) {
 		t.Errorf("zero value for poor tencile")
 	}
 	
