@@ -35,6 +35,8 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 		$scope.DTpow10 = 0.0;
 		$scope.theta = 0.5;
 
+		$scope.dirConfig = ""
+
 		this.updateDt = function() {
 
 			console.log( $scope.DTpow10);
@@ -147,24 +149,6 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 		  	console.log('updateArea called');
 	  	};
 
-
-	  	// get the image
-	  	$http.get('http://localhost:8000/render', '').then(function(response) {
-		    
-			$scope.render = 'data:image/gif;base64,' + response.data
-
-		  	}, function(errResponse) {
-	      	console.error('Error while fetching render');
-	  	});
-
-	  	$http.get('http://localhost:8000/status', '').then(function(response) {
-		    
-			$scope.status = response.data
-
-		  	}, function(errResponse) {
-	      	console.error('Error while fetching render');
-	  	});
-
 	  	var pollRender = function() {
 
 	  		$timeout( function() {
@@ -207,8 +191,20 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 
 		pollStatus();
 
-	  	$timeout(function () {
+		// function that list the files available
+		var pullConfigs = function() {
+				$http.get('http://localhost:8000/dirConfig', '').then( function(response) 
+  					{
+						$scope.dirConfig = response.data
+  					}, 
+  					function(errResponse) { // error handler
+      					console.error('error while Status');
+      					console.error(errResponse);
+  					}
 
-	  	}, 1000);
+  					);
+		}
 
+		pullConfigs();
 	}]);
+		

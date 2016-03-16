@@ -24,6 +24,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
+	"strings"
 )
 
 // constant to be added to the distance between bodies
@@ -545,4 +546,35 @@ func SpreadOnCircle(bodies * []quadtree.Body) {
 
 func (r * Run) BodyCountGini() quadtree.QuadtreeGini {
 	return r.q.BodyCountGini
+}
+
+var CurrentCountry = "TST"
+
+// return the list of available configuration
+func (r * Run) DirConfig() []string {
+
+	// open the current working directory
+	cwd, error := os.Open(".")
+
+	if( error != nil ) {
+		panic( "not able to open current working directory")
+	}
+
+	// get files with their names
+	names, err := cwd.Readdirnames(0)
+
+	if( err != nil ) {
+		panic( "cannot read names in current working directory")
+	}
+
+	// parse the list of names and pick the ones that match the 
+	var result []string
+
+	for _, dirname := range(names) {
+		if strings.Contains( dirname, CurrentCountry) {
+			result = append( result, dirname)
+		}
+	}
+
+	return result
 }

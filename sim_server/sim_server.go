@@ -38,6 +38,7 @@ func main() {
 	mux.HandleFunc("/area", area)
 	mux.HandleFunc("/dt", dt)
 	mux.HandleFunc("/theta", theta)
+	mux.HandleFunc("/dirConfig", dirConfig)
 	mux.Handle("/", http.FileServer(http.Dir("../tkv-client/")) )
 	log.Fatal(http.ListenAndServe("localhost:8000", mux))
 }
@@ -137,5 +138,13 @@ func theta(w http.ResponseWriter, req *http.Request) {
 	} else {
 		barnes_hut.ThetaRequest = thetaRequest
 	}
+}
+
+// list the content of the available config files
+func dirConfig(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	dircontent, _ := json.MarshalIndent( r.DirConfig(), "", "	")
+	fmt.Fprintf(w, "%s", dircontent)
 }
 

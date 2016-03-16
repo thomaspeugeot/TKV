@@ -86,12 +86,28 @@
 			      <div flex="10" layout="" layout-align="center center">
 			        <span class="md-body-1">THETA</span>
 			      </div>
-			      <md-slider flex="100" min="0" step="0.1" max="0.5" ng-model="theta" ng-change="areactrl.updateTheta()" aria-label="red" id="red-slider" class="">
+			      <md-slider flex="100" min="0" step="0.1" max="1.5" ng-model="theta" ng-change="areactrl.updateTheta()" aria-label="red" id="red-slider" class="">
 			      </md-slider>
 			      <div flex="40" layout="" layout-align="center center">
 			        <input flex="" ng-model="theta" step="0.1" ng-change="areactrl.updateTheta()" aria-label="red" aria-controls="red-slider" type="number">
 			      </div>
 			    </div>
+
+			    <div>
+			    	<div>
+			    		Available configs
+			    	</div>
+			    	<md-radio-group ng-model="selected">
+  						<md-radio-button ng-repeat="d in dirConfig" ng-value="d" aria-label="{{ d }}">
+         					{{ d }}
+  						</md-radio-button>
+					</md-radio-group>
+			    </div>
+
+				<div>
+					<md-button ng-click="areactrl.captureConfig()" class="md-raised"> Load config </md-button>
+				</div>			     	
+
 
 			</td>
 		</tr>
