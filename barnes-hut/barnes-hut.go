@@ -24,6 +24,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
+	"encoding/binary"
 	"strings"
 )
 
@@ -459,6 +460,35 @@ func (r * Run) CaptureConfig() bool {
 		jsonBodies, _ := json.MarshalIndent( r.bodies, "","\t")
 		file.Write( jsonBodies)
 		file.Close()
+		
+		// r.CaptureConfigBase64()
+		return true
+	} else {
+		return false
+	}
+}
+
+func (r * Run) CaptureConfigBase64() bool {
+	if r.state == STOPPED {
+		filename := fmt.Sprintf("conf-base64-TST-%05d.bods", r.step)
+		file, err := os.Create(filename)
+		if( err != nil) {
+			log.Fatal(err)
+			return false
+		}
+		buf := new(bytes.Buffer)	
+
+		// encoder := base64.NewEncoder(base64.StdEncoding, &b)
+		// encoder.Write( *(r.bodies))
+		// encoder.Close()
+
+		for _, v := range *r.bodies {
+			err = binary.Write( buf, binary.LittleEndian, v.X)
+			err = binary.Write( buf, binary.LittleEndian, v.Y)
+		}
+		file.Write( buf.Bytes())
+
+		file.Close()
 		return true
 	} else {
 		return false
@@ -476,6 +506,14 @@ func (r * Run) LoadConfig(filename string) bool {
 			return false
 		}
 
+		// get the number of steps in the file name
+		nbItems, errScan := fmt.Sscanf(filename, "conf-TST-%05d.bods", & r.step)
+		if( errScan != nil) {
+			log.Fatal(errScan)
+			return false			
+		}
+		log.Output( 1, fmt.Sprintf( "nb item parsed %d (should be one)", nbItems))
+		
 		jsonParser := json.NewDecoder(file)
     	if err = jsonParser.Decode(r.bodies); err != nil {
         	log.Fatal( fmt.Sprintf( "parsing config file", err.Error()))
