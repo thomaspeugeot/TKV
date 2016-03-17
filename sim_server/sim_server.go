@@ -39,6 +39,7 @@ func main() {
 	mux.HandleFunc("/dt", dt)
 	mux.HandleFunc("/theta", theta)
 	mux.HandleFunc("/dirConfig", dirConfig)
+	mux.HandleFunc("/loadConfig", loadConfig)
 	mux.Handle("/", http.FileServer(http.Dir("../tkv-client/")) )
 	log.Fatal(http.ListenAndServe("localhost:8000", mux))
 }
@@ -146,5 +147,20 @@ func dirConfig(w http.ResponseWriter, req *http.Request) {
 
 	dircontent, _ := json.MarshalIndent( r.DirConfig(), "", "	")
 	fmt.Fprintf(w, "%s", dircontent)
+}
+
+// list the content of the available config files
+func loadConfig(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	// get the file
+	fileSlice := req.URL.Query()["file"]
+
+	fmt.Println(fileSlice[0])
+	// get the file name
+
+	loadResult := r.LoadConfig( fileSlice[0])
+	fmt.Println( "load result ", loadResult )
+
 }
 

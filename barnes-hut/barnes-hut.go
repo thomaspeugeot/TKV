@@ -465,6 +465,30 @@ func (r * Run) CaptureConfig() bool {
 	}
 }
 
+// load configuration from filename (does not contain path)
+// works only if state is STOPPED
+func (r * Run) LoadConfig(filename string) bool {
+	if r.state == STOPPED {
+
+		file, err := os.Open(filename)
+		if( err != nil) {
+			log.Fatal(err)
+			return false
+		}
+
+		jsonParser := json.NewDecoder(file)
+    	if err = jsonParser.Decode(r.bodies); err != nil {
+        	log.Fatal( fmt.Sprintf( "parsing config file", err.Error()))
+    	}
+
+		file.Close()
+		return true
+	} else {
+		return false
+	}
+}
+
+
 // compute modulo distance
 func getModuloDistanceBetweenBodies( A, B *quadtree.Body) float64 {
 

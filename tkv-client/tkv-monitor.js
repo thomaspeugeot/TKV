@@ -193,18 +193,35 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 
 		// function that list the files available
 		var pullConfigs = function() {
-				$http.get('http://localhost:8000/dirConfig', '').then( function(response) 
-  					{
-						$scope.dirConfig = response.data
-  					}, 
-  					function(errResponse) { // error handler
-      					console.error('error while Status');
-      					console.error(errResponse);
-  					}
+			$http.get('http://localhost:8000/dirConfig', '').then( function(response) 
+				{
+					$scope.dirConfig = response.data
+					$scope.selected = response.data[0]
+				}, 
+				function(errResponse) { // error handler
+					console.error('error while Status');
+					console.error(errResponse);
+				}
 
-  					);
+				);
 		}
 
 		pullConfigs();
+
+		$scope.selected = "";
+
+		this.loadConfig = function() {
+
+			$http.get('http://localhost:8000/loadConfig'+'?file='+$scope.selected, '').then( function(response) 
+				{
+					console.log("file loaded " + $scope.selected);
+				}, 
+				function(errResponse) { // error handler
+					console.error('error while Status');
+					console.error(errResponse);
+				}
+
+				);
+		}
 	}]);
 		
