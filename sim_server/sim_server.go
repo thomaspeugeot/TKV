@@ -40,6 +40,8 @@ func main() {
 	mux.HandleFunc("/theta", theta)
 	mux.HandleFunc("/dirConfig", dirConfig)
 	mux.HandleFunc("/loadConfig", loadConfig)
+	mux.HandleFunc("/getDensityTenciles", getDensityTenciles)
+	mux.HandleFunc("/nbVillagesPerAxe", nbVillagesPerAxe)
 	mux.Handle("/", http.FileServer(http.Dir("../tkv-client/")) )
 	log.Fatal(http.ListenAndServe("localhost:8000", mux))
 }
@@ -81,10 +83,17 @@ func render(w http.ResponseWriter, req *http.Request) {
 
 func stats(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	// stats, _ := json.MarshalIndent( r.BodyCountGini(), "", "	")
+	stats, _ := json.MarshalIndent( r.BodyCountGini(), "", "	")
 	// stats, _ := json.MarshalIndent( r.GiniOverTimeTransposed(), "", "	")
 	// fmt.Println( string( stats))
 	fmt.Fprintf(w, "%s", stats)
+}
+
+func getDensityTenciles(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	
+	tenciles, _ := json.MarshalIndent( r.ComputeDensityTencilePerVillage(), "", "	")
+	fmt.Fprintf(w, "%s", tenciles)
 }
 
 type test_struct struct {
@@ -138,6 +147,19 @@ func theta(w http.ResponseWriter, req *http.Request) {
 		log.Println("error decoding ", err)
 	} else {
 		barnes_hut.ThetaRequest = thetaRequest
+	}
+}
+
+func nbVillagesPerAxe(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	decoder := json.NewDecoder( req.Body)
+	var nbVillagesPerAxe int
+	err := decoder.Decode( &nbVillagesPerAxe)
+	if err != nil {
+		log.Println("error decoding ", err)
+	} else {
+		barnes_hut.SetNbVillagePerAxe( nbVillagesPerAxe)
 	}
 }
 

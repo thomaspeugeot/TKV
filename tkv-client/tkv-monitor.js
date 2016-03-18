@@ -35,6 +35,9 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 		$scope.DTpow10 = 0.0;
 		$scope.theta = 0.5;
 
+
+		$scope.nbVillagesPerAxe = 100;
+
 		$scope.dirConfig = ""
 
 		this.updateDt = function() {
@@ -72,6 +75,27 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 				function(response) { // success handler
 	  				console.log(response.status);
 	  				console.log('updating theta');
+	  			}, 
+  				function(errResponse) { // error handler
+      					console.error('error while posting theta');
+      					console.error(errResponse);
+  				}
+
+  			);
+		  	console.log('updateTheta called');
+	  	};
+
+		this.updateNbVillagesPerAxe = function() {
+
+			console.log( $scope.nbVillagesPerAxe);
+			var json = JSON.stringify( $scope.nbVillagesPerAxe);
+			console.log( json);
+			
+			$http.post('http://localhost:8000/nbVillagesPerAxe', json ).then
+			(
+				function(response) { // success handler
+	  				console.log(response.status);
+	  				console.log('updating nbVillagesPerAxe');
 	  			}, 
   				function(errResponse) { // error handler
       					console.error('error while posting theta');

@@ -26,6 +26,7 @@ import (
 	"encoding/json"
 	"encoding/binary"
 	"strings"
+	"sort"
 )
 
 // constant to be added to the distance between bodies
@@ -87,6 +88,8 @@ const (
 //
 var ConcurrentRoutines int = 100
 
+var nbVillagePerAxe int = 100 // number of village per X or Y axis. For 10 000 villages, this number is 100
+
 // a simulation run
 type Run struct {
 	bodies * []quadtree.Body // bodies position in the quatree
@@ -123,6 +126,15 @@ func (r * Run) SetState(s State) {
 func (r * Run) SetRenderingWindow( xMin, xMax, yMin, yMax float64) {
 	r.xMin, r.xMax, r.yMin, r.yMax = xMin, xMax, yMin, yMax
 }
+
+func NbVillagePerAxe() int {
+	return nbVillagePerAxe
+}
+
+func SetNbVillagePerAxe(nbVillagePerAxe_p int) {
+	nbVillagePerAxe = nbVillagePerAxe_p
+}
+
 func (r * Run) GiniOverTimeTransposed() [][]float64 {
 
 	var giniOverTimeTransposed [][]float64 
@@ -146,6 +158,59 @@ func (r * Run) Init( bodies * ([]quadtree.Body)) {
 	r.q.Init(bodies)
 	r.state = STOPPED
 	r.SetRenderingWindow( 0.0, 0.0, 1.0, 1.0)
+}
+
+// compute the density per village and return the density per village
+func (r * Run) ComputeDensityTencilePerVillage() [10]float64 {
+
+	log.Output( 1, fmt.Sprintf( "ComputeDensityTencilePerVillage %d ", nbVillagePerAxe))
+
+	// parse all bodies
+	// prepare the village
+	villages := make([][]int, nbVillagePerAxe)
+	for x,_  := range villages {
+		villages[x] = make([]int, nbVillagePerAxe)
+	}
+
+	// parse bodies
+	for _,b := range *r.bodies {
+		// compute village coordinate (from 0 to nbVillagePerAxe-1)
+		x := int( math.Floor(float64( nbVillagePerAxe) * b.X))
+		y := int( math.Floor(float64( nbVillagePerAxe) * b.Y))
+
+		villages[x][y]++
+	}
+
+	// var bodyCount []int
+	nbVillages := nbVillagePerAxe*nbVillagePerAxe
+	bodyCountPerVillage := make([]int, nbVillages)
+	for x,_  := range villages {
+		for y,_  := range villages[x] {
+			bodyCountPerVillage[y + x*nbVillagePerAxe] = villages[x][y]
+		}
+	}
+
+	sort.Ints(bodyCountPerVillage)
+
+
+	var density [10]float64
+	for tencile,_ := range density {
+		lowIndex  := int(math.Floor(float64(nbVillages) * float64(tencile)/10.0))
+		highIndex := int(math.Floor(float64(nbVillages) * float64(tencile+1)/10.0))
+		// log.Output( 1, fmt.Sprintf( "tencile %d ", tencile))
+		// log.Output( 1, fmt.Sprintf( "lowIndex %d ", lowIndex))
+		// log.Output( 1, fmt.Sprintf( "highIndex %d ", highIndex))
+		
+		nbBodiesInTencile := 0
+		for _, nbBodies := range bodyCountPerVillage[lowIndex:highIndex] {
+			nbBodiesInTencile += nbBodies
+		}
+		density[tencile] = float64(nbBodiesInTencile) / float64(len(bodyCountPerVillage[lowIndex:highIndex]))
+	}
+
+
+
+	return density
 }
 
 func (r * Run) OneStep() {

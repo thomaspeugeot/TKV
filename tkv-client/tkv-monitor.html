@@ -93,6 +93,17 @@
 			      </div>
 			    </div>
 
+			    <div layout="">
+			      <div flex="10" layout="" layout-align="center center">
+			        <span class="md-body-1">Villages / x</span>
+			      </div>
+			      <md-slider flex="100" min="10" step="10" max="200" ng-model="nbVillagesPerAxe" ng-change="areactrl.updateNbVillagesPerAxe()" aria-label="red" id="red-slider" class="">
+			      </md-slider>
+			      <div flex="40" layout="" layout-align="center center">
+			        <input flex="" ng-model="nbVillagesPerAxe" step="0.1" ng-change="areactrl.updateNbVillagesPerAxe()" aria-label="red" aria-controls="red-slider" type="number">
+			      </div>
+			    </div>
+
 			    <div>
 			    	<div>
 			    		Available configs
