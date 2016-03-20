@@ -27,7 +27,7 @@ import (
 	"encoding/binary"
 	"strings"
 	"sort"
-)
+	)
 
 // constant to be added to the distance between bodies
 // in order to compute repulsion (avoid near infinite repulsion force)
@@ -158,6 +158,11 @@ func NbVillagePerAxe() int {
 func SetNbVillagePerAxe(nbVillagePerAxe_p int) {
 	nbVillagePerAxe = nbVillagePerAxe_p
 }
+
+func SetNbRoutines(nbRoutines_p int) {
+	ConcurrentRoutines = nbRoutines_p
+}
+
 func SetRatioBorderBodies( ratioOfBorderVillages_p float64) {
 	ratioOfBorderVillages = ratioOfBorderVillages_p
 }
@@ -269,6 +274,8 @@ func (r * Run) ComputeDensityTencilePerVillage() [10]float64 {
 
 func (r * Run) OneStep() {
 
+	t0 := time.Now()
+
 	nbComputationPerStep =0
 
 	// update Dt according to request
@@ -296,9 +303,11 @@ func (r * Run) OneStep() {
 		r.q.BodyCountGini[8][0],
 		r.q.BodyCountGini[8][5],
 		r.q.BodyCountGini[8][9])
-		
+	
+	t1 := time.Now()
+	Gflops = float64( nbComputationPerStep) /  float64((t1.Sub(t0)).Nanoseconds())
 }
-
+var Gflops float64
 
 // compute repulsive forces by spreading the calculus
 // among nbRoutine go routines

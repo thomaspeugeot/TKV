@@ -39,6 +39,7 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 
 
 		$scope.nbVillagesPerAxe = 100;
+		$scope.nbRoutines = 100;
 
 		$scope.toto = "toto";
 
@@ -100,6 +101,27 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 				function(response) { // success handler
 	  				console.log(response.status);
 	  				console.log('updating nbVillagesPerAxe');
+	  			}, 
+  				function(errResponse) { // error handler
+      					console.error('error while posting theta');
+      					console.error(errResponse);
+  				}
+
+  			);
+		  	console.log('updateTheta called');
+	  	};
+
+		this.updateNbRoutines = function() {
+
+			console.log( $scope.nbRoutines);
+			var json = JSON.stringify( $scope.nbRoutines);
+			console.log( json);
+			
+			$http.post('http://localhost:8000/nbRoutines', json ).then
+			(
+				function(response) { // success handler
+	  				console.log(response.status);
+	  				console.log('updating nbRoutines');
 	  			}, 
   				function(errResponse) { // error handler
       					console.error('error while posting theta');

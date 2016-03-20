@@ -42,6 +42,7 @@ func main() {
 	mux.HandleFunc("/loadConfig", loadConfig)
 	mux.HandleFunc("/getDensityTenciles", getDensityTenciles)
 	mux.HandleFunc("/nbVillagesPerAxe", nbVillagesPerAxe)
+	mux.HandleFunc("/nbRoutines", nbRoutines)
 	mux.HandleFunc("/updateRatioBorderBodies", updateRatioBorderBodies)
 	mux.HandleFunc("/toggleRenderChoice", toggleRenderChoice)
 
@@ -52,11 +53,11 @@ func main() {
 
 func status(w http.ResponseWriter, req *http.Request) {
 	
-	fmt.Fprintf(w, "Run status %s step %d\n", r.State(), r.GetStep())
+	fmt.Fprintf(w, "Run status %s step %d Gflops %f \n", r.State(), r.GetStep(), barnes_hut.Gflops)
 }
 
 func play(w http.ResponseWriter, req *http.Request) {
-	
+		
 	r.SetState( barnes_hut.RUNNING)
 	fmt.Fprintf(w, "Run status %s\n", r.State())
 }
@@ -155,7 +156,6 @@ func theta(w http.ResponseWriter, req *http.Request) {
 
 func nbVillagesPerAxe(w http.ResponseWriter, req *http.Request) {
 	
-
 	decoder := json.NewDecoder( req.Body)
 	var nbVillagesPerAxe int
 	err := decoder.Decode( &nbVillagesPerAxe)
@@ -163,6 +163,18 @@ func nbVillagesPerAxe(w http.ResponseWriter, req *http.Request) {
 		log.Println("error decoding ", err)
 	} else {
 		barnes_hut.SetNbVillagePerAxe( nbVillagesPerAxe)
+	}
+}
+
+func nbRoutines(w http.ResponseWriter, req *http.Request) {
+	
+	decoder := json.NewDecoder( req.Body)
+	var nbRoutines int
+	err := decoder.Decode( &nbRoutines)
+	if err != nil {
+		log.Println("error decoding ", err)
+	} else {
+		barnes_hut.SetNbRoutines( nbRoutines)
 	}
 }
 
