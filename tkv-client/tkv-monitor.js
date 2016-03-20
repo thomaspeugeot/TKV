@@ -32,6 +32,8 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 			zoom: 1.0
 		}
 
+		$scope.ratioBorderBodies = 0.1;
+
 		$scope.DTpow10 = 0.0;
 		$scope.theta = 0.5;
 
@@ -101,6 +103,28 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 	  			}, 
   				function(errResponse) { // error handler
       					console.error('error while posting theta');
+      					console.error(errResponse);
+  				}
+
+  			);
+		  	console.log('updateTheta called');
+	  	};
+
+
+		this.updateRatioBorderBodies = function() {
+
+			console.log( $scope.ratioBorderBodies);
+			var json = JSON.stringify( $scope.ratioBorderBodies);
+			console.log( json);
+			
+			$http.post('http://localhost:8000/updateRatioBorderBodies', json ).then
+			(
+				function(response) { // success handler
+	  				console.log(response.status);
+	  				console.log('updating updateRatioBorderBodies');
+	  			}, 
+  				function(errResponse) { // error handler
+      					console.error('error while updateRatioBorderBodies');
       					console.error(errResponse);
   				}
 

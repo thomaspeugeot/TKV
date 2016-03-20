@@ -42,6 +42,7 @@ func main() {
 	mux.HandleFunc("/loadConfig", loadConfig)
 	mux.HandleFunc("/getDensityTenciles", getDensityTenciles)
 	mux.HandleFunc("/nbVillagesPerAxe", nbVillagesPerAxe)
+	mux.HandleFunc("/updateRatioBorderBodies", updateRatioBorderBodies)
 	mux.HandleFunc("/toggleRenderChoice", toggleRenderChoice)
 
 	mux.Handle("/", http.FileServer(http.Dir("../tkv-client/")) )
@@ -50,12 +51,12 @@ func main() {
 //!-main
 
 func status(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	
 	fmt.Fprintf(w, "Run status %s step %d\n", r.State(), r.GetStep())
 }
 
 func play(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	
 	r.SetState( barnes_hut.RUNNING)
 	fmt.Fprintf(w, "Run status %s\n", r.State())
 }
@@ -63,7 +64,7 @@ func play(w http.ResponseWriter, req *http.Request) {
 func toggleRenderChoice(w http.ResponseWriter, req *http.Request) { r.ToggleRenderChoice() }
 
 func pause(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	
 	r.SetState( barnes_hut.STOPPED)
 	fmt.Fprintf(w, "Run status %s\n", r.State())
 }
@@ -80,13 +81,13 @@ func captureConfig(w http.ResponseWriter, req *http.Request) {
 }
 
 func render(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	
 	r.RenderGif( w)
 	// fmt.Fprintf(w, "Run status %s\n", r.State())
 }
 
 func stats(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	
 	stats, _ := json.MarshalIndent( r.BodyCountGini(), "", "	")
 	// stats, _ := json.MarshalIndent( r.GiniOverTimeTransposed(), "", "	")
 	// fmt.Println( string( stats))
@@ -94,7 +95,7 @@ func stats(w http.ResponseWriter, req *http.Request) {
 }
 
 func getDensityTenciles(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	
 	
 	tenciles, _ := json.MarshalIndent( r.ComputeDensityTencilePerVillage(), "", "	")
 	fmt.Fprintf(w, "%s", tenciles)
@@ -105,7 +106,7 @@ type test_struct struct {
 }
 
 func area(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	
 
 	fmt.Println( "Path ", req.URL.Path)
 	fmt.Println( "Header ", req.Header)
@@ -128,8 +129,7 @@ func area(w http.ResponseWriter, req *http.Request) {
 }
 
 func dt(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-
+	
 	decoder := json.NewDecoder( req.Body)
 	var dtRequest float64
 	err := decoder.Decode( &dtRequest)
@@ -142,7 +142,6 @@ func dt(w http.ResponseWriter, req *http.Request) {
 
 
 func theta(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	decoder := json.NewDecoder( req.Body)
 	var thetaRequest float64
@@ -155,7 +154,7 @@ func theta(w http.ResponseWriter, req *http.Request) {
 }
 
 func nbVillagesPerAxe(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	
 
 	decoder := json.NewDecoder( req.Body)
 	var nbVillagesPerAxe int
@@ -167,9 +166,21 @@ func nbVillagesPerAxe(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
+func updateRatioBorderBodies(w http.ResponseWriter, req *http.Request) {
+
+	decoder := json.NewDecoder( req.Body)
+	var ratioBorderBodies float64
+	err := decoder.Decode( &ratioBorderBodies)
+	if err != nil {
+		log.Println("error decoding ", err)
+	} else {
+		barnes_hut.SetRatioBorderBodies( ratioBorderBodies)
+	}
+}
+
 // list the content of the available config files
 func dirConfig(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	
 
 	dircontent, _ := json.MarshalIndent( r.DirConfig(), "", "	")
 	fmt.Fprintf(w, "%s", dircontent)
@@ -177,7 +188,7 @@ func dirConfig(w http.ResponseWriter, req *http.Request) {
 
 // list the content of the available config files
 func loadConfig(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	
 
 	// get the file
 	fileSlice := req.URL.Query()["file"]

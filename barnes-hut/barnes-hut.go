@@ -158,6 +158,9 @@ func NbVillagePerAxe() int {
 func SetNbVillagePerAxe(nbVillagePerAxe_p int) {
 	nbVillagePerAxe = nbVillagePerAxe_p
 }
+func SetRatioBorderBodies( ratioOfBorderVillages_p float64) {
+	ratioOfBorderVillages = ratioOfBorderVillages_p
+}
 
 func (r * Run) GiniOverTimeTransposed() [][]float64 {
 

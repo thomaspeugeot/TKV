@@ -106,6 +106,17 @@
 			      </div>
 			    </div>
 
+			    <div layout="">
+			      <div flex="10" layout="" layout-align="center center">
+			        <span class="md-body-1">Ratio Border Bodies</span>
+			      </div>
+			      <md-slider flex="100" min="0" step="0.01" max="1.00" ng-model="ratioBorderBodies" ng-change="areactrl.updateRatioBorderBodies()" aria-label="red" id="red-slider" class="">
+			      </md-slider>
+			      <div flex="40" layout="" layout-align="center center">
+			        <input flex="" ng-model="ratioBorderBodies" step="0.01" ng-change="areactrl.updateRatioBorderBodies()" aria-label="red" aria-controls="red-slider" type="number">
+			      </div>
+			    </div>
+
 			    <div>
 			    	<div>
 			    		Available configs
