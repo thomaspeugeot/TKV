@@ -42,6 +42,8 @@ func main() {
 	mux.HandleFunc("/loadConfig", loadConfig)
 	mux.HandleFunc("/getDensityTenciles", getDensityTenciles)
 	mux.HandleFunc("/nbVillagesPerAxe", nbVillagesPerAxe)
+	mux.HandleFunc("/toggleRenderChoice", toggleRenderChoice)
+
 	mux.Handle("/", http.FileServer(http.Dir("../tkv-client/")) )
 	log.Fatal(http.ListenAndServe("localhost:8000", mux))
 }
@@ -57,6 +59,8 @@ func play(w http.ResponseWriter, req *http.Request) {
 	r.SetState( barnes_hut.RUNNING)
 	fmt.Fprintf(w, "Run status %s\n", r.State())
 }
+
+func toggleRenderChoice(w http.ResponseWriter, req *http.Request) { r.ToggleRenderChoice() }
 
 func pause(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")

@@ -38,6 +38,8 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 
 		$scope.nbVillagesPerAxe = 100;
 
+		$scope.toto = "toto";
+
 		$scope.dirConfig = ""
 
 		this.updateDt = function() {
@@ -142,6 +144,11 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 				function(errResponse) { console.error('error while request captureConfig');})	
 		};
 
+		this.toggleRenderChoice  = function() {
+			$http.get('http://localhost:8000/toggleRenderChoice').then( function(response) {},
+				function(errResponse) { console.error('error while request toggleRenderChoice');})	
+		};
+
 		this.updateArea = function() {
 
 			$scope.area.x1 = $scope.area.centerX - 0.5/$scope.area.zoom
@@ -214,6 +221,30 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 		};
 
 		pollStatus();
+
+	  	var pollDensityTenciles = function() {
+
+	  		$timeout( function() {
+				$http.get('http://localhost:8000/getDensityTenciles', '').then( function(response) 
+  					{
+  						console.log( response.data)
+						$scope.densityTenciles = response.data
+						pollDensityTenciles()
+  					}, 
+  					function(errResponse) { // error handler
+      					console.error('error while Status');
+      					console.error(errResponse);
+  					}
+
+  					);
+	  			} 
+	  			,  2000
+	  		);
+		};
+
+		pollDensityTenciles();
+
+
 
 		// function that list the files available
 		var pullConfigs = function() {

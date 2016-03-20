@@ -15,7 +15,9 @@
 				Simulation management
 				<md-button ng-click="areactrl.run()">Run</md-button>
 				<md-button ng-click="areactrl.pause()">Pause</md-button>
-				<md-button ng-click="areactrl.oneStep()">One Step</md-button> {{status}}
+				<md-button ng-click="areactrl.oneStep()">One Step</md-button> 
+				<md-button ng-click="areactrl.toggleRenderChoice()">Toggle Orig/Running</md-button> 
+				{{status}}
 				</div>
 			</td>
 		</tr>
@@ -97,10 +99,10 @@
 			      <div flex="10" layout="" layout-align="center center">
 			        <span class="md-body-1">Villages / x</span>
 			      </div>
-			      <md-slider flex="100" min="10" step="10" max="200" ng-model="nbVillagesPerAxe" ng-change="areactrl.updateNbVillagesPerAxe()" aria-label="red" id="red-slider" class="">
+			      <md-slider flex="100" min="1" step="10" max="200" ng-model="nbVillagesPerAxe" ng-change="areactrl.updateNbVillagesPerAxe()" aria-label="red" id="red-slider" class="">
 			      </md-slider>
 			      <div flex="40" layout="" layout-align="center center">
-			        <input flex="" ng-model="nbVillagesPerAxe" step="0.1" ng-change="areactrl.updateNbVillagesPerAxe()" aria-label="red" aria-controls="red-slider" type="number">
+			        <input flex="" ng-model="nbVillagesPerAxe" step="1" ng-change="areactrl.updateNbVillagesPerAxe()" aria-label="red" aria-controls="red-slider" type="number">
 			      </div>
 			    </div>
 
@@ -119,6 +121,9 @@
 					<md-button ng-click="areactrl.loadConfig()" class="md-raised"> Load config </md-button>
 				</div>			     	
 
+				<div>
+					{{densityTenciles}}
+				</div>			     	
 
 			</td>
 		</tr>

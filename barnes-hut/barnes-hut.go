@@ -72,10 +72,12 @@ type Acc struct {
 }
 
 
-var palette = []color.Color{color.White, color.Black}
+// var palette = []color.Color{color.White, color.Black}
+var palette = []color.Color{color.White, color.Black, color.RGBA{255,0,0,255}}
 const (
 	whiteIndex = 0 // first color in palette
 	blackIndex = 1 // next color in palette
+	redIndex = 2 // next color in palette
 )
 
 type State string
@@ -85,6 +87,25 @@ const (
 	RUNNING = "RUNNING"
 )
 
+// decide wether, villages borders are drawn
+type RenderState string
+
+const (
+	WITHOUT_BORDERS = "WITHOUT_BORDERS"
+	WITH_BORDERS = "WITH_BORDERS"
+)
+var ratioOfBorderVillages = 0.1 // ratio of villages that are eligible for marking a border 
+
+// decide wether, to display the original configuration or the running configruation
+type RenderChoice string
+
+const (
+	ORIGINAL_CONFIGURATION = "ORIGINAL_CONFIGURATION"
+	RUNNING_CONFIGURATION = "RUNNING_CONFIGURATION"
+)
+
+
+
 //
 var ConcurrentRoutines int = 100
 
@@ -93,6 +114,7 @@ var nbVillagePerAxe int = 100 // number of village per X or Y axis. For 10 000 v
 // a simulation run
 type Run struct {
 	bodies * []quadtree.Body // bodies position in the quatree
+	bodiesOrig * []quadtree.Body // original bodies position in the quatree
 	bodiesAccel * []Acc // bodies acceleration
 	bodiesVel * []Vel // bodies velocity
 
@@ -101,6 +123,8 @@ type Run struct {
 	step int
 	giniOverTime [][]float64 // evolution of the gini distribution over time 
 	xMin, xMax, yMin, yMax float64 // coordinates of the rendering windows
+	renderState RenderState
+	renderChoice RenderChoice
 }
 
 func (r * Run) getAcc(index int) (* Acc) {
@@ -151,6 +175,12 @@ func (r * Run) GiniOverTime() [][]float64 {
 // init the run with an array of quadtree bodies
 func (r * Run) Init( bodies * ([]quadtree.Body)) {
 	r.bodies = bodies
+
+	// create a reference of the bodies
+	copySliceOfBodies := make( []quadtree.Body, len(*bodies))
+	r.bodiesOrig = &copySliceOfBodies
+	copy(  *r.bodiesOrig, *r.bodies)
+
 	acc := make([]Acc, len(*bodies))
 	vel := make([]Vel, len(*bodies))
 	r.bodiesAccel = &acc
@@ -158,12 +188,23 @@ func (r * Run) Init( bodies * ([]quadtree.Body)) {
 	r.q.Init(bodies)
 	r.state = STOPPED
 	r.SetRenderingWindow( 0.0, 0.0, 1.0, 1.0)
+	r.renderState = WITH_BORDERS // we draw borders
+	r.renderChoice = RUNNING_CONFIGURATION // we draw borders
+}
+
+func (r * Run) ToggleRenderChoice() {
+	if r.renderChoice == RUNNING_CONFIGURATION {
+		r.renderChoice = ORIGINAL_CONFIGURATION
+	} else {
+		r.renderChoice = RUNNING_CONFIGURATION
+	}
+
 }
 
 // compute the density per village and return the density per village
 func (r * Run) ComputeDensityTencilePerVillage() [10]float64 {
 
-	log.Output( 1, fmt.Sprintf( "ComputeDensityTencilePerVillage %d ", nbVillagePerAxe))
+	// log.Output( 1, fmt.Sprintf( "ComputeDensityTencilePerVillage %d ", nbVillagePerAxe))
 
 	// parse all bodies
 	// prepare the village
@@ -206,6 +247,16 @@ func (r * Run) ComputeDensityTencilePerVillage() [10]float64 {
 			nbBodiesInTencile += nbBodies
 		}
 		density[tencile] = float64(nbBodiesInTencile) / float64(len(bodyCountPerVillage[lowIndex:highIndex]))
+
+		// we compare with then average bodies per villages
+		density[tencile] /=	float64(len( *r.bodies)) / float64( nbVillages)	
+
+		// we round the density to 0.01 precision, and put it in percentage point
+		density[tencile] *= 100.0 * 100.0
+		intDensity := math.Floor( density[tencile] )
+		density[tencile] = float64( intDensity) / 100.0
+
+
 	}
 
 
@@ -465,19 +516,63 @@ func (r * Run) RenderGif(out io.Writer) {
 	for idx, _ := range (*r.bodies) {
 	
 		body := (*r.bodies)[idx]
+		bodyOrig := (*r.bodiesOrig)[idx]
 	
 		if false { fmt.Printf("Encoding body %d %f %f\n", idx, body.X, body.Y) }
 	
 		// take into account rendering window
-		if( (body.X > r.xMin) && (body.X < r.xMax) && (body.Y > r.yMin) && (body.Y < r.yMax) ) {
+		var imX, imY float64
+		if( r.renderChoice == RUNNING_CONFIGURATION) {
+			imX = (body.X - r.xMin)/(r.xMax-r.xMin)
+			imY = (body.Y - r.yMin)/(r.yMax-r.yMin)
+		} else { 
+			// we display the original
+			imX = (bodyOrig.X - r.xMin)/(r.xMax-r.xMin)
+			imY = (bodyOrig.Y - r.yMin)/(r.yMax-r.yMin)				
+		}
+		// if( (body.X > r.xMin) && (body.X < r.xMax) && (body.Y > r.yMin) && (body.Y < r.yMax) ) {
+		if( (imX > 0.0) && (imX < 1.0) && (imY > 0.0) && (imY < 1.0) ) {
 
-			imX := (body.X - r.xMin)/(r.xMax-r.xMin)
-			imY := (body.Y - r.yMin)/(r.yMax-r.yMin)
 
-			img.SetColorIndex(
-			int(imX*size+0.5), 
-			int(imY*size+0.5),
-			blackIndex)
+			// check wether body is on a border
+			isOnBorder := false
+			coordX := body.X * float64(nbVillagePerAxe)
+			distanceToBorderX := coordX - math.Floor( coordX)
+			if( distanceToBorderX < ratioOfBorderVillages /2.0) { isOnBorder = true }
+			if( distanceToBorderX > 1.0 -  ratioOfBorderVillages /2.0) { isOnBorder = true }
+
+			coordY := body.Y * float64(nbVillagePerAxe)
+			distanceToBorderY := coordY - math.Floor( coordY)
+			if( distanceToBorderY < ratioOfBorderVillages / 2.0) { isOnBorder = true }
+			if( distanceToBorderY > 1.0 -  ratioOfBorderVillages /2.0) { isOnBorder = true }
+
+			if( isOnBorder && r.renderState == WITH_BORDERS) {
+				img.SetColorIndex(
+					int(imX*size+0.5), 
+					int(imY*size+0.5),
+					redIndex)
+				img.SetColorIndex(
+					int(imX*size+0.5)+1, 
+					int(imY*size+0.5),
+					redIndex)
+				img.SetColorIndex(
+					int(imX*size+0.5)-1, 
+					int(imY*size+0.5),
+					redIndex)
+				img.SetColorIndex(
+					int(imX*size+0.5), 
+					int(imY*size+0.5)+1,
+					redIndex)
+				img.SetColorIndex(
+					int(imX*size+0.5), 
+					int(imY*size+0.5)-1,
+					redIndex)
+			} else {
+				img.SetColorIndex(
+					int(imX*size+0.5), 
+					int(imY*size+0.5),
+					blackIndex)				
+			}
 		}
 	}
 	anim.Delay = append(anim.Delay, delay)
