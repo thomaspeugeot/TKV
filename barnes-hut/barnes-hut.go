@@ -27,6 +27,7 @@ import (
 	"encoding/binary"
 	"strings"
 	"sort"
+	"sync/atomic"
     "github.com/ajstarks/svgo/float"
 	)
 
@@ -49,7 +50,7 @@ var BN_THETA float64 = 0.5 // can use barnes if distance to COM is 5 times side 
 var ThetaRequest = BN_THETA // new value of theta requested by the UI. The real BN_THETA will be changed at the end of the current step.
 
 // used to compute speed up
-var nbComputationPerStep int
+var nbComputationPerStep uint64
 
 // if true, Barnes-Hut algo is used
 var UseBarnesHut bool = true
@@ -787,7 +788,7 @@ func getRepulsionVector( A, B *quadtree.Body) (x, y float64) {
 	x *= massCombined
 	y *= massCombined
 
-	nbComputationPerStep++
+	atomic.AddUint64( &nbComputationPerStep, 1)
 	
 	return x/distPow3, y/distPow3
 
