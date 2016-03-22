@@ -107,14 +107,6 @@ type test_struct struct {
 }
 
 func area(w http.ResponseWriter, req *http.Request) {
-	
-
-	fmt.Println( "Path ", req.URL.Path)
-	fmt.Println( "Header ", req.Header)
-	fmt.Println( "Form ", req.Form)
-	fmt.Println( "PostForm ", req.PostForm)
-	fmt.Println( "Body ",  req.Body)
-
 	decoder := json.NewDecoder( req.Body)
 	var t test_struct
 	err := decoder.Decode( &t)
@@ -122,11 +114,6 @@ func area(w http.ResponseWriter, req *http.Request) {
 		log.Println("error decoding ", err)
 	}
 	r.SetRenderingWindow( t.X1, t.X2, t.Y1, t.Y2)
-	log.Println(t.X1)
-	log.Println(t.X2)
-	log.Println(t.Y1)
-	log.Println(t.Y2)
-
 }
 
 func dt(w http.ResponseWriter, req *http.Request) {
@@ -193,7 +180,6 @@ func updateRatioBorderBodies(w http.ResponseWriter, req *http.Request) {
 // list the content of the available config files
 func dirConfig(w http.ResponseWriter, req *http.Request) {
 	
-
 	dircontent, _ := json.MarshalIndent( r.DirConfig(), "", "	")
 	fmt.Fprintf(w, "%s", dircontent)
 }

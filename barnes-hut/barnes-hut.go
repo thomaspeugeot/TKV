@@ -298,12 +298,13 @@ func (r * Run) OneStep() {
 	// update the step
 	r.step++
 
-	fmt.Printf("step %d speedup %f low 10 %f high 5 %f high 10 %f\n",
+	fmt.Printf("step %d speedup %f low 10 %f high 5 %f high 10 %f MFlops %f\n",
 		r.step, 
 		float64(len(*r.bodies)*len(*r.bodies))/float64(nbComputationPerStep),
 		r.q.BodyCountGini[8][0],
 		r.q.BodyCountGini[8][5],
-		r.q.BodyCountGini[8][9])
+		r.q.BodyCountGini[8][9],
+		Gflops*1000.0)
 	
 	t1 := time.Now()
 	Gflops = float64( nbComputationPerStep) /  float64((t1.Sub(t0)).Nanoseconds())
