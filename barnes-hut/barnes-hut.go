@@ -27,6 +27,7 @@ import (
 	"encoding/binary"
 	"strings"
 	"sort"
+    "github.com/ajstarks/svgo/float"
 	)
 
 // constant to be added to the distance between bodies
@@ -594,6 +595,59 @@ func (r * Run) RenderGif(out io.Writer) {
 	encodedB64 := base64.StdEncoding.EncodeToString([]byte(b.Bytes()))
 	out.Write( []byte(encodedB64))
 
+}
+
+
+func (r * Run) RenderSVG(out io.Writer) {
+	const (
+		size    = 600   // image canvas 
+	)
+	s := svg.New(out)
+	s.Start(size, size)
+	s.Circle(250, 250, 125, "fill:none;stroke:black")
+	
+	for idx, _ := range (*r.bodies) {
+	
+		body := (*r.bodies)[idx]
+		bodyOrig := (*r.bodiesOrig)[idx]
+	
+		if false { fmt.Printf("Encoding body %d %f %f\n", idx, body.X, body.Y) }
+	
+		// take into account rendering window
+		var imX, imY float64
+		if( r.renderChoice == RUNNING_CONFIGURATION) {
+			imX = (body.X - r.xMin)/(r.xMax-r.xMin)
+			imY = (body.Y - r.yMin)/(r.yMax-r.yMin)
+		} else { 
+			// we display the original
+			imX = (bodyOrig.X - r.xMin)/(r.xMax-r.xMin)
+			imY = (bodyOrig.Y - r.yMin)/(r.yMax-r.yMin)				
+		}
+		// if( (body.X > r.xMin) && (body.X < r.xMax) && (body.Y > r.yMin) && (body.Y < r.yMax) ) {
+		if( (imX > 0.0) && (imX < 1.0) && (imY > 0.0) && (imY < 1.0) ) {
+
+
+			// check wether body is on a border
+			isOnBorder := false
+			coordX := body.X * float64(nbVillagePerAxe)
+			distanceToBorderX := coordX - math.Floor( coordX)
+			if( distanceToBorderX < ratioOfBorderVillages /2.0) { isOnBorder = true }
+			if( distanceToBorderX > 1.0 -  ratioOfBorderVillages /2.0) { isOnBorder = true }
+
+			coordY := body.Y * float64(nbVillagePerAxe)
+			distanceToBorderY := coordY - math.Floor( coordY)
+			if( distanceToBorderY < ratioOfBorderVillages / 2.0) { isOnBorder = true }
+			if( distanceToBorderY > 1.0 -  ratioOfBorderVillages /2.0) { isOnBorder = true }
+
+			if( isOnBorder && r.renderState == WITH_BORDERS) {
+				s.Circle(imX*size, imY*size, 0.1, "fill:none;stroke:red")
+			} else {
+				s.Circle(imX*size, imY*size, 0.1, "fill:none;stroke:black")
+			}
+		}
+	}
+	s.End()
+	log.Output( 1, fmt.Sprintf( "end of render SVG"))
 }
 
 // output position of bodies of the Run into a GIF representation

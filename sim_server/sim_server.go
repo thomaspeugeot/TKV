@@ -33,7 +33,10 @@ func main() {
 	mux.HandleFunc("/pause", pause)
 	mux.HandleFunc("/oneStep", oneStep)
 	mux.HandleFunc("/captureConfig", captureConfig)
+
 	mux.HandleFunc("/render", render)
+	mux.HandleFunc("/renderSVG", renderSVG)
+
 	mux.HandleFunc("/stats", stats)
 	mux.HandleFunc("/area", area)
 	mux.HandleFunc("/dt", dt)
@@ -81,11 +84,8 @@ func captureConfig(w http.ResponseWriter, req *http.Request) {
 	r.CaptureConfig()
 }
 
-func render(w http.ResponseWriter, req *http.Request) {
-	
-	r.RenderGif( w)
-	// fmt.Fprintf(w, "Run status %s\n", r.State())
-}
+func render(w http.ResponseWriter, req *http.Request) { r.RenderGif( w) }
+func renderSVG(w http.ResponseWriter, req *http.Request) { r.RenderSVG( w) }
 
 func stats(w http.ResponseWriter, req *http.Request) {
 	
