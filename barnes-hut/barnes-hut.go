@@ -75,11 +75,12 @@ type Acc struct {
 
 
 // var palette = []color.Color{color.White, color.Black}
-var palette = []color.Color{color.White, color.Black, color.RGBA{255,0,0,255}}
+var palette = []color.Color{color.White, color.Black, color.RGBA{255,0,0,255}, color.RGBA{0,255,0,255}, }
 const (
 	whiteIndex = 0 // first color in palette
 	blackIndex = 1 // next color in palette
 	redIndex = 2 // next color in palette
+	blueIndex = 3 // next color in palette
 )
 
 type State string
@@ -561,27 +562,38 @@ func (r * Run) RenderGif(out io.Writer) {
 			if( distanceToBorderY < ratioOfBorderVillages / 2.0) { isOnBorder = true }
 			if( distanceToBorderY > 1.0 -  ratioOfBorderVillages /2.0) { isOnBorder = true }
 
+
+
+			// compute village coordinate (from 0 to nbVillagePerAxe-1)
+			x := int( math.Floor(float64( nbVillagePerAxe) * body.X))
+			y := int( math.Floor(float64( nbVillagePerAxe) * body.Y))
+
+			// we want to alternate red and blue
+			var borderIndex uint8
+			borderIndex = redIndex
+			if( (x+y)%2 ==0) { borderIndex = blueIndex }
+
 			if( isOnBorder && r.renderState == WITH_BORDERS) {
 				img.SetColorIndex(
 					int(imX*size+0.5), 
 					int(imY*size+0.5),
-					redIndex)
+					borderIndex)
 				img.SetColorIndex(
 					int(imX*size+0.5)+1, 
 					int(imY*size+0.5),
-					redIndex)
+					borderIndex)
 				img.SetColorIndex(
 					int(imX*size+0.5)-1, 
 					int(imY*size+0.5),
-					redIndex)
+					borderIndex)
 				img.SetColorIndex(
 					int(imX*size+0.5), 
 					int(imY*size+0.5)+1,
-					redIndex)
+					borderIndex)
 				img.SetColorIndex(
 					int(imX*size+0.5), 
 					int(imY*size+0.5)-1,
-					redIndex)
+					borderIndex)
 			} else {
 				img.SetColorIndex(
 					int(imX*size+0.5), 
