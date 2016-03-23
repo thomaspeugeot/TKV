@@ -29,6 +29,9 @@ func main() {
 	
 	mux := http.NewServeMux()
 	mux.HandleFunc("/status", status)
+
+	mux.HandleFunc("/toggleLocalGlobal", toggleLocalGlobal)
+
 	mux.HandleFunc("/play", play)
 	mux.HandleFunc("/pause", pause)
 	mux.HandleFunc("/oneStep", oneStep)
@@ -66,6 +69,7 @@ func play(w http.ResponseWriter, req *http.Request) {
 }
 
 func toggleRenderChoice(w http.ResponseWriter, req *http.Request) { r.ToggleRenderChoice() }
+func toggleLocalGlobal(w http.ResponseWriter, req *http.Request) { r.ToggleLocalGlobal() }
 
 func pause(w http.ResponseWriter, req *http.Request) {
 	

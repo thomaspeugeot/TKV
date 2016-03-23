@@ -195,6 +195,11 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 				function(errResponse) { console.error('error while request toggleRenderChoice');})	
 		};
 
+		this.toggleLocalGlobal  = function() {
+			$http.get('http://localhost:8000/toggleLocalGlobal').then( function(response) {},
+				function(errResponse) { console.error('error while request toggleLocalGlobal');})	
+		};
+
 		this.updateArea = function() {
 
 			$scope.area.x1 = $scope.area.centerX - 0.5/$scope.area.zoom

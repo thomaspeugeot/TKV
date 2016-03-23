@@ -83,6 +83,16 @@ const (
 	blueIndex = 3 // next color in palette
 )
 
+// decides wether the spred is at the village level or at the country level
+type RepulsionPhyicsType string
+
+const (
+	LOCAL = "LOCAL"
+	GLOBAL = "GLOBAL"
+)
+
+var RepulsionPhysics RepulsionPhyicsType
+
 type State string
 
 const (
@@ -201,6 +211,8 @@ func (r * Run) Init( bodies * ([]quadtree.Body)) {
 	r.SetRenderingWindow( 0.0, 0.0, 1.0, 1.0)
 	r.renderState = WITH_BORDERS // we draw borders
 	r.renderChoice = RUNNING_CONFIGURATION // we draw borders
+
+	RepulsionPhysics = "GLOBAL"
 }
 
 func (r * Run) ToggleRenderChoice() {
@@ -209,7 +221,14 @@ func (r * Run) ToggleRenderChoice() {
 	} else {
 		r.renderChoice = RUNNING_CONFIGURATION
 	}
+}
 
+func (r * Run) ToggleLocalGlobal() {
+	if RepulsionPhysics == "LOCAL" {
+		RepulsionPhysics = "GLOBAL"
+	} else {
+		RepulsionPhysics = "LOCAL"
+	}
 }
 
 // compute the density per village and return the density per village
