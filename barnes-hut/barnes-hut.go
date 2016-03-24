@@ -832,6 +832,36 @@ func (r * Run) LoadConfig(filename string) bool {
 	}
 }
 
+// load configuration from filename into the original config (for computing borders)
+// works only if state is STOPPED
+func (r * Run) LoadConfigOrig(filename string) bool {
+	if r.state == STOPPED {
+
+		file, err := os.Open(filename)
+		if( err != nil) {
+			log.Fatal(err)
+			return false
+		}
+
+		// get the number of steps in the file name
+		nbItems, errScan := fmt.Sscanf(filename, "conf-TST-%05d.bods", & r.step)
+		if( errScan != nil) {
+			log.Fatal(errScan)
+			return false			
+		}
+		log.Output( 1, fmt.Sprintf( "nb item parsed %d (should be one)", nbItems))
+		
+		jsonParser := json.NewDecoder(file)
+    	if err = jsonParser.Decode(r.bodiesOrig); err != nil {
+        	log.Fatal( fmt.Sprintf( "parsing config file", err.Error()))
+    	}
+
+		file.Close()
+		return true
+	} else {
+		return false
+	}
+}
 
 // compute modulo distance
 func getModuloDistanceBetweenBodies( A, B *quadtree.Body) float64 {

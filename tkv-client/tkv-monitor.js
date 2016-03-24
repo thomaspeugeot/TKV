@@ -329,5 +329,20 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 
 				);
 		}
+
+		this.loadConfigOrig = function() {
+
+			$http.get('http://localhost:8000/loadConfigOrig'+'?file='+$scope.selected, '').then( function(response) 
+				{
+					console.log("file orig loaded " + $scope.selected);
+				}, 
+				function(errResponse) { // error handler
+					console.error('error while Status');
+					console.error(errResponse);
+				}
+
+				);
+		}
+
 	}]);
 		

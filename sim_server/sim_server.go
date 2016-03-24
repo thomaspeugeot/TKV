@@ -46,6 +46,7 @@ func main() {
 	mux.HandleFunc("/theta", theta)
 	mux.HandleFunc("/dirConfig", dirConfig)
 	mux.HandleFunc("/loadConfig", loadConfig)
+	mux.HandleFunc("/loadConfigOrig", loadConfigOrig)
 	mux.HandleFunc("/getDensityTenciles", getDensityTenciles)
 	mux.HandleFunc("/nbVillagesPerAxe", nbVillagesPerAxe)
 	mux.HandleFunc("/nbRoutines", nbRoutines)
@@ -194,10 +195,9 @@ func dirConfig(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(w, "%s", dircontent)
 }
 
-// list the content of the available config files
+// load config files
 func loadConfig(w http.ResponseWriter, req *http.Request) {
 	
-
 	// get the file
 	fileSlice := req.URL.Query()["file"]
 
@@ -206,6 +206,18 @@ func loadConfig(w http.ResponseWriter, req *http.Request) {
 
 	loadResult := r.LoadConfig( fileSlice[0])
 	fmt.Println( "load result ", loadResult )
+}
 
+// list config files in orig
+func loadConfigOrig(w http.ResponseWriter, req *http.Request) {
+	
+	// get the file
+	fileSlice := req.URL.Query()["file"]
+
+	fmt.Println(fileSlice[0])
+	// get the file name
+
+	loadResult := r.LoadConfigOrig( fileSlice[0])
+	fmt.Println( "load result ", loadResult )
 }
 
