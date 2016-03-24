@@ -212,7 +212,7 @@ func (r * Run) Init( bodies * ([]quadtree.Body)) {
 	r.renderState = WITH_BORDERS // we draw borders
 	r.renderChoice = RUNNING_CONFIGURATION // we draw borders
 
-	RepulsionPhysics = "GLOBAL"
+	RepulsionPhysics = GLOBAL
 }
 
 func (r * Run) ToggleRenderChoice() {
@@ -224,10 +224,10 @@ func (r * Run) ToggleRenderChoice() {
 }
 
 func (r * Run) ToggleLocalGlobal() {
-	if RepulsionPhysics == "LOCAL" {
-		RepulsionPhysics = "GLOBAL"
+	if RepulsionPhysics == LOCAL {
+		RepulsionPhysics = GLOBAL
 	} else {
-		RepulsionPhysics = "LOCAL"
+		RepulsionPhysics = LOCAL
 	}
 }
 
@@ -328,9 +328,11 @@ func (r * Run) OneStep() {
 		Gflops*1000.0)
 	
 	t1 := time.Now()
-	Gflops = float64( nbComputationPerStep) /  float64((t1.Sub(t0)).Nanoseconds())
+	StepDuration = float64((t1.Sub(t0)).Nanoseconds())
+	Gflops = float64( nbComputationPerStep) /  StepDuration
 }
 var Gflops float64
+var StepDuration float64
 
 // compute repulsive forces by spreading the calculus
 // among nbRoutine go routines
@@ -516,24 +518,56 @@ func (r * Run) UpdatePosition() {
 		
 		// updatePos
 		vel := r.getVel(idx)
-		body.X += vel.X * Dt
-		body.Y += vel.Y * Dt
 		
-		if body.X >= 1.0 { 
-			body.X = 1.0 - (body.X - 1.0) 
-			vel.X = -vel.X
-		}
-		if body.X <= 0.0 { 
-			body.X = - body.X 
-			vel.X = -vel.X
-		}
-		if body.Y >= 1.0 { 
-			body.Y = 1.0 - (body.Y - 1.0) 
-			vel.Y = -vel.Y
-		}
-		if body.Y <= 0.0 { 
-			body.Y = - body.Y 
-			vel.Y = -vel.Y
+		if( RepulsionPhysics == GLOBAL) {
+			body.X += vel.X * Dt
+			body.Y += vel.Y * Dt
+		
+			if body.X >= 1.0 { 
+				body.X = 1.0 - (body.X - 1.0) 
+				vel.X = -vel.X
+			}
+			if body.X <= 0.0 { 
+				body.X = - body.X 
+				vel.X = -vel.X
+			}
+			if body.Y >= 1.0 { 
+				body.Y = 1.0 - (body.Y - 1.0) 
+				vel.Y = -vel.Y
+			}
+			if body.Y <= 0.0 { 
+				body.Y = - body.Y 
+				vel.Y = -vel.Y
+			}
+		} else {
+
+			// compute min & max of village
+			vilXMin := math.Floor( float64( nbVillagePerAxe) * body.X)/float64( nbVillagePerAxe)
+			vilYMin := math.Floor( float64( nbVillagePerAxe) * body.Y)/float64( nbVillagePerAxe)
+			vilXMax := (1.0+math.Floor( float64( nbVillagePerAxe) * body.X))/float64( nbVillagePerAxe)
+			vilYMax := (1.0+math.Floor( float64( nbVillagePerAxe) * body.Y))/float64( nbVillagePerAxe)
+
+			// move body
+			body.X += vel.X * Dt
+			body.Y += vel.Y * Dt
+
+			// move back body into village		
+			if body.X >= vilXMax { 
+				body.X = vilXMax - (body.X - vilXMax) 
+				vel.X = -vel.X
+			}
+			if body.X <= vilXMin { 
+				body.X = vilXMin - (body.X - vilXMin) 
+				vel.X = -vel.X
+			}
+			if body.Y >= vilYMax { 
+				body.Y = vilYMax - (body.Y - vilYMax) 
+				vel.Y = -vel.Y
+			}
+			if body.Y <= vilYMin { 
+				body.Y = vilYMin - (body.Y - vilYMin) 
+				vel.Y = -vel.Y
+			}
 		}
 	}
 }
@@ -802,8 +836,34 @@ func getModuloDistanceBetweenBodies( A, B *quadtree.Body) float64 {
 // proportional to the inverse of the distance squared
 func getRepulsionVector( A, B *quadtree.Body) (x, y float64) {
 
-	x = getModuloDistance( B.X, A.X)
-	y = getModuloDistance( B.Y, A.Y)
+	atomic.AddUint64( &nbComputationPerStep, 1)
+
+	if( RepulsionPhysics == GLOBAL) {
+		x = getModuloDistance( B.X, A.X)
+		y = getModuloDistance( B.Y, A.Y)
+	} else {
+
+		// check wether A & B are in the same village
+		vilAxF := math.Floor( float64( nbVillagePerAxe) * A.X)
+		vilAyF := math.Floor( float64( nbVillagePerAxe) * A.Y)
+		vilBxF := math.Floor( float64( nbVillagePerAxe) * B.X)
+		vilByF := math.Floor( float64( nbVillagePerAxe) * B.Y)
+
+		
+		vilAx := int(  vilAxF)
+		vilAy := int(  vilAyF)
+		vilBx := int(  vilBxF)
+		vilBy := int(  vilByF)
+
+		if( vilAx == vilBx ) && (vilAy == vilBy ) {
+
+			x = getModuloDistanceLocal( B.X, A.X, vilAxF/float64( nbVillagePerAxe), (vilAxF+1.0)/float64( nbVillagePerAxe))
+			y = getModuloDistanceLocal( B.Y, A.Y, vilAyF/float64( nbVillagePerAxe), (vilAyF+1.0)/float64( nbVillagePerAxe))
+		} else {
+			return 0.0, 0.0
+		}
+
+	}
 
 	distQuared := (x*x + y*y) + ETA
 	
@@ -819,7 +879,6 @@ func getRepulsionVector( A, B *quadtree.Body) (x, y float64) {
 	x *= massCombined
 	y *= massCombined
 
-	atomic.AddUint64( &nbComputationPerStep, 1)
 	
 	return x/distPow3, y/distPow3
 
@@ -835,6 +894,21 @@ func getModuloDistance( alpha, beta float64) (dist float64) {
 	dist = beta-alpha
 	if( dist > 0.5 ) { dist -= 1.0 }
 	if( dist < -0.5 ) { dist += 1.0 }
+		
+	return dist
+}
+
+// get modulo distance between alpha and beta in a given village.
+//
+// alpha and beta are between left and rigth
+// the modulo distance cannot be above (rigth-left) /2
+func getModuloDistanceLocal( alpha, beta, left, rigth float64) (dist float64) {
+
+	dist = beta-alpha
+	maxDist := rigth-left
+	halfMaxDist := maxDist/2.0
+	if( dist > halfMaxDist ) { dist -= maxDist }
+	if( dist < -halfMaxDist ) { dist += maxDist }
 		
 	return dist
 }
