@@ -59,12 +59,13 @@ func main() {
 
 func status(w http.ResponseWriter, req *http.Request) {
 	
-	fmt.Fprintf(w, "Run status %s physics %s step %d Mflops %f Dur (ms) %f\n", 
+	fmt.Fprintf(w, "Run status %s physics %s step %d Mflops %f Dur (ms) %f MinDist %f\n", 
 				r.State(), 
 				barnes_hut.RepulsionPhysics ,
 				r.GetStep(), 
 				barnes_hut.Gflops * 1000.0,
-				barnes_hut.StepDuration / 1000000.0 )
+				barnes_hut.StepDuration / 1000000.0,
+				r.GetMinInterBodyDistance() )
 }
 
 func play(w http.ResponseWriter, req *http.Request) {

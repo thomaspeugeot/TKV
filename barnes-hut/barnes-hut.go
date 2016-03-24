@@ -138,6 +138,8 @@ type Run struct {
 	xMin, xMax, yMin, yMax float64 // coordinates of the rendering windows
 	renderState RenderState
 	renderChoice RenderChoice
+
+	minInterBodyDistance float64 // computed at each step (to compute optimal DT value)
 }
 
 func (r * Run) getAcc(index int) (* Acc) {
@@ -178,6 +180,10 @@ func SetNbRoutines(nbRoutines_p int) {
 
 func SetRatioBorderBodies( ratioOfBorderVillages_p float64) {
 	ratioOfBorderVillages = ratioOfBorderVillages_p
+}
+
+func (r * Run) GetMinInterBodyDistance() float64 {
+	return r.minInterBodyDistance
 }
 
 func (r * Run) GiniOverTimeTransposed() [][]float64 {
@@ -298,7 +304,8 @@ func (r * Run) OneStep() {
 
 	t0 := time.Now()
 
-	nbComputationPerStep =0
+	nbComputationPerStep = 0
+	r.minInterBodyDistance = 2.0 // cannot be in a 1.0 by 1.0 square
 
 	// update Dt according to request
 	Dt = DtRequest
@@ -319,13 +326,15 @@ func (r * Run) OneStep() {
 	// update the step
 	r.step++
 
-	fmt.Printf("step %d speedup %f low 10 %f high 5 %f high 10 %f MFlops %f\n",
+	fmt.Printf("step %d speedup %f low 10 %f high 5 %f high 10 %f MFlops %f Dur (s) %f MinDist %f\n",
 		r.step, 
 		float64(len(*r.bodies)*len(*r.bodies))/float64(nbComputationPerStep),
 		r.q.BodyCountGini[8][0],
 		r.q.BodyCountGini[8][5],
 		r.q.BodyCountGini[8][9],
-		Gflops*1000.0)
+		Gflops*1000.0,
+		StepDuration/1000000000.0,
+		r.minInterBodyDistance * 1000000.0)
 	
 	t1 := time.Now()
 	StepDuration = float64((t1.Sub(t0)).Nanoseconds())
@@ -472,6 +481,10 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 			rank := 0
 			for b := node.First() ; b != nil; b = b.Next() {
 				if( *b != body) {
+	
+					dist := getModuloDistanceBetweenBodies( &body, b)
+					if dist < r.minInterBodyDistance { r.minInterBodyDistance = dist }
+					
 					x, y := getRepulsionVector( &body, b)
 			
 					acc.X += x
