@@ -43,7 +43,7 @@ var DtRequest = Dt // new value of Dt requested by the UI. The real Dt will be c
 
 // velocity cannot be too high in order to stop bodies from overtaking
 // each others
-var MaxVelocity float64  = 0.001 // cannot make more that 1/1000 th of the unit square per second
+var MaxDisplacement float64  = 0.001 // cannot make more that 1/1000 th of the unit square per second
 
 // the barnes hut criteria 
 var BN_THETA float64 = 0.5 // can use barnes if distance to COM is 5 times side of the node's box
@@ -143,6 +143,8 @@ type Run struct {
 	maxVelocity float64 // max velocity
 	dtOptim float64 // optimal dt
 	ratioOfBodiesWithCapVel float64 // ratio of bodies where the speed has been capped
+
+	status string // status of the run
 }
 
 func (r * Run) RatioOfBodiesWithCapVel() float64 {
@@ -335,20 +337,22 @@ func (r * Run) OneStep() {
 	// update the step
 	r.step++
 
-//	fmt.Printf("step %d speedup %f low 10 %f high 5 %f high 10 %f MFlops %f Dur (s) %f MinDist %f Max Vel %f Optim Dt %f Dt %f ratio %f \n",
-	fmt.Printf("step %d speedup %f MFlops %f Dur (s) %f MinDist %e Max Vel %e Optim Dt %e Dt %e ratio %e \n",
+	//	fmt.Printf("step %d speedup %f low 10 %f high 5 %f high 10 %f MFlops %f Dur (s) %f MinDist %f Max Vel %f Optim Dt %f Dt %f ratio %f \n",
+	r.status = fmt.Sprintf("step %d speedup %f MFlops %f Dur (s) %e MinDist %e Max Vel %e Optim Dt %e Dt %e ratio %e \n",
 		r.step, 
 		float64(len(*r.bodies)*len(*r.bodies))/float64(nbComputationPerStep),
 		// r.q.BodyCountGini[8][0],
 		// r.q.BodyCountGini[8][5],
 		// r.q.BodyCountGini[8][9],
 		Gflops*1000.0,
-		StepDuration/1000000000.0,
-		r.minInterBodyDistance * 1000000.0,
+		StepDuration*1000000000	,
+		r.minInterBodyDistance,
 		r.maxVelocity,
-		r.dtOptim * 1000000.0,
-		Dt * 1000000.0,
+		r.dtOptim,
+		Dt,
 		r.ratioOfBodiesWithCapVel)
+
+	fmt.Printf( r.Status())
 	
 	t1 := time.Now()
 	StepDuration = float64((t1.Sub(t0)).Nanoseconds())
@@ -356,6 +360,11 @@ func (r * Run) OneStep() {
 }
 var Gflops float64
 var StepDuration float64
+
+func (r * Run) Status() string {
+
+	return r.status
+}
 
 // compute repulsive forces by spreading the calculus
 // among nbRoutine go routines
@@ -534,9 +543,9 @@ func (r * Run) UpdateVelocity() {
 			r.maxVelocity = velocity
 		}
 
-		if velocity > MaxVelocity { 
-			vel.X *= MaxVelocity/velocity
-			vel.Y *= MaxVelocity/velocity
+		if velocity*Dt > MaxDisplacement { 
+			vel.X *= MaxDisplacement/(velocity*Dt)
+			vel.Y *= MaxDisplacement/(velocity*Dt)
 			nbVelCapping += 1
 		}
 	}
