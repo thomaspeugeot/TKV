@@ -140,6 +140,14 @@ type Run struct {
 	renderChoice RenderChoice
 
 	minInterBodyDistance float64 // computed at each step (to compute optimal DT value)
+	maxVelocity float64 // max velocity
+	dtOptim float64 // optimal dt
+	ratioOfBodiesWithCapVel float64 // ratio of bodies where the speed has been capped
+}
+
+func (r * Run) RatioOfBodiesWithCapVel() float64 {
+	// log.Output( 1, fmt.Sprintf( "ratioOfBodiesWithCapVel %f ", r.ratioOfBodiesWithCapVel))
+	return r.ratioOfBodiesWithCapVel
 }
 
 func (r * Run) getAcc(index int) (* Acc) {
@@ -306,6 +314,7 @@ func (r * Run) OneStep() {
 
 	nbComputationPerStep = 0
 	r.minInterBodyDistance = 2.0 // cannot be in a 1.0 by 1.0 square
+	r.maxVelocity = 0.0
 
 	// update Dt according to request
 	Dt = DtRequest
@@ -326,15 +335,20 @@ func (r * Run) OneStep() {
 	// update the step
 	r.step++
 
-	fmt.Printf("step %d speedup %f low 10 %f high 5 %f high 10 %f MFlops %f Dur (s) %f MinDist %f\n",
+//	fmt.Printf("step %d speedup %f low 10 %f high 5 %f high 10 %f MFlops %f Dur (s) %f MinDist %f Max Vel %f Optim Dt %f Dt %f ratio %f \n",
+	fmt.Printf("step %d speedup %f MFlops %f Dur (s) %f MinDist %e Max Vel %e Optim Dt %e Dt %e ratio %e \n",
 		r.step, 
 		float64(len(*r.bodies)*len(*r.bodies))/float64(nbComputationPerStep),
-		r.q.BodyCountGini[8][0],
-		r.q.BodyCountGini[8][5],
-		r.q.BodyCountGini[8][9],
+		// r.q.BodyCountGini[8][0],
+		// r.q.BodyCountGini[8][5],
+		// r.q.BodyCountGini[8][9],
 		Gflops*1000.0,
 		StepDuration/1000000000.0,
-		r.minInterBodyDistance * 1000000.0)
+		r.minInterBodyDistance * 1000000.0,
+		r.maxVelocity,
+		r.dtOptim * 1000000.0,
+		Dt * 1000000.0,
+		r.ratioOfBodiesWithCapVel)
 	
 	t1 := time.Now()
 	StepDuration = float64((t1.Sub(t0)).Nanoseconds())
@@ -499,6 +513,7 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 
 func (r * Run) UpdateVelocity() {
 
+	var nbVelCapping int64
 	// parse all bodies
 	for idx, _ := range (*r.bodies) {
 
@@ -515,14 +530,24 @@ func (r * Run) UpdateVelocity() {
 		// if velocity is above
 		velocity := math.Sqrt( vel.X*vel.X + vel.Y*vel.Y)
 		
+		if velocity > r.maxVelocity {
+			r.maxVelocity = velocity
+		}
+
 		if velocity > MaxVelocity { 
 			vel.X *= MaxVelocity/velocity
 			vel.Y *= MaxVelocity/velocity
+			nbVelCapping += 1
 		}
 	}
+	r.ratioOfBodiesWithCapVel = float64(nbVelCapping) / float64(len(*r.bodies))
 }
 
 func (r * Run) UpdatePosition() {
+
+	// compute optimal Dt, where we want the move to be
+	// half of the minimum distance between bodies 
+	r.dtOptim = 0.5 * (r.minInterBodyDistance / r.maxVelocity)
 
 	// parse all bodies
 	for idx, _ := range (*r.bodies) {
