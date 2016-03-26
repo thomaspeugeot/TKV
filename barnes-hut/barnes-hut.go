@@ -35,11 +35,11 @@ import (
 // constant to be added to the distance between bodies
 // in order to compute repulsion (avoid near infinite repulsion force)
 // note : declaring those variable as constant has no impact on benchmarks results
-var	ETA float64 = 0.000001
+var	ETA float64 = 1e-10
 
 // pseudo gravitational constant to compute 
 var	G float64 = 0.01
-var Dt float64  = 0.00000001 // 0.1 second, time step
+var Dt float64  = 3*1e-8 // difficult to fine tune
 var DtRequest = Dt // new value of Dt requested by the UI. The real Dt will be changed at the end of the current step.
 
 // velocity cannot be too high in order to stop bodies from overtaking
