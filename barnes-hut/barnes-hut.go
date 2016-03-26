@@ -28,17 +28,18 @@ import (
 	"strings"
 	"sort"
 	"sync/atomic"
+	"sync"
     "github.com/ajstarks/svgo/float"
 	)
 
 // constant to be added to the distance between bodies
 // in order to compute repulsion (avoid near infinite repulsion force)
 // note : declaring those variable as constant has no impact on benchmarks results
-var	ETA float64 = 0.00000001
+var	ETA float64 = 0.000001
 
 // pseudo gravitational constant to compute 
 var	G float64 = 0.01
-var Dt float64  = 0.1 // 0.1 second, time step
+var Dt float64  = 0.00000001 // 0.1 second, time step
 var DtRequest = Dt // new value of Dt requested by the UI. The real Dt will be changed at the end of the current step.
 
 // velocity cannot be too high in order to stop bodies from overtaking
@@ -46,7 +47,7 @@ var DtRequest = Dt // new value of Dt requested by the UI. The real Dt will be c
 var MaxDisplacement float64  = 0.001 // cannot make more that 1/1000 th of the unit square per second
 
 // the barnes hut criteria 
-var BN_THETA float64 = 0.5 // can use barnes if distance to COM is 5 times side of the node's box
+var BN_THETA float64 = 0.2 // can use barnes if distance to COM is 5 times side of the node's box
 var ThetaRequest = BN_THETA // new value of theta requested by the UI. The real BN_THETA will be changed at the end of the current step.
 
 // used to compute speed up
@@ -229,6 +230,9 @@ func (r * Run) Init( bodies * ([]quadtree.Body)) {
 	r.renderChoice = RUNNING_CONFIGURATION // we draw borders
 
 	RepulsionPhysics = GLOBAL
+
+	// init measures
+	r.OneStepOptional( false)
 }
 
 func (r * Run) ToggleRenderChoice() {
@@ -311,6 +315,9 @@ func (r * Run) ComputeDensityTencilePerVillage() [10]float64 {
 }
 
 func (r * Run) OneStep() {
+	r.OneStepOptional( true)
+}
+func (r * Run) OneStepOptional( updatePosition bool) {
 
 	t0 := time.Now()
 
@@ -319,7 +326,11 @@ func (r * Run) OneStep() {
 	r.maxVelocity = 0.0
 
 	// update Dt according to request
-	Dt = DtRequest
+	// Dt = DtRequest
+	// adjust Dt
+
+	if( r.dtOptim > 0.0) {	Dt = r.dtOptim }
+
 	BN_THETA = ThetaRequest
 	
 	// compute the quadtree from the bodies
@@ -332,7 +343,7 @@ func (r * Run) OneStep() {
 	r.UpdateVelocity()
 		
 	// compute new position
-	r.UpdatePosition()
+	if( updatePosition) { r.UpdatePosition() }
 
 	// update the step
 	r.step++
@@ -345,13 +356,14 @@ func (r * Run) OneStep() {
 		// r.q.BodyCountGini[8][5],
 		// r.q.BodyCountGini[8][9],
 		Gflops*1000.0,
-		StepDuration*1000000000	,
+		StepDuration/1000000000	,
 		r.minInterBodyDistance,
 		r.maxVelocity,
 		r.dtOptim,
 		Dt,
 		r.ratioOfBodiesWithCapVel)
 
+	
 	fmt.Printf( r.Status())
 	
 	t1 := time.Now()
@@ -506,7 +518,12 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 				if( *b != body) {
 	
 					dist := getModuloDistanceBetweenBodies( &body, b)
-					if dist < r.minInterBodyDistance { r.minInterBodyDistance = dist }
+					if dist < r.minInterBodyDistance { 
+						var m sync.Mutex
+						m.Lock()
+						r.minInterBodyDistance = dist 
+						m.Unlock()	
+					}
 					
 					x, y := getRepulsionVector( &body, b)
 			
@@ -540,7 +557,10 @@ func (r * Run) UpdateVelocity() {
 		velocity := math.Sqrt( vel.X*vel.X + vel.Y*vel.Y)
 		
 		if velocity > r.maxVelocity {
+			var m sync.Mutex
+			m.Lock()
 			r.maxVelocity = velocity
+			m.Unlock()
 		}
 
 		if velocity*Dt > MaxDisplacement { 
