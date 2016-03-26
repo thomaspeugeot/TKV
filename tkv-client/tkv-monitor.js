@@ -23,8 +23,8 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 		// );	
 
 		$scope.area = {
-			centerX: 0.5,
-			centerY: 0.5,
+			centerX: 0.2,
+			centerY: 0.7,
 			x1: 0.0,
 			x2: 1.0,
 			y1: 0.0,
