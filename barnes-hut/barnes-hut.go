@@ -326,10 +326,13 @@ func (r * Run) OneStepOptional( updatePosition bool) {
 	r.maxVelocity = 0.0
 
 	// update Dt according to request
-	// Dt = DtRequest
+	if RepulsionPhysics == LOCAL {
+		Dt = DtRequest
+	} else {
+		if( r.dtOptim > 0.0) {	Dt = r.dtOptim }
+	} 
 	// adjust Dt
 
-	if( r.dtOptim > 0.0) {	Dt = r.dtOptim }
 
 	BN_THETA = ThetaRequest
 	

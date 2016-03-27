@@ -25,7 +25,7 @@ func main() {
 
 	output, _ := os.Create("essai200Kbody_6Ksteps.gif")
 
-	go r.OutputGif( output, 15000)
+	go r.OutputGif( output, 100000)
 	
 	mux := http.NewServeMux()
 	mux.HandleFunc("/status", status)
