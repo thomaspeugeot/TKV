@@ -109,7 +109,7 @@ func stats(w http.ResponseWriter, req *http.Request) {
 func getDensityTenciles(w http.ResponseWriter, req *http.Request) {
 	
 	
-	tenciles, _ := json.MarshalIndent( r.ComputeDensityTencilePerVillage(), "", "	")
+	tenciles, _ := json.MarshalIndent( r.ComputeDensityTencilePerVillageString(), "", "	")
 	fmt.Fprintf(w, "%s", tenciles)
 }
 

@@ -50,6 +50,10 @@ var MaxDisplacement float64  = 0.001 // cannot make more that 1/1000 th of the u
 var BN_THETA float64 = 0.5 // can use barnes if distance to COM is 5 times side of the node's box
 var ThetaRequest = BN_THETA // new value of theta requested by the UI. The real BN_THETA will be changed at the end of the current step.
 
+// how much drag we put (1.0 is no drag)
+// tis criteria is important because it favors bodies that moves freely against bodies that are stuck on a border
+var SpeedDragFactor float64 = 0.99
+
 // used to compute speed up
 var nbComputationPerStep uint64
 
@@ -269,6 +273,14 @@ func (r * Run) ToggleManualAuto() {
 }
 
 // compute the density per village and return the density per village
+func (r * Run) ComputeDensityTencilePerVillageString() [10]string {
+	var densityString [10]string
+	density := r.ComputeDensityTencilePerVillage()
+	for tencile,_ := range density {
+		densityString[tencile] = fmt.Sprintf( "%3.2f", density[tencile])
+	}
+	return densityString
+}
 func (r * Run) ComputeDensityTencilePerVillage() [10]float64 {
 
 	// log.Output( 1, fmt.Sprintf( "ComputeDensityTencilePerVillage %d ", nbVillagePerAxe))
@@ -570,8 +582,8 @@ func (r * Run) UpdateVelocity() {
 		vel.Y += acc.Y * G * Dt
 		
 		// put some drag
-		vel.X *= 0.75
-		vel.Y *= 0.75
+		vel.X *= SpeedDragFactor
+		vel.Y *= SpeedDragFactor
 		
 		// if velocity is above
 		velocity := math.Sqrt( vel.X*vel.X + vel.Y*vel.Y)
