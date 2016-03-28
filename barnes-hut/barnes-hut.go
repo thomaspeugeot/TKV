@@ -91,8 +91,16 @@ const (
 	LOCAL = "LOCAL"
 	GLOBAL = "GLOBAL"
 )
-
 var RepulsionPhysics RepulsionPhyicsType
+
+// decides wether Dt is set manual or automaticaly
+type DtAdjustModeType string
+
+const (
+	AUTO = "AUTO"
+	MANUAL = "MANUAL"
+)
+var DtAdjustMode DtAdjustModeType
 
 type State string
 
@@ -230,6 +238,7 @@ func (r * Run) Init( bodies * ([]quadtree.Body)) {
 	r.renderChoice = RUNNING_CONFIGURATION // we draw borders
 
 	RepulsionPhysics = GLOBAL
+	DtAdjustMode = MANUAL
 
 	// init measures
 	// r.OneStepOptional( false)
@@ -248,6 +257,14 @@ func (r * Run) ToggleLocalGlobal() {
 		RepulsionPhysics = GLOBAL
 	} else {
 		RepulsionPhysics = LOCAL
+	}
+}
+
+func (r * Run) ToggleManualAuto() {
+	if DtAdjustMode == MANUAL {
+		DtAdjustMode = AUTO
+	} else {
+		DtAdjustMode = MANUAL
 	}
 }
 
@@ -326,7 +343,7 @@ func (r * Run) OneStepOptional( updatePosition bool) {
 	r.maxVelocity = 0.0
 
 	// update Dt according to request
-	if RepulsionPhysics == LOCAL {
+	if DtAdjustMode == MANUAL {
 		Dt = DtRequest
 	} else {
 		if( r.dtOptim > 0.0) {	Dt = r.dtOptim }
@@ -352,7 +369,7 @@ func (r * Run) OneStepOptional( updatePosition bool) {
 	r.step++
 
 	//	fmt.Printf("step %d speedup %f low 10 %f high 5 %f high 10 %f MFlops %f Dur (s) %f MinDist %f Max Vel %f Optim Dt %f Dt %f ratio %f \n",
-	r.status = fmt.Sprintf("step %d speedup %f MFlops %f Dur (s) %e MinDist %e Max Vel %e Optim Dt %e Dt %e ratio %e \n",
+	r.status = fmt.Sprintf("step %d speedup %f MFlops %f Dur (s) %e MinDist %e Max Vel %e Dt Opt %e Dt %e ratio %e \n",
 		r.step, 
 		float64(len(*r.bodies)*len(*r.bodies))/float64(nbComputationPerStep),
 		// r.q.BodyCountGini[8][0],

@@ -31,6 +31,7 @@ func main() {
 	mux.HandleFunc("/status", status)
 
 	mux.HandleFunc("/toggleLocalGlobal", toggleLocalGlobal)
+	mux.HandleFunc("/toggleManualAuto", toggleManualAuto)
 
 	mux.HandleFunc("/play", play)
 	mux.HandleFunc("/pause", pause)
@@ -60,9 +61,10 @@ func main() {
 
 func status(w http.ResponseWriter, req *http.Request) {
 	
-	fmt.Fprintf(w, "%s physics %s %s", 
+	fmt.Fprintf(w, "%s physics %s Dt Adjust %s\n%s", 
 				r.State(), 
 				barnes_hut.RepulsionPhysics,
+				barnes_hut.DtAdjustMode,
 				r.Status())
 }
 
@@ -74,6 +76,7 @@ func play(w http.ResponseWriter, req *http.Request) {
 
 func toggleRenderChoice(w http.ResponseWriter, req *http.Request) { r.ToggleRenderChoice() }
 func toggleLocalGlobal(w http.ResponseWriter, req *http.Request) { r.ToggleLocalGlobal() }
+func toggleManualAuto(w http.ResponseWriter, req *http.Request) { r.ToggleManualAuto() }
 
 func pause(w http.ResponseWriter, req *http.Request) {
 	

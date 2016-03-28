@@ -6,8 +6,8 @@
 </head>
 
 <body ng-app="MyApp" class="sliderdemoBasicUsage" ng-controller="RenderImage as areactrl" ng-cloak="">
-	<h2>Ten Kilo Villages Barnes Hut simulation monitoring</h2>
-
+	<!-- <h2>Ten Kilo Villages Barnes Hut simulation monitoring</h2>
+ -->
 	<table>
 		<tr>
 			<td colspan=2>
@@ -18,11 +18,12 @@
 				<md-button ng-click="areactrl.pause()">Pause</md-button>
 				<md-button ng-click="areactrl.oneStep()">One Step</md-button> 
 				<md-button ng-click="areactrl.toggleRenderChoice()">Toggle Orig/Running</md-button> 
+				<md-button ng-click="areactrl.toggleManualAuto()">Toggle Dt Manual/Auto</md-button> 
 				</div>
-				<div>
+				</td>
+		</tr>
+		<tr>
 				{{status}}
-				</div>
-			</td>
 		</tr>
 		<tr>
 			<td>

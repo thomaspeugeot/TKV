@@ -34,7 +34,7 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 
 		$scope.ratioBorderBodies = 0.1;
 
-		$scope.DTpow10 = 0.0;
+		$scope.DTpow10 = -7.0;
 		$scope.theta = 0.5;
 
 
@@ -48,7 +48,7 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 		this.updateDt = function() {
 
 			console.log( $scope.DTpow10);
-			var newDt = Math.pow( 10, $scope.DTpow10)/10.0;
+			var newDt = Math.pow( 10, $scope.DTpow10);
 			console.log( newDt);
 			var jsondt = JSON.stringify( newDt);
 			console.log( jsondt);
@@ -198,6 +198,11 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 		this.toggleLocalGlobal  = function() {
 			$http.get('http://localhost:8000/toggleLocalGlobal').then( function(response) {},
 				function(errResponse) { console.error('error while request toggleLocalGlobal');})	
+		};
+
+		this.toggleManualAuto  = function() {
+			$http.get('http://localhost:8000/toggleManualAuto').then( function(response) {},
+				function(errResponse) { console.error('error while request toggleManualAuto');})	
 		};
 
 		this.updateArea = function() {
