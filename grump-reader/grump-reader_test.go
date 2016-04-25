@@ -11,7 +11,7 @@ import (
 	"os"
 	"log"
 	"github.com/thomaspeugeot/tkv/country"
-	// "github.com/thomaspeugeot/tkv/barnes-hut"
+	"github.com/thomaspeugeot/tkv/barnes-hut"
 	"github.com/thomaspeugeot/tkv/quadtree"
 )
 
@@ -46,7 +46,7 @@ const (
 
 func BenchmarkReadGrumpNationalities(b * testing.B ) {
 
-	// open grump file
+	// open grump file for ntl boundaries
 	var grumpNtlFile *os.File
 	var err error
 	grumpNtlFile, err = os.Open("/Users/thomaspeugeot/the-mapping-data/gl_grumpv1_ntlbndid_ascii_30/gluntlbnds.asc")
@@ -54,13 +54,22 @@ func BenchmarkReadGrumpNationalities(b * testing.B ) {
 		log.Fatal(err)
 	}	
 
+	// open grump files for densities
+	var grumpNtlFileDensities *os.File
+	var errDensities error
+	grumpNtlFileDensities, errDensities = os.Open("/Users/thomaspeugeot/the-mapping-data/gl_grumpv1_pcount_00_ascii_30/glup00g.asc")
+	if errDensities != nil {
+		log.Fatal(err)
+	}	
+
+
 	// open output map
 	popMapFile, _ := os.Create("popMapFile.gif")
 	anim := gif.GIF{LoopCount: 1}
 
 	// for debug sake, introduce which ratio of the 
 	// input date is processed
-	ratioOfProcessedLines := 0.99
+	ratioOfProcessedLines := 0.45
 	maxNbLines := int( ratioOfProcessedLines * float64(17100))
 	maxNbCols := 43200
 
@@ -81,8 +90,10 @@ func BenchmarkReadGrumpNationalities(b * testing.B ) {
 	}
 
 	// prepare the density file
+	maxBodies := 200000
+	bodyCountFrance := 0
 	var bodies []quadtree.Body
-	quadtree.InitBodiesUniform( &bodies, 200000)
+	quadtree.InitBodiesUniform( &bodies, maxBodies)
 
 	// prepare one file per country (for 1 to 229)
 	countryGifFiles := make(map[int](* os.File))
@@ -132,9 +143,30 @@ func BenchmarkReadGrumpNationalities(b * testing.B ) {
 		fmt.Println( fmt.Sprintf("item %d : %s", nbWords, scanner.Text()))
 	}
 
+	// parse the grump densities
+	var nbWordsDensities int
+	scannerD := bufio.NewScanner( grumpNtlFileDensities)
+	scannerD.Split(bufio.ScanWords)
+	
+	// scan the header
+	for nbWords < 12 {
+		scanner.Scan()
+		nbWords++		
+		fmt.Println( fmt.Sprintf("item %d : %s", nbWords, scanner.Text()))
+	}
+
+	// scan the header
+	for nbWordsDensities < 12 {
+		scannerD.Scan()
+		nbWordsDensities++		
+		fmt.Println( fmt.Sprintf("densities item %d : %s", nbWordsDensities, scannerD.Text()))
+	}
 	
 	// Count the words, teh countries.
 	countries := make(map[int]int)
+	
+	// Count the words, teh countries.
+	countriesDensities := make(map[int]int)
 
 	topLat := 85.0
 	bottomLat := -85.0
@@ -144,6 +176,8 @@ func BenchmarkReadGrumpNationalities(b * testing.B ) {
 	lineLatWidth := (topLat - bottomLat) / 17160.0
 	columnLongWdth := (eastLong - westLong) / 43200.0
 	
+	// init france body count
+
 	// for nbLines :=0; nbLines < 17160;  {
 	parisIsMet := false
 	for nbLines :=0; nbLines < maxNbLines;  {
@@ -151,9 +185,18 @@ func BenchmarkReadGrumpNationalities(b * testing.B ) {
 		for nbWords =0; nbWords < maxNbCols; scanner.Scan() {
 			nbWords++
 			columnLong := westLong + (float64(nbWords)*columnLongWdth)
+
+			// get the scan value for boundary
 			var value int
 			fmt.Sscanf( scanner.Text(), "%d", &value)
 			countries[value]++
+
+			// get the scan value for count
+			var count int
+			scannerD.Scan()
+			fmt.Sscanf( scanner.Text(), "%d", &count)
+			countriesDensities[value] += count
+
 			if( columnLong > 21.0 && lineLat < 48.5) {
 				if parisIsMet == false {
 					fmt.Printf("\nparis country code is %d\n", value)
@@ -209,10 +252,34 @@ func BenchmarkReadGrumpNationalities(b * testing.B ) {
 				}
 			}
 			// fmt.Println(scanner.Text()) // Println will add back the final '\n'
+
+
+			// for france, fill up bodies count
+			if( value == 67) {
+				// compute relative position in the 1*1 sqaure
+				border := country.CountryBorders[value]
+				relX := (columnLong - border.WestLng) / (border.EastLng - border.WestLng)
+				relY := (lineLat - border.BottomLat) / (border.TopLat - border.BottomLat)
+
+				// how many bodies ? it is maxBodies *( count / border.PCount) 
+				bodyNb := int( math.Floor( float64( maxBodies) * float64( count) / float64( border.PCount)))
+
+				// initiate the bodies
+				for i :=0; i<bodyNb && bodyCountFrance+i < maxBodies; i++ {
+					bodies[bodyCountFrance+i].X = relX
+					bodies[bodyCountFrance+i].Y = relY
+				}
+				bodyCountFrance += bodyNb
+			}
 		}
 		nbLines++
 
 	}
+
+	// capture config
+	var r barnes_hut.Run
+	r.Init( & bodies)
+	r.CaptureConfigCountry( "FRA")
 
 	// indicate the corners of each country
 	for index, boundary := range countryBoundaries {
@@ -238,7 +305,8 @@ func BenchmarkReadGrumpNationalities(b * testing.B ) {
 						int( float64(nbWordsEast) * displayRatioY), 
 						int( float64(nbLinesBottom) * displayRatioY), 
 						redIndex)
-		fmt.Printf("{%d,\"%s\",%f,%f,%f,%f},\n", index, countryName[index], boundary.topLat, boundary.bottomLat, boundary.westLng, boundary.eastLng)
+		fmt.Printf("{%d,\"%s\",%f,%f,%f,%f,%d},\n", 
+			index, countryName[index], boundary.topLat, boundary.bottomLat, boundary.westLng, boundary.eastLng, countriesDensities[index])
 	}
 
 	// print the country

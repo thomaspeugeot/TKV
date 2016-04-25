@@ -842,8 +842,11 @@ func (r * Run) OutputGif(out io.Writer, nbStep int) {
 // return true if operation was successfull 
 // works only if state is STOPPED
 func (r * Run) CaptureConfig() bool {
+	return r.CaptureConfigCountry("TST")
+}
+func (r * Run) CaptureConfigCountry( country string) bool {
 	if r.state == STOPPED {
-		filename := fmt.Sprintf("conf-TST-%05d.bods", r.step)
+		filename := fmt.Sprintf("conf-%s-%05d.bods", country, r.step)
 		file, err := os.Create(filename)
 		if( err != nil) {
 			log.Fatal(err)
