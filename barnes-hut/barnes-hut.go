@@ -39,7 +39,8 @@ var	ETA float64 = 1e-10
 
 // pseudo gravitational constant to compute 
 var	G float64 = 0.01
-var Dt float64  = 3*1e-8 // difficult to fine tune
+//var Dt float64  = 3*1e-8 // difficult to fine tune
+var Dt float64  = 2.3*1e-10 // difficult to fine tune
 var DtRequest = Dt // new value of Dt requested by the UI. The real Dt will be changed at the end of the current step.
 
 // velocity cannot be too high in order to stop bodies from overtaking
@@ -52,7 +53,7 @@ var ThetaRequest = BN_THETA // new value of theta requested by the UI. The real 
 
 // how much drag we put (1.0 is no drag)
 // tis criteria is important because it favors bodies that moves freely against bodies that are stuck on a border
-var SpeedDragFactor float64 = 0.99
+var SpeedDragFactor float64 = 0.3 // 0.99 makes a very bumpy behavior for the Dt
 
 // used to compute speed up
 var nbComputationPerStep uint64
@@ -902,7 +903,8 @@ func (r * Run) LoadConfig(filename string) bool {
 		}
 
 		// get the number of steps in the file name
-		nbItems, errScan := fmt.Sscanf(filename, "conf-TST-%05d.bods", & r.step)
+		// var countryName string
+		nbItems, errScan := fmt.Sscanf(filename, "conf-fra-%05d.bods", & r.step)
 		if( errScan != nil) {
 			log.Fatal(errScan)
 			return false			
@@ -1075,7 +1077,7 @@ func (r * Run) BodyCountGini() quadtree.QuadtreeGini {
 	return r.q.BodyCountGini
 }
 
-var CurrentCountry = "TST"
+var CurrentCountry = "bods"
 
 // return the list of available configuration
 func (r * Run) DirConfig() []string {
