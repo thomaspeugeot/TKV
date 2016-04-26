@@ -935,7 +935,7 @@ func (r * Run) LoadConfigOrig(filename string) bool {
 		}
 
 		// get the number of steps in the file name
-		nbItems, errScan := fmt.Sscanf(filename, "conf-TST-%05d.bods", & r.step)
+		nbItems, errScan := fmt.Sscanf(filename, "conf-fra-%05d.bods", & r.step)
 		if( errScan != nil) {
 			log.Fatal(errScan)
 			return false			

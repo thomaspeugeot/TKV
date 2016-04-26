@@ -1,5 +1,10 @@
 //
-// grump reader parses a country specific file
+// grump reader parses a country specific file and generate a config file of bodies
+//
+// for each cell of the country specifc file, this program generate bodies per cells according to
+// the population count in the cell
+//
+// the arrangement of circle in each cell is taken from a outsite source (csq something) up to 200 circles 
 //
 // usage grump-reader -country=xxx where xxx isthe 3 small letter ISO 3166 code for the country (for instance "fra")
 // 
@@ -20,6 +25,17 @@ type country struct {
 	Name string
 	NCols, NRows, XllCorner, YllCorner int
 }	
+
+// coordinates of arrangement of circle packing in a square
+type circleCoord struct {
+	x,y float64
+}
+
+var maxCirclePerCell = 80
+
+// storage of circle arrangement per number of circle in the square
+type arrangementsStore [][]circleCoord
+
 
 
 
@@ -89,10 +105,50 @@ func main() {
 		fmt.Printf("\rrow %5d lat %2.3f total %f", row, lat, popTotal)
 	}
 	fmt.Println("")
+	grumpFile.Close()
+
+	// get the arrangement
+	arrangements := make( arrangementsStore, maxCirclePerCell)
+	for nbCircles := 1; nbCircles < maxCirclePerCell; nbCircles++ {
+
+		fmt.Printf("\rgetting arrangement for %3d circles", nbCircles)
+
+		arrangements[nbCircles] = make( []circleCoord, nbCircles)
+		
+		// open the reference file
+		circlePackingFilePath := fmt.Sprintf( "/Users/thomaspeugeot/the-mapping-data/csq_coords/csq%d.txt", nbCircles )
+		var circlePackingFile *os.File
+		var errCirclePackingFile error
+		circlePackingFile, errCirclePackingFile = os.Open( circlePackingFilePath)
+		if errCirclePackingFile != nil {
+			log.Fatal(err)
+		}	
+
+		// prepare scanner
+		scannerCircle := bufio.NewScanner( circlePackingFile)
+		scannerCircle.Split(bufio.ScanWords)
+
+		// one line per circle
+		for circle := 0; circle < nbCircles; circle++ {
+			
+			// scan the id of the circle
+			scannerCircle.Scan(); 
+
+			// scan X coordinate
+			scannerCircle.Scan()
+			fmt.Sscanf( scannerCircle.Text(), "%f", & (arrangements[nbCircles][circle].x))
+			// scan Y coordinate
+			scannerCircle.Scan()
+			fmt.Sscanf( scannerCircle.Text(), "%f", & (arrangements[nbCircles][circle].y))
+			fmt.Printf("getting arrangement for %d circle %f %f\n", nbCircles, arrangements[nbCircles][circle].x, arrangements[nbCircles][circle].y)
+		}
+		circlePackingFile.Close()
+	}
 
 	// prepare the output density file
 	targetMaxBodies := 200000
 	var bodies []quadtree.Body
+	bodiesInCellMax := 0
 
 	cumulativePopTotal := 0.0
 	for row :=0; row < country.NRows; row++ {
@@ -109,14 +165,14 @@ func main() {
 
 			// how many bodies ? it is maxBodies *( count / country.PCount) 
 			bodiesInCell := int( math.Floor( float64( targetMaxBodies) * (count/popTotal)))
-			// newBodies := make( []quadtree.Body, bodiesInCell)
-
+			if bodiesInCell > bodiesInCellMax { bodiesInCellMax = bodiesInCell}
+			
 			// initiate the bodies
 			for i :=0; i<bodiesInCell; i++ {
 				var body quadtree.Body
-				angle := float64(i) * 2.0 * math.Pi / float64(bodiesInCell)
-				body.X = relX + (1.0/float64(country.NCols))*(0.5 + 0.3*math.Cos(angle))
-				body.Y = relY + (1.0/float64(country.NRows))*(0.5 + 0.3*math.Sin(angle))
+				// angle := float64(i) * 2.0 * math.Pi / float64(bodiesInCell)
+				body.X = relX + (1.0/float64(country.NCols))*(0.5 + arrangements[bodiesInCell][i].x)
+				body.Y = relY + (1.0/float64(country.NRows))*(0.5 + arrangements[bodiesInCell][i].y)
 				body.M = count/float64(bodiesInCell)
 				bodies = append( bodies,  body)
 			}
@@ -127,6 +183,7 @@ func main() {
 
 	// var quadtree quadtree.Quadtree
 	// quadtree.Init( &bodies)
+	fmt.Println("bodies in cell max ", bodiesInCellMax)
 
 	var run barnes_hut.Run
 	run.Init( & bodies)
