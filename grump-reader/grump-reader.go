@@ -31,7 +31,9 @@ type circleCoord struct {
 	x,y float64
 }
 
-var maxCirclePerCell = 80
+var targetMaxBodies = 100000
+
+var maxCirclePerCell = 500
 
 // storage of circle arrangement per number of circle in the square
 type arrangementsStore [][]circleCoord
@@ -140,17 +142,17 @@ func main() {
 			// scan Y coordinate
 			scannerCircle.Scan()
 			fmt.Sscanf( scannerCircle.Text(), "%f", & (arrangements[nbCircles][circle].y))
-			fmt.Printf("getting arrangement for %d circle %f %f\n", nbCircles, arrangements[nbCircles][circle].x, arrangements[nbCircles][circle].y)
+			// fmt.Printf("getting arrangement for %d circle %f %f\n", nbCircles, arrangements[nbCircles][circle].x, arrangements[nbCircles][circle].y)
 		}
 		circlePackingFile.Close()
 	}
 
 	// prepare the output density file
-	targetMaxBodies := 200000
 	var bodies []quadtree.Body
 	bodiesInCellMax := 0
 
 	cumulativePopTotal := 0.0
+	bodiesNb :=0
 	for row :=0; row < country.NRows; row++ {
 		lat := float64( country.YllCorner) + (float64( country.NRows - row)*rowLatWidth)
 		for col :=0; col < country.NCols ; col++ {
@@ -177,13 +179,15 @@ func main() {
 				bodies = append( bodies,  body)
 			}
 			cumulativePopTotal += count
-
+			bodiesNb += bodiesInCell
 		}
 	}
 
 	// var quadtree quadtree.Quadtree
 	// quadtree.Init( &bodies)
 	fmt.Println("bodies in cell max ", bodiesInCellMax)
+	fmt.Println("cumulative pop ", cumulativePopTotal)
+	fmt.Println("nb of bodies ", bodiesNb)
 
 	var run barnes_hut.Run
 	run.Init( & bodies)

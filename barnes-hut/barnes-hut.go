@@ -161,6 +161,9 @@ type Run struct {
 	status string // status of the run
 }
 
+// rendering the data set can be done only outside the load config xxx function
+var rendering sync.Mutex						
+
 func (r * Run) RatioOfBodiesWithCapVel() float64 {
 	// log.Output( 1, fmt.Sprintf( "ratioOfBodiesWithCapVel %f ", r.ratioOfBodiesWithCapVel))
 	return r.ratioOfBodiesWithCapVel
@@ -673,6 +676,9 @@ func (r * Run) UpdatePosition() {
 }
 
 func (r * Run) RenderGif(out io.Writer) {
+
+	rendering.Lock()
+
 	const (
 		size    = 600   // image canvas 
 		delay   = 4    // delay between frames in 10ms units
@@ -761,6 +767,8 @@ func (r * Run) RenderGif(out io.Writer) {
 	gif.EncodeAll(&b, &anim)
 	encodedB64 := base64.StdEncoding.EncodeToString([]byte(b.Bytes()))
 	out.Write( []byte(encodedB64))
+
+	rendering.Unlock()
 
 }
 
@@ -896,6 +904,8 @@ func (r * Run) CaptureConfigBase64() bool {
 func (r * Run) LoadConfig(filename string) bool {
 	if r.state == STOPPED {
 
+		rendering.Lock()
+
 		file, err := os.Open(filename)
 		if( err != nil) {
 			log.Fatal(err)
@@ -912,11 +922,17 @@ func (r * Run) LoadConfig(filename string) bool {
 		log.Output( 1, fmt.Sprintf( "nb item parsed %d (should be one)", nbItems))
 		
 		jsonParser := json.NewDecoder(file)
-    	if err = jsonParser.Decode(r.bodies); err != nil {
+		var bodies []quadtree.Body
+    	if err = jsonParser.Decode( &bodies); err != nil {
         	log.Fatal( fmt.Sprintf( "parsing config file", err.Error()))
     	}
 
 		file.Close()
+
+		r.Init( & bodies)
+		
+		rendering.Unlock()
+
 		return true
 	} else {
 		return false
