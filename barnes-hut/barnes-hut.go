@@ -11,25 +11,14 @@ package barnes_hut
 
 import (
 	"github.com/thomaspeugeot/tkv/quadtree"
-	"image"
 	"image/color"
-	"image/gif"
-	"io"
-	"os"
-	"log"
 	"fmt"
 	"math"
 	"math/rand"
 	"time"
-	"bytes"
-	"encoding/base64"
-	"encoding/json"
-	"encoding/binary"
-	"strings"
 	"sort"
 	"sync/atomic"
 	"sync"
-    "github.com/ajstarks/svgo/float"
 	)
 
 // constant to be added to the distance between bodies
@@ -91,24 +80,22 @@ const (
 
 // decides wether the spred is at the village level or at the country level
 type RepulsionPhyicsType string
-
+var RepulsionPhysics RepulsionPhyicsType
 const (
 	LOCAL = "LOCAL"
 	GLOBAL = "GLOBAL"
 )
-var RepulsionPhysics RepulsionPhyicsType
 
 // decides wether Dt is set manual or automaticaly
 type DtAdjustModeType string
-
+var DtAdjustMode DtAdjustModeType
 const (
 	AUTO = "AUTO"
 	MANUAL = "MANUAL"
 )
-var DtAdjustMode DtAdjustModeType
 
+// state of the simulation
 type State string
-
 const (
 	STOPPED = "STOPPED"
 	RUNNING = "RUNNING"
@@ -116,27 +103,26 @@ const (
 
 // decide wether, villages borders are drawn
 type RenderState string
-
 const (
 	WITHOUT_BORDERS = "WITHOUT_BORDERS"
 	WITH_BORDERS = "WITH_BORDERS"
 )
 var ratioOfBorderVillages = 0.1 // ratio of villages that are eligible for marking a border 
 
-// decide wether, to display the original configuration or the running configruation
+// decide wether to display the original configuration or the running configruation
 type RenderChoice string
-
 const (
 	ORIGINAL_CONFIGURATION = "ORIGINAL_CONFIGURATION"
 	RUNNING_CONFIGURATION = "RUNNING_CONFIGURATION"
 )
 
-
-
-//
+// set the number of concurrent routine for the physic calculation
+// this value can be set interactively during the run
 var ConcurrentRoutines int = 100
 
-var nbVillagePerAxe int = 100 // number of village per X or Y axis. For 10 000 villages, this number is 100
+// number of village per X or Y axis. For 10 000 villages, this number is 100
+// this value can be set interactively during the run
+var nbVillagePerAxe int = 100 
 
 // a simulation run
 type Run struct {
@@ -313,7 +299,6 @@ func (r * Run) ComputeDensityTencilePerVillage() [10]float64 {
 			bodyCountPerVillage[y + x*nbVillagePerAxe] = villages[x][y]
 		}
 	}
-
 	sort.Ints(bodyCountPerVillage)
 
 
@@ -338,11 +323,7 @@ func (r * Run) ComputeDensityTencilePerVillage() [10]float64 {
 		density[tencile] *= 100.0 * 100.0
 		intDensity := math.Floor( density[tencile] )
 		density[tencile] = float64( intDensity) / 100.0
-
-
 	}
-
-
 
 	return density
 }
@@ -675,6 +656,7 @@ func (r * Run) UpdatePosition() {
 	}
 }
 
+<<<<<<< HEAD
 func (r * Run) RenderGif(out io.Writer) {
 
 	rendering.Lock()
@@ -970,6 +952,8 @@ func (r * Run) LoadConfigOrig(filename string) bool {
 	}
 }
 
+=======
+>>>>>>> origin/master
 // compute modulo distance
 func getModuloDistanceBetweenBodies( A, B *quadtree.Body) float64 {
 
@@ -1094,32 +1078,3 @@ func (r * Run) BodyCountGini() quadtree.QuadtreeGini {
 }
 
 var CurrentCountry = "bods"
-
-// return the list of available configuration
-func (r * Run) DirConfig() []string {
-
-	// open the current working directory
-	cwd, error := os.Open(".")
-
-	if( error != nil ) {
-		panic( "not able to open current working directory")
-	}
-
-	// get files with their names
-	names, err := cwd.Readdirnames(0)
-
-	if( err != nil ) {
-		panic( "cannot read names in current working directory")
-	}
-
-	// parse the list of names and pick the ones that match the 
-	var result []string
-
-	for _, dirname := range(names) {
-		if strings.Contains( dirname, CurrentCountry) {
-			result = append( result, dirname)
-		}
-	}
-
-	return result
-}
