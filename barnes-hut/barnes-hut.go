@@ -427,6 +427,13 @@ func (r * Run) ComputeRepulsiveForce() {
 }
 
 // compute repulsive forces for a sub part of the bodies
+func (r * Run) ComputeRepulsiveForceSubSetMinDist( startIndex, endIndex int, minDistance chan<- float64) {
+	
+	var _minDistance float64
+	r.ComputeRepulsiveForceSubSet( startIndex, endIndex)
+	minDistance <- 	_minDistance
+}
+// compute repulsive forces for a sub part of the bodies
 func (r * Run) ComputeRepulsiveForceSubSet( startIndex, endIndex int) {
 
 	// parse all bodies
@@ -474,7 +481,8 @@ func (r * Run) computeAccelerationOnBody(origIndex int) {
 
 // parse all other bodies to compute acceleration
 // with the barnes-hut algorithm
-func (r * Run) computeAccelerationOnBodyBarnesHut(idx int) {
+// return min distance
+func (r * Run) computeAccelerationOnBodyBarnesHut(idx int) float64 {
 
 	// reset acceleration
 	acc := &((*r.bodiesAccel)[idx])
@@ -484,11 +492,11 @@ func (r * Run) computeAccelerationOnBodyBarnesHut(idx int) {
 	// Coord is initialized at the Root coord
 	var rootCoord quadtree.Coord
 	
-	r.computeAccelationWithNodeRecursive( idx, rootCoord)
+	return r.computeAccelationWithNodeRecursive( idx, rootCoord)
 }
 
 // given a body and a node in the quadtree, compute the repulsive force
-func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord) {
+func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord) float64 {
 	
 	body := (*r.bodies)[idx]
 	acc := &((*r.bodiesAccel)[idx])
@@ -503,7 +511,7 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 	
 	// avoid node with zero mass
 	if( node.M == 0) {
-		return
+		return 0.0
 	}
 	
 	// fmt.Printf("computeAccelationWithNodeRecursive index %d at coord %#v level %d boxSize %f mass %f\n", idx, coord, level, boxSize, node.M)
@@ -552,6 +560,7 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 			}
 		}
 	}
+	return 0.0
 }
 
 func (r * Run) UpdateVelocity() {
