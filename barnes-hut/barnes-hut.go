@@ -400,22 +400,19 @@ func (r * Run) Status() string {
 func (r * Run) ComputeRepulsiveForceConcurrent(nbRoutine int) {
 
 	sliceLen := len(*r.bodies)
-	done := make( chan struct{})
+	misDistance := make( chan float64)
 
 	// breakdown slice
 	for i:=0; i<nbRoutine; i++ {
 	
 		startIndex := (i*sliceLen)/nbRoutine
 		endIndex := ((i+1)*sliceLen)/nbRoutine -1
-		go func() { 
-			r.ComputeRepulsiveForceSubSet( startIndex, endIndex)
-			done <- struct{}{} 
-		}()
+		go r.ComputeRepulsiveForceSubSetMinDist( startIndex, endIndex, misDistance)
 	}
 
 	// wait for return
 	for i:=0; i<nbRoutine; i++ {
-		<- done
+		<- misDistance
 	}
 
 }
@@ -426,6 +423,13 @@ func (r * Run) ComputeRepulsiveForce() {
 	r.ComputeRepulsiveForceSubSet( 0, len(*r.bodies))
 }
 
+// compute repulsive forces for a sub part of the bodies
+func (r * Run) ComputeRepulsiveForceSubSetMinDist( startIndex, endIndex int, minDistance chan<- float64) {
+	
+	var _minDistance float64
+	r.ComputeRepulsiveForceSubSet( startIndex, endIndex)
+	minDistance <- 	_minDistance
+}
 // compute repulsive forces for a sub part of the bodies
 func (r * Run) ComputeRepulsiveForceSubSet( startIndex, endIndex int) {
 
@@ -461,7 +465,7 @@ func (r * Run) computeAccelerationOnBody(origIndex int) {
 		if( idx2 != origIndex) {
 			body2 := (*r.bodies)[idx2]
 			
-			x, y := getRepulsionVector( &body, &body2)
+			x, y, _ := getRepulsionVector( &body, &body2)
 			
 			acc.X += x
 			acc.Y += y
@@ -474,7 +478,8 @@ func (r * Run) computeAccelerationOnBody(origIndex int) {
 
 // parse all other bodies to compute acceleration
 // with the barnes-hut algorithm
-func (r * Run) computeAccelerationOnBodyBarnesHut(idx int) {
+// return min distance
+func (r * Run) computeAccelerationOnBodyBarnesHut(idx int) float64 {
 
 	// reset acceleration
 	acc := &((*r.bodiesAccel)[idx])
@@ -484,11 +489,11 @@ func (r * Run) computeAccelerationOnBodyBarnesHut(idx int) {
 	// Coord is initialized at the Root coord
 	var rootCoord quadtree.Coord
 	
-	r.computeAccelationWithNodeRecursive( idx, rootCoord)
+	return r.computeAccelationWithNodeRecursive( idx, rootCoord)
 }
 
 // given a body and a node in the quadtree, compute the repulsive force
-func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord) {
+func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord) float64 {
 	
 	body := (*r.bodies)[idx]
 	acc := &((*r.bodiesAccel)[idx])
@@ -503,7 +508,7 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 	
 	// avoid node with zero mass
 	if( node.M == 0) {
-		return
+		return 0.0
 	}
 	
 	// fmt.Printf("computeAccelationWithNodeRecursive index %d at coord %#v level %d boxSize %f mass %f\n", idx, coord, level, boxSize, node.M)
@@ -511,7 +516,7 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 	// check if the COM of the node can be used
 	if (boxSize / dist) < BN_THETA {
 	
-		x, y := getRepulsionVector( &body, &(node.Body))
+		x, y, _ := getRepulsionVector( &body, &(node.Body))
 			
 		acc.X += x
 		acc.Y += y
@@ -542,7 +547,7 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 						m.Unlock()	
 					}
 					
-					x, y := getRepulsionVector( &body, b)
+					x, y, _ := getRepulsionVector( &body, b)
 			
 					acc.X += x
 					acc.Y += y
@@ -552,6 +557,7 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 			}
 		}
 	}
+	return 0.0
 }
 
 func (r * Run) UpdateVelocity() {
@@ -670,7 +676,8 @@ func getModuloDistanceBetweenBodies( A, B *quadtree.Body) float64 {
 // compute repulsion force vector between body A and body B
 // applied to body A
 // proportional to the inverse of the distance squared
-func getRepulsionVector( A, B *quadtree.Body) (x, y float64) {
+// return x, y of repulsion vector and distance between A & B
+func getRepulsionVector( A, B *quadtree.Body) (x, y, absDistance float64) {
 
 	atomic.AddUint64( &nbComputationPerStep, 1)
 
@@ -696,14 +703,14 @@ func getRepulsionVector( A, B *quadtree.Body) (x, y float64) {
 			x = getModuloDistanceLocal( B.X, A.X, vilAxF/float64( nbVillagePerAxe), (vilAxF+1.0)/float64( nbVillagePerAxe))
 			y = getModuloDistanceLocal( B.Y, A.Y, vilAyF/float64( nbVillagePerAxe), (vilAyF+1.0)/float64( nbVillagePerAxe))
 		} else {
-			return 0.0, 0.0
+			return 0.0, 0.0, 2.0
 		}
 
 	}
 
 	distQuared := (x*x + y*y) + ETA
-	
-	distPow3 := distQuared * math.Sqrt( distQuared )
+	absDistance = math.Sqrt( distQuared )
+	distPow3 := distQuared * absDistance
 	
 	if false { 
 		distPow3 := math.Pow( distQuared, 1.5) 
@@ -716,7 +723,7 @@ func getRepulsionVector( A, B *quadtree.Body) (x, y float64) {
 	y *= massCombined
 
 	
-	return x/distPow3, y/distPow3
+	return x/distPow3, y/distPow3, absDistance
 
 	// return x / distQuared, y / distQuared
 }
