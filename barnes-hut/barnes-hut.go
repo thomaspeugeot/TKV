@@ -414,7 +414,8 @@ func (r * Run) ComputeRepulsiveForceSubSetMinDist( startIndex, endIndex int, min
 	minDistance <- 	_minDistance
 }
 // compute repulsive forces for a sub part of the bodies
-func (r * Run) ComputeRepulsiveForceSubSet( startIndex, endIndex int) {
+// return the minimal distance between the bodies sub set
+func (r * Run) ComputeRepulsiveForceSubSet( startIndex, endIndex int) float64 {
 
 	// parse all bodies
 	bodiesSubSet := (*r.bodies)[startIndex:endIndex]
@@ -429,6 +430,7 @@ func (r * Run) ComputeRepulsiveForceSubSet( startIndex, endIndex int) {
 			r.computeAccelerationOnBody( origIndex)
 		}
 	}
+	return 0.0
 }
 
 // parse all other bodies to compute acceleration
@@ -448,7 +450,7 @@ func (r * Run) computeAccelerationOnBody(origIndex int) {
 		if( idx2 != origIndex) {
 			body2 := (*r.bodies)[idx2]
 			
-			x, y, _ := getRepulsionVector( &body, &body2)
+			x, y := getRepulsionVector( &body, &body2)
 			
 			acc.X += x
 			acc.Y += y
@@ -499,7 +501,7 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 	// check if the COM of the node can be used
 	if (boxSize / dist) < BN_THETA {
 	
-		x, y, _ := getRepulsionVector( &body, &(node.Body))
+		x, y := getRepulsionVector( &body, &(node.Body))
 			
 		acc.X += x
 		acc.Y += y
@@ -530,7 +532,7 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 						m.Unlock()	
 					}
 					
-					x, y, _ := getRepulsionVector( &body, b)
+					x, y := getRepulsionVector( &body, b)
 			
 					acc.X += x
 					acc.Y += y
@@ -629,7 +631,7 @@ func getModuloDistanceBetweenBodies( A, B *quadtree.Body) float64 {
 // applied to body A
 // proportional to the inverse of the distance squared
 // return x, y of repulsion vector and distance between A & B
-func getRepulsionVector( A, B *quadtree.Body) (x, y, absDistance float64) {
+func getRepulsionVector( A, B *quadtree.Body) (x, y float64) {
 
 	atomic.AddUint64( &nbComputationPerStep, 1)
 
@@ -637,7 +639,7 @@ func getRepulsionVector( A, B *quadtree.Body) (x, y, absDistance float64) {
 	y = getModuloDistance( B.Y, A.Y)
 
 	distQuared := (x*x + y*y)
-	absDistance = math.Sqrt( distQuared + ETA )
+	absDistance := math.Sqrt( distQuared + ETA )
 	
 	distPow3 := (distQuared + ETA) * absDistance
 	
@@ -651,10 +653,8 @@ func getRepulsionVector( A, B *quadtree.Body) (x, y, absDistance float64) {
 	x *= massCombined
 	y *= massCombined
 
-	
-	return x/distPow3, y/distPow3, absDistance
-
-	// return x / distQuared, y / distQuared
+	// repulsion is inversly proportional to the square of the distance (1/r2)
+	return x/distPow3, y/distPow3
 }
 
 // get modulo distance between alpha and beta.
