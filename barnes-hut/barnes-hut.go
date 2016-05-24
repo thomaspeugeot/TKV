@@ -317,20 +317,25 @@ func (r * Run) Status() string {
 func (r * Run) ComputeRepulsiveForceConcurrent(nbRoutine int) {
 
 	sliceLen := len(*r.bodies)
-	misDistance := make( chan float64)
+	minDistanceChan := make( chan float64)
 
 	// breakdown slice
 	for i:=0; i<nbRoutine; i++ {
 	
 		startIndex := (i*sliceLen)/nbRoutine
 		endIndex := ((i+1)*sliceLen)/nbRoutine -1
-		go r.ComputeRepulsiveForceSubSetMinDist( startIndex, endIndex, misDistance)
+		go r.ComputeRepulsiveForceSubSetMinDist( startIndex, endIndex, minDistanceChan)
 	}
 
-	// wait for return
+	// wait for return and compute the min distance across all routines
+	minDistance := 2.0
 	for i:=0; i<nbRoutine; i++ {
-		<- misDistance
+		minDistanceRoutine := <- minDistanceChan
+		if( minDistanceRoutine < minDistance) {
+			minDistance = minDistanceRoutine
+		}
 	}
+	fmt.Printf( "minDistance by mutex %e, by concurency %e ", r.minInterBodyDistance, minDistance)
 
 }
 
@@ -351,6 +356,8 @@ func (r * Run) ComputeRepulsiveForceSubSetMinDist( startIndex, endIndex int, min
 // return the minimal distance between the bodies sub set
 func (r * Run) ComputeRepulsiveForceSubSet( startIndex, endIndex int) float64 {
 
+	minDistance := 2.0
+
 	// parse all bodies
 	bodiesSubSet := (*r.bodies)[startIndex:endIndex]
 	for idx, _ := range  bodiesSubSet {
@@ -358,17 +365,23 @@ func (r * Run) ComputeRepulsiveForceSubSet( startIndex, endIndex int) float64 {
 		// index in the original slice
 		origIndex := idx+startIndex
 		
+		minDistanceSubSet := 2.0
 		if( UseBarnesHut ) {
-			r.computeAccelerationOnBodyBarnesHut( origIndex)
+			minDistanceSubSet = r.computeAccelerationOnBodyBarnesHut( origIndex)
 		} else {
-			r.computeAccelerationOnBody( origIndex)
+			minDistanceSubSet = r.computeAccelerationOnBody( origIndex)
+		}
+		if( minDistanceSubSet < minDistance) {
+			minDistance =  minDistanceSubSet
 		}
 	}
-	return 0.0
+	return minDistance
 }
 
 // parse all other bodies to compute acceleration
-func (r * Run) computeAccelerationOnBody(origIndex int) {
+func (r * Run) computeAccelerationOnBody(origIndex int) float64 {
+
+	minDistance := 2.0
 
 	body := (*r.bodies)[origIndex]
 
@@ -384,6 +397,11 @@ func (r * Run) computeAccelerationOnBody(origIndex int) {
 		if( idx2 != origIndex) {
 			body2 := (*r.bodies)[idx2]
 			
+			dist := getModuloDistanceBetweenBodies( &body, &body2)
+			if( dist < minDistance) {
+				minDistance = dist
+			}
+			
 			x, y := getRepulsionVector( &body, &body2)
 			
 			acc.X += x
@@ -392,7 +410,7 @@ func (r * Run) computeAccelerationOnBody(origIndex int) {
 			// fmt.Printf("computeAccelerationOnBody idx2 %3d x %9.3f y %9.3f \n", idx2, x, y)
 		}
 	}
-	
+	return minDistance
 }
 
 // parse all other bodies to compute acceleration
@@ -413,6 +431,8 @@ func (r * Run) computeAccelerationOnBodyBarnesHut(idx int) float64 {
 
 // given a body and a node in the quadtree, compute the repulsive force
 func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord) float64 {
+	
+	minDistance := 2.0
 	
 	body := (*r.bodies)[idx]
 	acc := &((*r.bodiesAccel)[idx])
@@ -447,10 +467,19 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 			// parse sub nodes
 			// fmt.Printf("computeAccelationWithNodeRecursive go down at node %#v\n", node.Coord())
 			coordNW, coordNE, coordSW, coordSE := quadtree.NodesBelow( coord)
-			r.computeAccelationWithNodeRecursive( idx, coordNW)
-			r.computeAccelationWithNodeRecursive( idx, coordNE)
-			r.computeAccelationWithNodeRecursive( idx, coordSW)
-			r.computeAccelationWithNodeRecursive( idx, coordSE)		
+			dist := 2.0
+			dist = r.computeAccelationWithNodeRecursive( idx, coordNW)
+			if (dist < minDistance) { minDistance = dist }
+			
+			dist = r.computeAccelationWithNodeRecursive( idx, coordNE)
+			if (dist < minDistance) { minDistance = dist }
+			
+			dist = r.computeAccelationWithNodeRecursive( idx, coordSW)
+			if (dist < minDistance) { minDistance = dist }
+			
+			dist = r.computeAccelationWithNodeRecursive( idx, coordSE)		
+			if (dist < minDistance) { minDistance = dist }
+			
 		} else {
 		
 			// parse bodies of the node
@@ -465,6 +494,7 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 						r.minInterBodyDistance = dist 
 						m.Unlock()	
 					}
+					if (dist < minDistance) { minDistance = dist }
 					
 					x, y := getRepulsionVector( &body, b)
 			
@@ -476,7 +506,7 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 			}
 		}
 	}
-	return 0.0
+	return minDistance
 }
 
 func (r * Run) UpdateVelocity() {
