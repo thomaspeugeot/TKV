@@ -19,7 +19,8 @@
 //
 // to see the doc
 //
-// 		godoc -goroot=$GOPATH -http=:8080
+// 		godoc -goroot=$GOPATH -http=:8080 -index
+//		godoc -http=:8080 -index
 package quadtree
 
 import (
