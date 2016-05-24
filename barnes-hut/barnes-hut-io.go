@@ -93,6 +93,8 @@ func (r * Run) LoadConfig(filename string) bool {
     	}
 
 		file.Close()
+		
+		r.Init( r.bodies)
 		return true
 	} else {
 		return false
