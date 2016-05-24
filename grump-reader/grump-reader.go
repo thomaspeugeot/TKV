@@ -17,6 +17,7 @@ import "fmt"
 import "os"
 import "log"
 import "bufio"
+import "path/filepath"
 import "github.com/thomaspeugeot/tkv/barnes-hut"
 import "github.com/thomaspeugeot/tkv/quadtree"
 
@@ -40,23 +41,31 @@ type arrangementsStore [][]circleCoord
 
 
 
-
+//
+// on the PC
+//  go run grump-reader.go -tkvdata="C:\Users\peugeot\tkv-data"
 func main() {
 
 	// flag "country"
 	countryPtr := flag.String("country","fra","iso 3166 country code")
 
+	// get the directory containing tkv data through the flag "tkvdata"
+	dirTKVDataPtr := flag.String("tkvdata","/Users/thomaspeugeot/the-mapping-data/%s_grumpv1_pcount_00_ascii_30/","directory containing input tkv data")
+		
 	var country country
 
 	flag.Parse()
 	fmt.Println( "country to parse", *countryPtr)
 	country.Name = *countryPtr
+	fmt.Println( "directory containing tkv data", *dirTKVDataPtr)
+	dirTKVData := *dirTKVDataPtr
 
 	// create the path to the agragate country count
-	grumpFilePath := fmt.Sprintf( "/Users/thomaspeugeot/the-mapping-data/%s_grumpv1_pcount_00_ascii_30/%sup00ag.asc", *countryPtr, *countryPtr )
+	grumpFilePath := fmt.Sprintf( "%s/%s_grumpv1_pcount_00_ascii_30/%sup00ag.asc", dirTKVData, *countryPtr, *countryPtr )
+	fmt.Println("relative path ", filepath.Clean( grumpFilePath))
 	var grumpFile *os.File
 	var err error
-	grumpFile, err = os.Open( grumpFilePath)
+	grumpFile, err = os.Open( filepath.Clean( grumpFilePath))
 	if err != nil {
 		log.Fatal(err)
 	}	
@@ -117,11 +126,13 @@ func main() {
 
 		arrangements[nbCircles] = make( []circleCoord, nbCircles)
 		
+
+		
 		// open the reference file
-		circlePackingFilePath := fmt.Sprintf( "/Users/thomaspeugeot/the-mapping-data/csq_coords/csq%d.txt", nbCircles )
+		circlePackingFilePath := fmt.Sprintf( "%s/csq_coords/csq%d.txt", dirTKVData, nbCircles )
 		var circlePackingFile *os.File
 		var errCirclePackingFile error
-		circlePackingFile, errCirclePackingFile = os.Open( circlePackingFilePath)
+		circlePackingFile, errCirclePackingFile = os.Open( filepath.Clean( circlePackingFilePath))
 		if errCirclePackingFile != nil {
 			log.Fatal(err)
 		}	
