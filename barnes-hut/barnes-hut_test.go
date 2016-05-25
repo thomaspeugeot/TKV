@@ -20,7 +20,7 @@ func TestOutputGif(t *testing.T) {
 	output, _ = os.Create("essai.gif")
 	
 	r.SetState( RUNNING)
-	r.OutputGif( output, 20)
+	r.OutputGif( output, 0)
 	// visual verification
 }
 
@@ -154,4 +154,28 @@ func TestComputeAccelerationOnBodyBarnesHut(t *testing.T) {
 	
 }
 
+// test wether the computation of min distance is equal between
+// a mutex approach or a concurrent approach
+func TestConcurrentMinDistanceCompute( t *testing.T) {
+	bodies := make([]quadtree.Body, 2000)
+	SpreadOnCircle( & bodies)
+	
+	var r Run
+	r.Init( & bodies)
+	
+	// init
+	r.minInterBodyDistance = 2.0 // cannot be in a 1.0 by 1.0 square
+	r.q.UpdateNodesListsAndCOM()
+	minDistance := r.ComputeRepulsiveForceConcurrent(20)
+	if( r.minInterBodyDistance == 0) {
+		t.Errorf("minInterBodyDistance is 0.0")
+	}
+	
+	if( minDistance == 0) {
+		t.Errorf("minDistance is 0.0")
+	}
+	if( minDistance != r.minInterBodyDistance) {
+		t.Errorf("different results for concurrent computation %e, with mutex %e", minDistance, r.minInterBodyDistance)
+	}
 
+}
