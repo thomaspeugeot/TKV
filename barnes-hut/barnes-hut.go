@@ -506,7 +506,11 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 					dist := getModuloDistanceBetweenBodies( &body, b)
 
 					if dist == 0.0 {
-						log.Fatal("distance is 0.0 between ", body, " and ", b)
+						c1 := body.Coord()
+						c2 := b.Coord()
+						logMessage := fmt.Sprintf("distance is 0.0 between \n%#v\n%s and \n%#v\n%s\n", body, c1.String(), b, c2.String())
+						
+						log.Fatal( logMessage)
 					}	
 					if dist < minDistance { minDistance = dist }
 					
