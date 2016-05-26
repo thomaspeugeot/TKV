@@ -156,6 +156,9 @@ func TestComputeAccelerationOnBodyBarnesHut(t *testing.T) {
 
 // test wether the computation of min distance is equal between
 // a mutex approach or a concurrent approach
+//
+// reference failure :
+// barnes-hut_test.go:178: different results for concurrent computation 6.064784e-05, with mutex 1.448228e-04
 func TestConcurrentMinDistanceCompute( t *testing.T) {
 	bodies := make([]quadtree.Body, 2000)
 	SpreadOnCircle( & bodies)

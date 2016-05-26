@@ -299,7 +299,7 @@ func (r * Run) OneStepOptional( updatePosition bool) {
 		r.ratioOfBodiesWithCapVel)
 
 	
-	fmt.Printf( r.Status())
+	// fmt.Printf( r.Status())
 	
 	t1 := time.Now()
 	StepDuration = float64((t1.Sub(t0)).Nanoseconds())
@@ -337,7 +337,7 @@ func (r * Run) ComputeRepulsiveForceConcurrent(nbRoutine int) float64 {
 		// log.Printf( "waiting routine %3d\n", i)
 		
 		minDistanceRoutine := <- minDistanceChan
-		log.Printf( "routine %3d minDistance by mutex %e, by concurency %e\n", i, r.minInterBodyDistance, minDistanceRoutine)
+		// log.Printf( "routine %3d minDistance by mutex %e, by concurency %e\n", i, r.minInterBodyDistance, minDistanceRoutine)
 
 		if( minDistanceRoutine < minDistance) {
 			minDistance = minDistanceRoutine
@@ -345,6 +345,7 @@ func (r * Run) ComputeRepulsiveForceConcurrent(nbRoutine int) float64 {
 	}
 	// log.Printf( "minDistance by mutex %e, by concurency %e\n", r.minInterBodyDistance, minDistance)
 
+	r.minInterBodyDistance = minDistance
 	return minDistance
 }
 
@@ -503,13 +504,7 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 				if( *b != body) {
 	
 					dist := getModuloDistanceBetweenBodies( &body, b)
-					if dist < r.minInterBodyDistance { 
-						var m sync.Mutex
-						m.Lock()
-						r.minInterBodyDistance = dist 
-						m.Unlock()	
-					}
-					
+
 					if dist == 0.0 {
 						log.Fatal("distance is 0.0 between ", body, " and ", b)
 					}	
