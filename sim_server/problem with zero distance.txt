@@ -1,0 +1,22 @@
+2016/05/26 11:31:42 distance is 0.0 between 
+
+
+quadtree.Body{X:0.6951995621476404, Y:0.7443006202908425, M:156.47693999999998, coord:0x8b1be, prev:(*quadtree.Body)(0x17c0e530), next:(*quadtree.Body)(0x17c0d3c0)} and
+quadtree.Body{X:0.6951995621476404, Y:0.7443006202908425, M:156.47693999999998, coord:0x89967, prev:(*quadtree.Body)(0x17c1105c), next:(*quadtree.Body)(0x156ffe7c)}
+
+quadtree.Body{X:0.6951995621476404, Y:0.7443006202908425, M:156.47693999999998, coord:0x8b1be, prev:(*quadtree.Body)(0x17d0a530), next:(*quadtree.Body)(0x17d093c0)}
+{|       0|    1000|10110001|10111110|    8b1be} and
+&quadtree.Body{X:0.6951995621476404, Y:0.7443006202908425, M:156.47693999999998, coord:0x89967, prev:(*quadtree.Body)(0x17d0d05c), next:(*quadtree.Body)(0x1580fe7c)}
+{|       0|    1000|10011001| 1100111|    89967}
+exit status 1
+
+Les deux noeuds sont de niveau 8, il ont la meme coordonnées en X, en Y, 10111110 vaut 190 alors que 1100111 vaut 103 !!
+
+à la ligne 12097
+	{
+		"X": 0.6951995621476404,
+		"Y": 0.7443006202908425,
+		"M": 156.47693999999998
+	},
+	
+soit le 2409 eme plot, il est unique, cela signifie qu'il a été déposé dans deux nodes différents.
