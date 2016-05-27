@@ -12,9 +12,11 @@ import (
 )
 
 //!+main
-var r barnes_hut.Run
+var r * barnes_hut.Run
 
 func main() {
+	
+	r = barnes_hut.NewRun()
 	
 	var bodies []quadtree.Body
 	quadtree.InitBodiesUniform( &bodies, 200000)
