@@ -186,17 +186,8 @@ func TestConcurrentMinDistanceCompute( t *testing.T) {
 // test to check if the zero distance problem with France is solved.
 func TestZeroDistanceFrance( t *testing.T) {
 
-	var r Run
-	bodies := make([]quadtree.Body, 0)
-	r.bodies = & bodies
-	// r.Init( & bodies)
+	r := NewRun()
 	r.LoadConfig("conf-fra-00000.bods")
-
-	Info.Printf("nb of bodies for france %d", len( *(r.bodies)))
-
-	// r.q.UpdateNodesListsAndCOM()
-	
-
-	// r.OneStep()
+	r.OneStep()
 
 }

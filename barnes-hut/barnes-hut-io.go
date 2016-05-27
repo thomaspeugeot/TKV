@@ -70,6 +70,7 @@ func (r * Run) CaptureConfigBase64() bool {
 // load configuration from filename (does not contain path)
 // works only if state is STOPPED
 func (r * Run) LoadConfig(filename string) bool {
+	Info.Printf( "LoadConfig file %s", filename)
 	if r.state == STOPPED {
 
 		file, err := os.Open(filename)
@@ -85,13 +86,13 @@ func (r * Run) LoadConfig(filename string) bool {
 			log.Fatal(errScan)
 			return false			
 		}
-		Info.Printf( "nb item parsed in file name %d (should be one)", nbItems)
+		Info.Printf( "nb item parsed in file name %d (should be one)\n", nbItems)
 		
 		jsonParser := json.NewDecoder(file)
     	if err = jsonParser.Decode(r.bodies); err != nil {
-        	log.Fatal( fmt.Sprintf( "parsing config file", err.Error()))
+        	log.Fatal( fmt.Sprintf( "parsing config file %s", err.Error()))
     	}
-		Info.Printf( "nb item parsed in file %d", len( *r.bodies))
+		Info.Printf( "nb item parsed in file %d\n", len( *r.bodies))
 
 		file.Close()
 		

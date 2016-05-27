@@ -139,6 +139,14 @@ type Run struct {
 	status string // status of the run
 }
 
+func NewRun() * Run {
+	var r Run
+	r.state = STOPPED
+	bodies := make([]quadtree.Body, 0)
+	r.bodies = & bodies
+	return &r
+}
+
 // rendering the data set can be done only outside the load config xxx function
 var rendering sync.Mutex						
 
