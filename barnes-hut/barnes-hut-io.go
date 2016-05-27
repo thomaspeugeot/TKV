@@ -85,12 +85,15 @@ func (r * Run) LoadConfig(filename string) bool {
 			log.Fatal(errScan)
 			return false			
 		}
-		log.Output( 1, fmt.Sprintf( "nb item parsed %d (should be one)", nbItems))
+		log.Output( 1, fmt.Sprintf( "nb item parsed in file name %d (should be one)", nbItems))
+		Trace.Println( "nb item parsed in file name %d (should be one)", nbItems)
+		fmt.Println( "nb item parsed in file name %d (should be one)", nbItems)
 		
 		jsonParser := json.NewDecoder(file)
     	if err = jsonParser.Decode(r.bodies); err != nil {
         	log.Fatal( fmt.Sprintf( "parsing config file", err.Error()))
     	}
+		log.Output( 1, fmt.Sprintf( "nb item parsed in file %d", len( *r.bodies)))
 
 		file.Close()
 		

@@ -8,6 +8,18 @@ import (
 	"math/rand"
 )
 
+
+// MacBook-Pro-de-Thomas:barnes-hut thomaspeugeot$ go test -bench=.
+// PASS
+// BenchmarkComputeRepulsiveForces_1K-8             	      50	  23658474 ns/op
+// BenchmarkComputeRepulsiveForces_10K-8            	       5	 292513993 ns/op
+// BenchmarkComputeRepulsiveForcesOnHalfSet_1K-8    	     100	  11466750 ns/op
+// BenchmarkComputeRepulsiveForcesConcurrent20_30K-8	       5	 253429700 ns/op
+// BenchmarkGetModuleDistance-8                     	2000000000	         1.23 ns/op
+// BenchmarkGetRepulsionVector-8                    	100000000	        15.5 ns/op
+// BenchmarkInitRun_1M-8                            	       5	 304567105 ns/op
+// BenchmarkOutputGif_1MBody_1KSteps-8              	       1	11655204392 ns/op
+
 func BenchmarkComputeRepulsiveForces_1K(b * testing.B ) {
 
 	bodies := make([]quadtree.Body, 1000)
