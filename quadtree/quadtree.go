@@ -63,6 +63,19 @@ func (q * Quadtree) Init( bodies * []Body) {
 	q.updateNodesCOM()
 }
 
+
+// updates nodes according to bodies locations
+// this function should be called when bodies have been moved
+func (q * Quadtree) UpdateNodesListsAndCOM() {
+
+	q.updateNodesList()
+	q.updateNodesCOM()
+	
+	var t testing.T
+	q.CheckIntegrity( &t)
+}
+
+
 // compute quadtree Nodes for levels from 0 to 7
 func (q * Quadtree) updateNodesCOMAbove8() {
 	
@@ -122,6 +135,7 @@ func (q * Quadtree) setupNodesCoord() {
 // setup quadtree Nodes for levels from 7 to 0
 func (q * Quadtree) setupNodesLinks() {
 	
+	Info.Println( "setupNodesLinks")
 	for level := 7; level >= 0; level-- {
 	
 		// nb of nodes for the current level
@@ -159,6 +173,8 @@ func (q * Quadtree) setupNodesLinks() {
 
 // fill quadtree at level 8 with bodies 
 func (q * Quadtree) updateNodesList() {
+
+	Info.Println( "updateNodesList")
 
 	for idx, _ := range (*q.bodies) {
 	
@@ -213,6 +229,7 @@ func (q * Quadtree) updateNodesList() {
 // compute COM of quadtree from level 8 to level 0
 func (q * Quadtree) updateNodesCOM() {
 
+	Info.Println( "updateNodesCOM")
 	// compute is bottom up
 	for level := 8; level >= 0; level-- {
 	
@@ -237,13 +254,6 @@ func (q * Quadtree) updateNodesCOM() {
 	}	
 }
 
-// updates nodes according to bodies locations
-// this function should be called when bodies have been moved
-func (q * Quadtree) UpdateNodesListsAndCOM() {
-
-	q.updateNodesList()
-	q.updateNodesCOM()
-}
 
 // check integrity of the quadtree by performing
 // all kinds of test

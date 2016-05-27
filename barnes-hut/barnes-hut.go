@@ -327,6 +327,7 @@ func (r * Run) Status() string {
 // return minDistance
 func (r * Run) ComputeRepulsiveForceConcurrent(nbRoutine int) float64 {
 
+	Info.Println("ComputeRepulsiveForceConcurrent")
 	sliceLen := len(*r.bodies)
 	minDistanceChan := make( chan float64)
 
@@ -508,6 +509,7 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 		
 			// parse bodies of the node
 			rank := 0
+			rankOfBody := -1
 			for b := node.First() ; b != nil; b = b.Next() {
 				if( *b != body) {
 	
@@ -516,6 +518,8 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 					if dist == 0.0 {
 						c1 := body.Coord()
 						c2 := b.Coord()
+						Error.Printf("Problem at rank %d for body of rank %d on node %#v ", 
+						rank, rankOfBody, *node)
 						logMessage := fmt.Sprintf("distance is 0.0 between \n%#v\n%s and \n%#v\n%s\n", body, c1.String(), b, c2.String())
 						
 						log.Fatal( logMessage)
@@ -528,6 +532,8 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 					acc.Y += y
 					rank++
 					// fmt.Printf("computeAccelationWithNodeRecursive at leaf %#v rank %d x %9.3f y %9.3f\n", b.Coord(), rank, x, y)
+				} else {
+					rankOfBody = rank
 				}
 			}
 		}
@@ -536,6 +542,8 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 }
 
 func (r * Run) UpdateVelocity() {
+
+	Info.Println("UpdateVelocity")
 
 	var nbVelCapping int64
 	// parse all bodies
