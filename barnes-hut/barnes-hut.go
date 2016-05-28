@@ -19,6 +19,7 @@ import (
 	"sync/atomic"
 	"sync"
 	"log"
+	"testing"
 	)
 
 // constant to be added to the distance between bodies
@@ -516,6 +517,9 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 					dist := getModuloDistanceBetweenBodies( &body, b)
 
 					if dist == 0.0 {
+						var t testing.T
+						r.q.CheckIntegrity( &t)
+
 						c1 := body.Coord()
 						c2 := b.Coord()
 						Error.Printf("Problem at rank %d for body of rank %d on node %#v ", 
