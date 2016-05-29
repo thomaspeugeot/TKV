@@ -135,7 +135,7 @@ func (q * Quadtree) setupNodesCoord() {
 // setup quadtree Nodes for levels from 7 to 0
 func (q * Quadtree) setupNodesLinks() {
 	
-	Info.Println( "setupNodesLinks")
+	Trace.Println( "setupNodesLinks")
 	for level := 7; level >= 0; level-- {
 	
 		// nb of nodes for the current level
@@ -174,7 +174,7 @@ func (q * Quadtree) setupNodesLinks() {
 // fill quadtree at level 8 with bodies 
 func (q * Quadtree) updateNodesList() {
 
-	Info.Println( "updateNodesList")
+	Trace.Println( "updateNodesList")
 
 	for idx, _ := range (*q.bodies) {
 	
@@ -229,7 +229,7 @@ func (q * Quadtree) updateNodesList() {
 // compute COM of quadtree from level 8 to level 0
 func (q * Quadtree) updateNodesCOM() {
 
-	Info.Println( "updateNodesCOM")
+	Trace.Println( "updateNodesCOM")
 	// compute is bottom up
 	for level := 8; level >= 0; level-- {
 	
@@ -259,6 +259,7 @@ func (q * Quadtree) updateNodesCOM() {
 // all kinds of test
 func (q *Quadtree)CheckIntegrity(t * testing.T) {
 
+	Trace.Printf("CheckIntegrity")
 	nbBodies := 0
 
 	// perform some tests on the links of each nodes

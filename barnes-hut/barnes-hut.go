@@ -293,7 +293,7 @@ func (r * Run) OneStepOptional( updatePosition bool) {
 	r.step++
 
 	//	fmt.Printf("step %d speedup %f low 10 %f high 5 %f high 10 %f MFlops %f Dur (s) %f MinDist %f Max Vel %f Optim Dt %f Dt %f ratio %f \n",
-	r.status = fmt.Sprintf("step %d speedup %f MFlops %f Dur (s) %e MinDist %e Max Vel %e Dt Opt %e Dt %e ratio %e \n",
+	r.status = fmt.Sprintf("step %d speedup %f MFlops %f Dur (s) %e MinDist %e MaxV %e Dt Opt %e Dt %e F/A %e \n",
 		r.step, 
 		float64(len(*r.bodies)*len(*r.bodies))/float64(nbComputationPerStep),
 		// r.q.BodyCountGini[8][0],
@@ -308,7 +308,7 @@ func (r * Run) OneStepOptional( updatePosition bool) {
 		r.ratioOfBodiesWithCapVel)
 
 	
-	// fmt.Printf( r.Status())
+	Info.Printf( r.Status())
 	
 	t1 := time.Now()
 	StepDuration = float64((t1.Sub(t0)).Nanoseconds())
@@ -328,7 +328,7 @@ func (r * Run) Status() string {
 // return minDistance
 func (r * Run) ComputeRepulsiveForceConcurrent(nbRoutine int) float64 {
 
-	Info.Println("ComputeRepulsiveForceConcurrent")
+	Trace.Println("ComputeRepulsiveForceConcurrent")
 	sliceLen := len(*r.bodies)
 	minDistanceChan := make( chan float64)
 
@@ -520,13 +520,13 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 						var t testing.T
 						r.q.CheckIntegrity( &t)
 
-						c1 := body.Coord()
-						c2 := b.Coord()
+						// c1 := body.Coord()
+						// c2 := b.Coord()
 						Error.Printf("Problem at rank %d for body of rank %d on node %#v ", 
 						rank, rankOfBody, *node)
-						logMessage := fmt.Sprintf("distance is 0.0 between \n%#v\n%s and \n%#v\n%s\n", body, c1.String(), b, c2.String())
+						// logMessage := fmt.Sprintf("distance is 0.0 between \n%#v\n%s and \n%#v\n%s\n", body, c1.String(), b, c2.String())
 						
-						log.Fatal( logMessage)
+						// log.Fatal( logMessage)
 					}	
 					if dist < minDistance { minDistance = dist }
 					
@@ -547,7 +547,7 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 
 func (r * Run) UpdateVelocity() {
 
-	Info.Println("UpdateVelocity")
+	Trace.Println("UpdateVelocity")
 
 	var nbVelCapping int64
 	// parse all bodies
@@ -586,7 +586,7 @@ func (r * Run) UpdatePosition() {
 
 	// compute optimal Dt, where we want the move to be
 	// half of the minimum distance between bodies 
-	r.dtOptim = 0.5 * (r.minInterBodyDistance / r.maxVelocity)
+	r.dtOptim = 1.0 * (r.minInterBodyDistance / r.maxVelocity)
 
 	// parse all bodies
 	for idx, _ := range (*r.bodies) {
