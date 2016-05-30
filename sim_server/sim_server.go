@@ -2,8 +2,6 @@ package main
 
 import (
 	"github.com/thomaspeugeot/tkv/barnes-hut"
-	"github.com/thomaspeugeot/tkv/quadtree"
-	// "testing"
 	"fmt"
 	"log"
 	"net/http"
@@ -17,13 +15,6 @@ var r * barnes_hut.Run
 func main() {
 	
 	r = barnes_hut.NewRun()
-	
-	var bodies []quadtree.Body
-	quadtree.InitBodiesUniform( &bodies, 200000)
-
-	barnes_hut.SpreadOnCircle( & bodies)
-	
-	r.Init( & bodies)
 
 	output, _ := os.Create("essai200Kbody_6Ksteps.gif")
 	go r.OutputGif( output, 100000)
