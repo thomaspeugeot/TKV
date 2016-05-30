@@ -186,7 +186,8 @@ func main() {
 				// angle := float64(i) * 2.0 * math.Pi / float64(bodiesInCell)
 				body.X = relX + (1.0/float64(country.NCols))*(0.5 + arrangements[bodiesInCell][i].x)
 				body.Y = relY + (1.0/float64(country.NRows))*(0.5 + arrangements[bodiesInCell][i].y)
-				body.M = count/float64(bodiesInCell)
+				// body.M = count/float64(bodiesInCell)
+				body.M = float64(targetMaxBodies)
 				bodies = append( bodies,  body)
 			}
 			cumulativePopTotal += count
