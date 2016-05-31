@@ -263,7 +263,6 @@ func (r * Run) OneStepOptional( updatePosition bool) {
 	t0 := time.Now()
 
 	nbComputationPerStep = 0
-	r.minInterBodyDistance = 2.0 // cannot be in a 1.0 by 1.0 square
 	r.maxVelocity = 0.0
 
 	// update Dt according to request
@@ -283,14 +282,6 @@ func (r * Run) OneStepOptional( updatePosition bool) {
 	// compute repulsive forces & acceleration
 	r.ComputeRepulsiveForceConcurrent( ConcurrentRoutines)
 	
-	// compute velocity
-	r.UpdateVelocity()
-		
-	// compute new position
-	if( updatePosition) { r.UpdatePosition() }
-
-	// update the step
-	r.step++
 
 	//	fmt.Printf("step %d speedup %f low 10 %f high 5 %f high 10 %f MFlops %f Dur (s) %f MinDist %f Max Vel %f Optim Dt %f Dt %f ratio %f \n",
 	r.status = fmt.Sprintf("step %d speedup %f MFlops %f Dur (s) %e MinDist %e MaxV %e Dt Opt %e Dt %e F/A %e \n",
@@ -306,9 +297,22 @@ func (r * Run) OneStepOptional( updatePosition bool) {
 		r.dtOptim,
 		Dt,
 		r.ratioOfBodiesWithCapVel)
-
 	
 	Info.Printf( r.Status())
+
+	// compute velocity
+	r.UpdateVelocity()
+		
+	// compute optimal Dt, where we want the move to be
+	// half of the minimum distance between bodies 
+	r.dtOptim = 1.0 * (r.minInterBodyDistance / r.maxVelocity)
+
+	// compute new position
+	if( updatePosition) { r.UpdatePosition() }
+
+	// update the step
+	r.step++
+
 	
 	t1 := time.Now()
 	StepDuration = float64((t1.Sub(t0)).Nanoseconds())
@@ -325,12 +329,12 @@ func (r * Run) Status() string {
 // compute repulsive forces by spreading the calculus
 // among nbRoutine go routines
 //
-// return minDistance
+// return minInterbodyDistance
 func (r * Run) ComputeRepulsiveForceConcurrent(nbRoutine int) float64 {
 
 	Trace.Println("ComputeRepulsiveForceConcurrent")
 	sliceLen := len(*r.bodies)
-	minDistanceChan := make( chan float64)
+	minInterbodyDistanceChan := make( chan float64)
 
 	// breakdown slice
 	for i:=0; i<nbRoutine; i++ {
@@ -342,25 +346,25 @@ func (r * Run) ComputeRepulsiveForceConcurrent(nbRoutine int) float64 {
 		if endIndex < startIndex { endIndex = startIndex }
 
 		// log.Printf( "started routine %3d\n", i)
-		go r.ComputeRepulsiveForceSubSetMinDist( startIndex, endIndex, minDistanceChan)
+		go r.ComputeRepulsiveForceSubSetMinDist( startIndex, endIndex, minInterbodyDistanceChan)
 	}
 
 	// wait for return and compute the min distance across all routines
-	minDistance := 2.0
+	r.minInterBodyDistance = 2.0 // cannot be in a 1.0 by 1.0 square
 	for i:=0; i<nbRoutine; i++ {
 		// log.Printf( "waiting routine %3d\n", i)
 		
-		minDistanceRoutine := <- minDistanceChan
-		// log.Printf( "routine %3d minDistance by mutex %e, by concurency %e\n", i, r.minInterBodyDistance, minDistanceRoutine)
+		minInterbodyDistanceRoutine := <- minInterbodyDistanceChan
+		// log.Printf( "routine %3d minInterbodyDistance by mutex %e, by concurency %e\n", i, r.minInterBodyDistance, minInterbodyDistanceRoutine)
 
-		if( minDistanceRoutine < minDistance) {
-			minDistance = minDistanceRoutine
+		if( minInterbodyDistanceRoutine < r.minInterBodyDistance) {
+			r.minInterBodyDistance = minInterbodyDistanceRoutine
 		}
 	}
-	// log.Printf( "minDistance by mutex %e, by concurency %e\n", r.minInterBodyDistance, minDistance)
+	// log.Printf( "minInterbodyDistance by mutex %e, by concurency %e\n", r.minInterBodyDistance, minInterbodyDistance)
 
-	r.minInterBodyDistance = minDistance
-	return minDistance
+	r.minInterBodyDistance = minInterbodyDistance
+	return minInterbodyDistance
 }
 
 // compute repulsive forces
@@ -371,20 +375,20 @@ func (r * Run) ComputeRepulsiveForce() {
 
 // compute repulsive forces for a sub part of the bodies
 // 
-// send the computed min distance through minDistanceChan
-func (r * Run) ComputeRepulsiveForceSubSetMinDist( startIndex, endIndex int, minDistanceChan chan<- float64) {
+// send the computed min distance through minInterbodyDistanceChan
+func (r * Run) ComputeRepulsiveForceSubSetMinDist( startIndex, endIndex int, minInterbodyDistanceChan chan<- float64) {
 	
-	_minDistance := r.ComputeRepulsiveForceSubSet( startIndex, endIndex)
-	// log.Printf( "minDistance by mutex %e, by concurency %e\n", r.minInterBodyDistance, _minDistance)
+	_minInterbodyDistance := r.ComputeRepulsiveForceSubSet( startIndex, endIndex)
+	// log.Printf( "minInterbodyDistance by mutex %e, by concurency %e\n", r.minInterBodyDistance, _minInterbodyDistance)
 
-	minDistanceChan <- 	_minDistance
+	minInterbodyDistanceChan <- 	_minInterbodyDistance
 }
 // compute repulsive forces for a sub part of the bodies
 // return the minimal distance between the bodies sub set
 func (r * Run) ComputeRepulsiveForceSubSet( startIndex, endIndex int) float64 {
 
 	Trace.Printf("ComputeRepulsiveForceSubSet %d %d", startIndex, endIndex)
-	minDistance := 2.0
+	minInterbodyDistance := 2.0
 
 	// parse all bodies
 	bodiesSubSet := (*r.bodies)[startIndex:endIndex]
@@ -393,23 +397,23 @@ func (r * Run) ComputeRepulsiveForceSubSet( startIndex, endIndex int) float64 {
 		// index in the original slice
 		origIndex := idx+startIndex
 		
-		minDistanceSubSet := 2.0
+		minInterbodyDistanceSubSet := 2.0
 		if( UseBarnesHut ) {
-			minDistanceSubSet = r.computeAccelerationOnBodyBarnesHut( origIndex)
+			minInterbodyDistanceSubSet = r.computeAccelerationOnBodyBarnesHut( origIndex)
 		} else {
-			minDistanceSubSet = r.computeAccelerationOnBody( origIndex)
+			minInterbodyDistanceSubSet = r.computeAccelerationOnBody( origIndex)
 		}
-		if( minDistanceSubSet < minDistance) {
-			minDistance =  minDistanceSubSet
+		if( minInterbodyDistanceSubSet < minInterbodyDistance) {
+			minInterbodyDistance =  minInterbodyDistanceSubSet
 		}
 	}
-	return minDistance
+	return minInterbodyDistance
 }
 
 // parse all other bodies to compute acceleration
 func (r * Run) computeAccelerationOnBody(origIndex int) float64 {
 
-	minDistance := 2.0
+	minInterbodyDistance := 2.0
 
 	body := (*r.bodies)[origIndex]
 
@@ -431,8 +435,8 @@ func (r * Run) computeAccelerationOnBody(origIndex int) float64 {
 				log.Fatal("distance is 0.0 between ", body, " and ", body2)
 			}	
 
-			if dist < minDistance {
-				minDistance = dist
+			if dist < minInterbodyDistance {
+				minInterbodyDistance = dist
 			}
 			
 			x, y := getRepulsionVector( &body, &body2)
@@ -443,7 +447,7 @@ func (r * Run) computeAccelerationOnBody(origIndex int) float64 {
 			// fmt.Printf("computeAccelerationOnBody idx2 %3d x %9.3f y %9.3f \n", idx2, x, y)
 		}
 	}
-	return minDistance
+	return minInterbodyDistance
 }
 
 // with body index idx, parse all other bodies to compute acceleration
@@ -466,7 +470,7 @@ func (r * Run) computeAccelerationOnBodyBarnesHut(idx int) float64 {
 // given a body and a node in the quadtree, compute the repulsive force
 func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord) float64 {
 	
-	minDistance := 2.0
+	minInterbodyDistance := 2.0
 	
 	body := (*r.bodies)[idx]
 	acc := &((*r.bodiesAccel)[idx])
@@ -500,16 +504,16 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 			coordNW, coordNE, coordSW, coordSE := quadtree.NodesBelow( coord)
 			dist := 2.0
 			dist = r.computeAccelationWithNodeRecursive( idx, coordNW)
-			if dist < minDistance { minDistance = dist }
+			if dist < minInterbodyDistance { minInterbodyDistance = dist }
 			
 			dist = r.computeAccelationWithNodeRecursive( idx, coordNE)
-			if dist < minDistance { minDistance = dist }
+			if dist < minInterbodyDistance { minInterbodyDistance = dist }
 			
 			dist = r.computeAccelationWithNodeRecursive( idx, coordSW)
-			if dist < minDistance { minDistance = dist }
+			if dist < minInterbodyDistance { minInterbodyDistance = dist }
 			
 			dist = r.computeAccelationWithNodeRecursive( idx, coordSE)		
-			if dist < minDistance { minDistance = dist }
+			if dist < minInterbodyDistance { minInterbodyDistance = dist }
 			
 		} else {
 		
@@ -533,7 +537,7 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 						
 						// log.Fatal( logMessage)
 					}	
-					if dist < minDistance { minDistance = dist }
+					if dist < minInterbodyDistance { minInterbodyDistance = dist }
 					
 					x, y := getRepulsionVector( &body, b)
 			
@@ -547,7 +551,7 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 			}
 		}
 	}
-	return minDistance
+	return minInterbodyDistance
 }
 
 func (r * Run) UpdateVelocity() {
@@ -588,10 +592,6 @@ func (r * Run) UpdateVelocity() {
 }
 
 func (r * Run) UpdatePosition() {
-
-	// compute optimal Dt, where we want the move to be
-	// half of the minimum distance between bodies 
-	r.dtOptim = 1.0 * (r.minInterBodyDistance / r.maxVelocity)
 
 	// parse all bodies
 	for idx, _ := range (*r.bodies) {
