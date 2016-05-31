@@ -50,7 +50,7 @@ func main() {
 	countryPtr := flag.String("country","fra","iso 3166 country code")
 
 	// get the directory containing tkv data through the flag "tkvdata"
-	dirTKVDataPtr := flag.String("tkvdata","/Users/thomaspeugeot/the-mapping-data/%s_grumpv1_pcount_00_ascii_30/","directory containing input tkv data")
+	dirTKVDataPtr := flag.String("tkvdata","/Users/thomaspeugeot/the-mapping-data/","directory containing input tkv data")
 		
 	var country country
 

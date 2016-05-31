@@ -144,7 +144,7 @@ func NewRun() * Run {
 	var r Run
 	r.state = STOPPED
 	bodies := make([]quadtree.Body, 0)
-	r.bodies = & bodies
+	r.Init( & bodies)
 	return &r
 }
 
@@ -337,6 +337,10 @@ func (r * Run) ComputeRepulsiveForceConcurrent(nbRoutine int) float64 {
 	
 		startIndex := (i*sliceLen)/nbRoutine
 		endIndex := ((i+1)*sliceLen)/nbRoutine -1
+
+		// if nbRoutine is above sliceLen
+		if endIndex < startIndex { endIndex = startIndex }
+
 		// log.Printf( "started routine %3d\n", i)
 		go r.ComputeRepulsiveForceSubSetMinDist( startIndex, endIndex, minDistanceChan)
 	}
@@ -379,6 +383,7 @@ func (r * Run) ComputeRepulsiveForceSubSetMinDist( startIndex, endIndex int, min
 // return the minimal distance between the bodies sub set
 func (r * Run) ComputeRepulsiveForceSubSet( startIndex, endIndex int) float64 {
 
+	Trace.Printf("ComputeRepulsiveForceSubSet %d %d", startIndex, endIndex)
 	minDistance := 2.0
 
 	// parse all bodies

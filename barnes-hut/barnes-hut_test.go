@@ -191,3 +191,10 @@ func TestZeroDistanceFrance( t *testing.T) {
 	r.OneStep()
 
 }
+
+func TestEmptyBodySet( t *testing.T ) {
+
+	r := NewRun()
+	r.OneStep()
+	
+}
