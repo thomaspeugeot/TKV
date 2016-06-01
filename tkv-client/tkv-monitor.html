@@ -37,13 +37,14 @@
 		</tr>			     	
 		<tr>
 			<td>
-				<img ng-src="{{render}}">
+				<img ng-src="{{render}}" align="top">
 				</img>
 			</td>
 			<td>
 
 				<div>
 					<md-button ng-click="areactrl.updateArea()" class="md-raised"> Update Area </md-button>
+					<md-button ng-click="areactrl.zoomInSpecial()" class="md-raised"> Zoom special </md-button>
 				</div>			     	
 
 
@@ -135,6 +136,16 @@
 			      </div>
 			    </div>
 
+				<div>
+					<md-button ng-click="areactrl.loadConfig()" class="md-raised"> Load config </md-button>
+				</div>			     	
+				<div>
+					<md-button ng-click="areactrl.loadConfigOrig()" class="md-raised"> Load config Orig</md-button>
+				</div>			     	
+				<div>
+					<md-button ng-click="areactrl.captureConfig()" class="md-raised"> Serialize Bodies </md-button>
+				</div>			     	
+
 			    <div>
 			    	<div>
 			    		Available configs
@@ -146,15 +157,6 @@
 					</md-radio-group>
 			    </div>
 
-				<div>
-					<md-button ng-click="areactrl.loadConfig()" class="md-raised"> Load config </md-button>
-				</div>			     	
-				<div>
-					<md-button ng-click="areactrl.loadConfigOrig()" class="md-raised"> Load config Orig</md-button>
-				</div>			     	
-				<div>
-					<md-button ng-click="areactrl.captureConfig()" class="md-raised"> Serialize Bodies </md-button>
-				</div>			     	
 
 
 			</td>

@@ -205,6 +205,14 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 				function(errResponse) { console.error('error while request toggleManualAuto');})	
 		};
 
+		// fetch coordinates of minimal distance
+		this.zoomSpecial = function() {
+			$http.get('http://localhost:8000/minDistanceCoord').then( function(response) {
+				// get X and Y
+			},
+				function(errResponse) { console.error('error while request minimal distance');})	
+		};
+
 		this.updateArea = function() {
 
 			$scope.area.x1 = $scope.area.centerX - 0.5/$scope.area.zoom

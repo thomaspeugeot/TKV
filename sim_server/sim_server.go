@@ -40,6 +40,7 @@ func main() {
 	mux.HandleFunc("/loadConfig", loadConfig)
 	mux.HandleFunc("/loadConfigOrig", loadConfigOrig)
 	mux.HandleFunc("/getDensityTenciles", getDensityTenciles)
+	mux.HandleFunc("/minDistanceCoord", minDistanceCoord)
 	mux.HandleFunc("/nbVillagesPerAxe", nbVillagesPerAxe)
 	mux.HandleFunc("/nbRoutines", nbRoutines)
 	mux.HandleFunc("/updateRatioBorderBodies", updateRatioBorderBodies)
@@ -182,6 +183,13 @@ func dirConfig(w http.ResponseWriter, req *http.Request) {
 	
 	dircontent, _ := json.MarshalIndent( r.DirConfig(), "", "	")
 	fmt.Fprintf(w, "%s", dircontent)
+}
+
+// send coordinates of minimal distance
+func minDistanceCoord(w http.ResponseWriter, req *http.Request) {
+	
+	minDistanceCoordResp, _ := json.MarshalIndent( r.GetMaxRepulsiveForce(), "", "	")
+	fmt.Fprintf(w, "%s", minDistanceCoordResp)
 }
 
 // load config files

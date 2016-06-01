@@ -152,6 +152,10 @@ func NewRun() * Run {
 // rendering the data set can be done only outside the load config xxx function
 var renderingMutex sync.Mutex						
 
+func (r * Run) GetMaxRepulsiveForce() MaxRepulsiveForce {
+	return r.maxRepulsiveForce
+}
+
 func (r * Run) RatioOfBodiesWithCapVel() float64 {
 	// log.Output( 1, fmt.Sprintf( "ratioOfBodiesWithCapVel %f ", r.ratioOfBodiesWithCapVel))
 	return r.ratioOfBodiesWithCapVel
@@ -274,14 +278,6 @@ func (r * Run) OneStepOptional( updatePosition bool) {
 	nbComputationPerStep = 0
 	r.maxVelocity = 0.0
 
-	// update Dt according to request
-	if DtAdjustMode == MANUAL {
-		Dt = DtRequest
-	} else {
-		if( r.dtOptim > 0.0) {	Dt = r.dtOptim }
-	} 
-	// adjust Dt
-
 
 	BN_THETA = ThetaRequest
 	
@@ -292,17 +288,41 @@ func (r * Run) OneStepOptional( updatePosition bool) {
 	r.ComputeRepulsiveForceConcurrent( ConcurrentRoutines)
 	r.ComputeMaxRepulsiveForce()	
 
-	Info.Printf("MaxRepulsiveForce %#v", r.maxRepulsiveForce)
+	Trace.Printf("MaxRepulsiveForce %#v", r.maxRepulsiveForce)
+
+	// compute optimal Dt, where we want the move to be
+	// half of the minimum distance between bodies 
+	// with initial speed at 0, the speed will increase to Dt*Acc and
+	// the displacement will be Dx = Dt*Dt*Acc. Thefore Dt 
+	r.dtOptim = math.Sqrt( 0.5 * r.minInterBodyDistance / r.maxRepulsiveForce.Norm )
+
+	// update Dt according to request or according to computing optimal Dt
+	if DtAdjustMode == MANUAL {
+		Dt = DtRequest
+	} else {
+		if( r.dtOptim > 0.0) {	Dt = r.dtOptim }
+	} 
+
+	// compute velocity
+	r.UpdateVelocity()
+		
+	
+	// compute new position
+	if( updatePosition) { r.UpdatePosition() }
+
+	// update the step
+	r.step++
+	
+	t1 := time.Now()
+	StepDuration = float64((t1.Sub(t0)).Nanoseconds())
+	Gflops = float64( nbComputationPerStep) /  StepDuration
 
 	//	fmt.Printf("step %d speedup %f low 10 %f high 5 %f high 10 %f MFlops %f Dur (s) %f MinDist %f Max Vel %f Optim Dt %f Dt %f ratio %f \n",
-	r.status = fmt.Sprintf("step %d speedup %f MFlops %f Dur (s) %e MinDist %e MaxV %e Dt Opt %e Dt %e F/A %e \n",
+	r.status = fmt.Sprintf("step %d speedup %f Dur (s) %e MaxF %e MinD %e MaxV %e Dt Opt %e Dt %e F/A %e \n",
 		r.step, 
 		float64(len(*r.bodies)*len(*r.bodies))/float64(nbComputationPerStep),
-		// r.q.BodyCountGini[8][0],
-		// r.q.BodyCountGini[8][5],
-		// r.q.BodyCountGini[8][9],
-		Gflops*1000.0,
 		StepDuration/1000000000	,
+		r.maxRepulsiveForce.Norm,
 		r.minInterBodyDistance,
 		r.maxVelocity,
 		r.dtOptim,
@@ -311,23 +331,6 @@ func (r * Run) OneStepOptional( updatePosition bool) {
 	
 	Info.Printf( r.Status())
 
-	// compute velocity
-	r.UpdateVelocity()
-		
-	// compute optimal Dt, where we want the move to be
-	// half of the minimum distance between bodies 
-	r.dtOptim = 1.0 * (r.minInterBodyDistance / r.maxVelocity)
-
-	// compute new position
-	if( updatePosition) { r.UpdatePosition() }
-
-	// update the step
-	r.step++
-
-	
-	t1 := time.Now()
-	StepDuration = float64((t1.Sub(t0)).Nanoseconds())
-	Gflops = float64( nbComputationPerStep) /  StepDuration
 }
 var Gflops float64
 var StepDuration float64
