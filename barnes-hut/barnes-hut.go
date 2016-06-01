@@ -133,6 +133,7 @@ type Run struct {
 	renderChoice RenderChoice
 
 	minInterBodyDistance float64 // computed at each step (to compute optimal DT value)
+	maxRepulsiveForce MaxRepulsiveForce // computed at each step (to compute optimal DT value)
 	maxVelocity float64 // max velocity
 	dtOptim float64 // optimal dt
 	ratioOfBodiesWithCapVel float64 // ratio of bodies where the speed has been capped
@@ -149,7 +150,7 @@ func NewRun() * Run {
 }
 
 // rendering the data set can be done only outside the load config xxx function
-var rendering sync.Mutex						
+var renderingMutex sync.Mutex						
 
 func (r * Run) RatioOfBodiesWithCapVel() float64 {
 	// log.Output( 1, fmt.Sprintf( "ratioOfBodiesWithCapVel %f ", r.ratioOfBodiesWithCapVel))
@@ -215,6 +216,11 @@ func (r * Run) GiniOverTime() [][]float64 {
 
 // init the run with an array of quadtree bodies
 func (r * Run) Init( bodies * ([]quadtree.Body)) {
+
+	Info.Printf("Init begin")
+	
+	renderingMutex.Lock()
+
 	r.bodies = bodies
 
 	// create a reference of the bodies
@@ -236,6 +242,9 @@ func (r * Run) Init( bodies * ([]quadtree.Body)) {
 
 	// init measures
 	// r.OneStepOptional( false)
+	renderingMutex.Unlock()
+
+	Info.Printf("Init end")
 }
 
 func (r * Run) ToggleRenderChoice() {
@@ -281,7 +290,9 @@ func (r * Run) OneStepOptional( updatePosition bool) {
 	
 	// compute repulsive forces & acceleration
 	r.ComputeRepulsiveForceConcurrent( ConcurrentRoutines)
-	
+	r.ComputeMaxRepulsiveForce()	
+
+	Info.Printf("MaxRepulsiveForce %#v", r.maxRepulsiveForce)
 
 	//	fmt.Printf("step %d speedup %f low 10 %f high 5 %f high 10 %f MFlops %f Dur (s) %f MinDist %f Max Vel %f Optim Dt %f Dt %f ratio %f \n",
 	r.status = fmt.Sprintf("step %d speedup %f MFlops %f Dur (s) %e MinDist %e MaxV %e Dt Opt %e Dt %e F/A %e \n",
@@ -363,8 +374,7 @@ func (r * Run) ComputeRepulsiveForceConcurrent(nbRoutine int) float64 {
 	}
 	// log.Printf( "minInterbodyDistance by mutex %e, by concurency %e\n", r.minInterBodyDistance, minInterbodyDistance)
 
-	r.minInterBodyDistance = minInterbodyDistance
-	return minInterbodyDistance
+	return r.minInterBodyDistance
 }
 
 // compute repulsive forces

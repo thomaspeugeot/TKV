@@ -18,6 +18,10 @@ import (
 
 
 func (r * Run) RenderGif(out io.Writer) {
+
+	Trace.Printf("RenderGif begin")
+	renderingMutex.Lock()
+
 	const (
 		size    = 600   // image canvas 
 		delay   = 4    // delay between frames in 10ms units
@@ -107,6 +111,9 @@ func (r * Run) RenderGif(out io.Writer) {
 	encodedB64 := base64.StdEncoding.EncodeToString([]byte(b.Bytes()))
 	out.Write( []byte(encodedB64))
 
+	renderingMutex.Unlock()
+
+	Trace.Printf("RenderGif end")
 }
 
 

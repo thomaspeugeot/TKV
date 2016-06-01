@@ -6,6 +6,28 @@ import (
 	"sort"
 	)
 
+type MaxRepulsiveForce struct {
+	Acc
+	Norm float64 // direction and norm
+	Idx int // body index where repulsive vector is max
+}
+
+func (r * Run) ComputeMaxRepulsiveForce() {
+	r.maxRepulsiveForce.Norm = 0.0
+
+	// parse bodies
+	for idx,_ := range *r.bodies {
+		acc := &((*r.bodiesAccel)[idx])
+		norm := math.Sqrt( acc.X*acc.X + acc.Y*acc.Y)
+		if norm > r.maxRepulsiveForce.Norm {
+			r.maxRepulsiveForce.X = acc.X
+			r.maxRepulsiveForce.Y = acc.Y
+			r.maxRepulsiveForce.Idx = idx
+			r.maxRepulsiveForce.Norm = norm
+		}
+	}
+}
+
 // compute the density per village and return the density per village
 func (r * Run) ComputeDensityTencilePerVillageString() [10]string {
 	var densityString [10]string
