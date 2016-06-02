@@ -27,7 +27,8 @@ import (
 // note : declaring those variable as constant has no impact on benchmarks results
 var	ETA float64 = 1e-10
 
-// pseudo gravitational constant to compute 
+// pseudo gravitational constant to compute
+//should have no effect on the simulation since Dt is computed according to computed acceleration
 var	G float64 = 0.01
 //var Dt float64  = 3*1e-8 // difficult to fine tune
 var Dt float64  = 2.3*1e-10 // difficult to fine tune
@@ -578,8 +579,8 @@ func (r * Run) UpdateVelocity() {
 		// update velocity (to be completed with Dt)
 		acc := r.getAcc(idx)
 		vel := r.getVel(idx)
-		vel.X += acc.X * G * Dt
-		vel.Y += acc.Y * G * Dt
+		vel.X += acc.X * Dt
+		vel.Y += acc.Y * Dt
 		
 		// put some drag
 		vel.X *= SpeedDragFactor
