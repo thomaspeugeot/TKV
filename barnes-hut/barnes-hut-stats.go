@@ -7,7 +7,7 @@ import (
 	)
 
 type MaxRepulsiveForce struct {
-	Acc
+	AccX, AccY, X, Y float64
 	Norm float64 // direction and norm
 	Idx int // body index where repulsive vector is max
 }
@@ -20,10 +20,12 @@ func (r * Run) ComputeMaxRepulsiveForce() {
 		acc := &((*r.bodiesAccel)[idx])
 		norm := math.Sqrt( acc.X*acc.X + acc.Y*acc.Y)
 		if norm > r.maxRepulsiveForce.Norm {
-			r.maxRepulsiveForce.X = acc.X
-			r.maxRepulsiveForce.Y = acc.Y
+			r.maxRepulsiveForce.AccX = acc.X
+			r.maxRepulsiveForce.AccY = acc.Y
 			r.maxRepulsiveForce.Idx = idx
 			r.maxRepulsiveForce.Norm = norm
+			r.maxRepulsiveForce.X = (*r.bodies)[idx].X
+			r.maxRepulsiveForce.Y = (*r.bodies)[idx].Y
 		}
 	}
 }
