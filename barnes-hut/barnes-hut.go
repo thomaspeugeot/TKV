@@ -242,7 +242,7 @@ func (r * Run) Init( bodies * ([]quadtree.Body)) {
 	r.renderState = WITH_BORDERS // we draw borders
 	r.renderChoice = RUNNING_CONFIGURATION // we draw borders
 
-	DtAdjustMode = MANUAL
+	DtAdjustMode = AUTO
 
 	// init measures
 	// r.OneStepOptional( false)
