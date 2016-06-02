@@ -31,7 +31,8 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 			y2: 1.0,
 			zoom: 1.0
 		}
-
+		$scope.zoomPow10 = 0
+		
 		$scope.ratioBorderBodies = 0.1;
 
 		$scope.DTpow10 = -7.0;
@@ -216,6 +217,8 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 		};
 
 		this.updateArea = function() {
+			
+			$scope.area.zoom = Math.pow( 10, $scope.zoomPow10)
 
 			$scope.area.x1 = $scope.area.centerX - 0.5/$scope.area.zoom
 			$scope.area.y1 = $scope.area.centerY - 0.5/$scope.area.zoom
