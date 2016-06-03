@@ -88,6 +88,13 @@ const (
 	MANUAL = "MANUAL"
 )
 
+// decides wether a body can cross the border of the square
+type UpdatePositionMode string
+const (
+	WITHIN_SQUARE_BORDER = "WITHIN_SQUARE_BORDER"
+	ACROSS_SQUARE_BORDER = "ACROSS_SQUARE_BORDER"
+)
+
 // state of the simulation
 type State string
 const (
@@ -139,12 +146,15 @@ type Run struct {
 	dtOptim float64 // optimal dt
 	ratioOfBodiesWithCapVel float64 // ratio of bodies where the speed has been capped
 
+	updatePositionMode UpdatePositionMode
+
 	status string // status of the run
 }
 
 func NewRun() * Run {
 	var r Run
 	r.state = STOPPED
+	r.updatePositionMode = ACROSS_SQUARE_BORDER
 	bodies := make([]quadtree.Body, 0)
 	r.Init( & bodies)
 	return &r
@@ -618,22 +628,38 @@ func (r * Run) UpdatePosition() {
 		body.X += vel.X * Dt
 		body.Y += vel.Y * Dt
 	
-		if body.X >= 1.0 { 
-			body.X = 1.0 - (body.X - 1.0) 
-			vel.X = -vel.X
+		if r.updatePositionMode == WITHIN_SQUARE_BORDER {
+			if body.X >= 1.0 { 
+				body.X = 1.0 - (body.X - 1.0) 
+				vel.X = -vel.X
+			}
+			if body.X <= 0.0 { 
+				body.X = - body.X 
+				vel.X = -vel.X
+			}
+			if body.Y >= 1.0 { 
+				body.Y = 1.0 - (body.Y - 1.0) 
+				vel.Y = -vel.Y
+			}
+			if body.Y <= 0.0 { 
+				body.Y = - body.Y 
+				vel.Y = -vel.Y
+			}		
+		} else { // move modulo the square
+			if body.X >= 1.0 { 
+				body.X = body.X - 1.0 
+			}
+			if body.X <= 0.0 { 
+				body.X = 1.0 + body.X 
+			}
+			if body.Y >= 1.0 { 
+				body.Y = body.Y - 1.0 
+			}
+			if body.Y <= 0.0 { 
+				body.Y = 1.0 + body.Y 
+			}	
 		}
-		if body.X <= 0.0 { 
-			body.X = - body.X 
-			vel.X = -vel.X
-		}
-		if body.Y >= 1.0 { 
-			body.Y = 1.0 - (body.Y - 1.0) 
-			vel.Y = -vel.Y
-		}
-		if body.Y <= 0.0 { 
-			body.Y = - body.Y 
-			vel.Y = -vel.Y
-		}		
+
 	}
 }
 
