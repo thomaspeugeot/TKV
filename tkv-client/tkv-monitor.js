@@ -210,16 +210,17 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 		this.zoomSpecial = function() {
 			$http.get('http://localhost:8000/minDistanceCoord').then( function(response) {
 				// get X and Y
-				$scope.area.centerX = parseFloat(response.data.X)
-				$scope.area.centerY = parseFloat(response.data.Y)
-			},
+				$scope.area.centerX = parseFloat(response.data.X);
+				$scope.area.centerY = parseFloat(response.data.Y);
+				self.updateArea();
+				},
 				function(errResponse) { console.error('error while request minimal distance');})	
 		};
 
 		this.centerArea = function() {
 			$scope.area.centerX = 0.5
 			$scope.area.centerY = 0.5
-			updateArea()
+			self.updateArea()
 		};
 
 
