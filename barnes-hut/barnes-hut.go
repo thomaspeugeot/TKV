@@ -25,7 +25,8 @@ import (
 // constant to be added to the distance between bodies
 // in order to compute repulsion (avoid near infinite repulsion force)
 // note : declaring those variable as constant has no impact on benchmarks results
-var	ETA float64 = 1e-10
+//var	ETA float64 = 1e-10
+var	ETA float64 = 0.0
 
 // pseudo gravitational constant to compute
 //should have no effect on the simulation since Dt is computed according to computed acceleration
@@ -44,7 +45,7 @@ var ThetaRequest = BN_THETA // new value of theta requested by the UI. The real 
 
 // how much drag we put (1.0 is no drag)
 // tis criteria is important because it favors bodies that moves freely against bodies that are stuck on a border
-var SpeedDragFactor float64 = 0.3 // 0.99 makes a very bumpy behavior for the Dt
+var SpeedDragFactor float64 = 0.00 // 0.99 makes a very bumpy behavior for the Dt
 
 // used to compute speed up
 var nbComputationPerStep uint64
@@ -586,15 +587,16 @@ func (r * Run) UpdateVelocity() {
 	// parse all bodies
 	for idx, _ := range (*r.bodies) {
 
+		// put some drag on initial speed
+		vel := r.getVel(idx)
+		vel.X *= SpeedDragFactor
+		vel.Y *= SpeedDragFactor
+
 		// update velocity (to be completed with Dt)
 		acc := r.getAcc(idx)
-		vel := r.getVel(idx)
 		vel.X += acc.X * Dt
 		vel.Y += acc.Y * Dt
 		
-		// put some drag
-		vel.X *= SpeedDragFactor
-		vel.Y *= SpeedDragFactor
 		
 		// if velocity is above
 		velocity := math.Sqrt( vel.X*vel.X + vel.Y*vel.Y)
