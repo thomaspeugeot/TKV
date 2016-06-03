@@ -31,6 +31,9 @@
 		<tr>
 			<td>
 				<div>
+					<md-button ng-click="areactrl.updateArea()" class="md-raised"> Update Area </md-button>
+					<md-button ng-click="areactrl.zoomSpecial()" class="md-raised"> Zoom special </md-button>
+					<md-button ng-click="areactrl.centerArea()" class="md-raised"> Center </md-button>
 					{{densityTenciles}}
 				</div>
 			</td>
@@ -43,8 +46,6 @@
 			<td>
 
 				<div>
-					<md-button ng-click="areactrl.updateArea()" class="md-raised"> Update Area </md-button>
-					<md-button ng-click="areactrl.zoomSpecial()" class="md-raised"> Zoom special </md-button>
 				</div>			     	
 
 
@@ -137,10 +138,8 @@
 			    </div>
 
 				<div>
-					<md-button ng-click="areactrl.loadConfig()" class="md-raised"> Load config </md-button>
-				</div>			     	
-				<div>
-					<md-button ng-click="areactrl.loadConfigOrig()" class="md-raised"> Load config Orig</md-button>
+					<md-button ng-click="areactrl.loadConfig()" class="md-raised"> Load </md-button>
+					<md-button ng-click="areactrl.loadConfigOrig()" class="md-raised"> Load Orig</md-button>
 				</div>			     	
 				<div>
 					<md-button ng-click="areactrl.captureConfig()" class="md-raised"> Serialize Bodies </md-button>

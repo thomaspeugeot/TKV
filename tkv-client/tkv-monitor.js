@@ -216,6 +216,13 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 				function(errResponse) { console.error('error while request minimal distance');})	
 		};
 
+		this.centerArea = function() {
+			$scope.area.centerX = 0.5
+			$scope.area.centerY = 0.5
+			updateArea()
+		};
+
+
 		this.updateArea = function() {
 			
 			$scope.area.zoom = Math.pow( 10, $scope.zoomPow10)
