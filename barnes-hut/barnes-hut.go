@@ -45,7 +45,7 @@ var ThetaRequest = BN_THETA // new value of theta requested by the UI. The real 
 
 // how much drag we put (1.0 is no drag)
 // tis criteria is important because it favors bodies that moves freely against bodies that are stuck on a border
-var SpeedDragFactor float64 = 0.99 // 0.99 makes a very bumpy behavior for the Dt
+var SpeedDragFactor float64 = 0.2 // 0.99 makes a very bumpy behavior for the Dt
 
 // used to compute speed up
 var nbComputationPerStep uint64
