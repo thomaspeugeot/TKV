@@ -5,7 +5,7 @@
 	<link rel="stylesheet" href="style.css">
 </head>
 
-<body ng-app="MyApp" class="sliderdemoBasicUsage" ng-controller="RenderImage as areactrl" ng-cloak="">
+<body ng-app="MyApp" class="sliderdemoBasicUsage" ng-controller="RenderImage as vm" ng-cloak="">
 	<!-- <h2>Ten Kilo Villages Barnes Hut simulation monitoring</h2>
  -->
 	<table>
@@ -13,35 +13,35 @@
 			<td colspan=2>
 				<div>
 				TKV
-				<md-button ng-click="areactrl.run()">Run</md-button>
-				<md-button ng-click="areactrl.pause()">Pause</md-button>
-				<md-button ng-click="areactrl.oneStep()">One Step</md-button> 
-				<md-button ng-click="areactrl.toggleRenderChoice()">Toggle Orig/Running</md-button> 
-				<md-button ng-click="areactrl.toggleFieldRendering()">Toggle Field Render</md-button> 
-				<md-button ng-click="areactrl.toggleManualAuto()">Toggle Dt Manual/Auto</md-button> 
+				<md-button ng-click="vm.run()">Run</md-button>
+				<md-button ng-click="vm.pause()">Pause</md-button>
+				<md-button ng-click="vm.oneStep()">One Step</md-button> 
+				<md-button ng-click="vm.toggleRenderChoice()">Toggle Orig/Running</md-button> 
+				<md-button ng-click="vm.toggleFieldRendering()">Toggle Field Render</md-button> 
+				<md-button ng-click="vm.toggleManualAuto()">Toggle Dt Manual/Auto</md-button> 
 				</div>
 				</td>
 		</tr>
 		<tr>
 			<td>
 				<div>
-				{{status}}
+				{{vm.status}}
 				</div>
 			</td>
 		</tr>
 		<tr>
 			<td>
 				<div>
-					<md-button ng-click="areactrl.updateArea()" class="md-raised"> Update Area </md-button>
-					<md-button ng-click="areactrl.zoomSpecial()" class="md-raised"> Zoom special </md-button>
-					<md-button ng-click="areactrl.centerArea()" class="md-raised"> Center </md-button>
-					{{densityTenciles}}
+					<md-button ng-click="vm.updateArea()" class="md-raised"> Update Area </md-button>
+					<md-button ng-click="vm.zoomSpecial()" class="md-raised"> Zoom special </md-button>
+					<md-button ng-click="vm.centerArea()" class="md-raised"> Center </md-button>
+					{{vm.densityTenciles}}
 				</div>
 			</td>
 		</tr>			     	
 		<tr>
 			<td>
-				<img ng-src="{{render}}" align="top" />
+				<img ng-src="{{vm.render}}" align="top" />
 			</td>
 			<td>
 
@@ -53,10 +53,10 @@
 					<div flex="10" layout="" layout-align="center center">
 			        <span class="md-body-1">x center</span>
 			      </div>
-			      <md-slider flex="100" min="0" step="0.0001" max="1" ng-model="area.centerX" ng-change="areactrl.updateArea()" aria-label="red" id="red-slider" class="">
+			      <md-slider flex="100" min="0" step="0.0001" max="1" ng-model="vm.area.centerX" aria-label="red" id="red-slider" class="">
 			      </md-slider>
 			      <div flex="40" layout="" layout-align="center center">
-			        <input flex="" ng-model="area.centerX" step="0.001" ng-change="areactrl.updateArea()" aria-label="red" aria-controls="red-slider" type="number">
+			        <input flex="" ng-model="vm.area.centerX" step="0.001"	aria-label="red" aria-controls="red-slider" type="number">
 			      </div>
 			    </div>
 
@@ -64,10 +64,10 @@
 			      <div flex="10" layout="" layout-align="center center">
 			        <span class="md-body-1">y center</span>
 			      </div>
-			      <md-slider flex="100" min="0" step="0.0001" max="1" ng-model="area.centerY" ng-change="areactrl.updateArea()" aria-label="red" id="red-slider" class="">
+			      <md-slider flex="100" min="0" step="0.0001" max="1" ng-model="vm.area.centerY" aria-label="red" id="red-slider" class="">
 			      </md-slider>
 			      <div flex="40" layout="" layout-align="center center">
-			        <input flex="" ng-model="area.centerY" step="0.001" ng-change="areactrl.updateArea()" aria-label="red" aria-controls="red-slider" type="number">
+			        <input flex="" ng-model="vm.area.centerY" step="0.001" aria-label="red" aria-controls="red-slider" type="number">
 			      </div>
 			    </div>
 
@@ -75,10 +75,10 @@
 			      <div flex="10" layout="" layout-align="center center">
 			        <span class="md-body-1">zoom</span>
 			      </div>
-			      <md-slider flex="100" min="0" step="0.1" max="7" ng-model="zoomPow10" ng-change="areactrl.updateArea()" aria-label="red" id="red-slider" class="">
+			      <md-slider flex="100" min="0" step="0.1" max="7" ng-model="vm.area.zoomPow10" aria-label="red" id="red-slider" class="">
 			      </md-slider>
 			      <div flex="40" layout="" layout-align="center center">
-			        <input flex="" ng-model="zoomPow10" step="0.1" ng-change="areactrl.updateArea()" aria-label="red" aria-controls="red-slider" type="number">
+			        <input flex="" ng-model="vm.area.zoomPow10" step="0.1" aria-label="red" aria-controls="red-slider" type="number">
 			      </div>
 			    </div>
 
@@ -86,10 +86,10 @@
 			      <div flex="10" layout="" layout-align="center center">
 			        <span class="md-body-1">DT</span>
 			      </div>
-			      <md-slider flex="100" min="-8" step="0.1" max="5" ng-model="DTpow10" ng-change="areactrl.updateDt()" aria-label="red" id="red-slider" class="">
+			      <md-slider flex="100" min="-8" step="0.1" max="5" ng-model="vm.DTpow10" ng-change="vm.updateDt()" aria-label="red" id="red-slider" class="">
 			      </md-slider>
 			      <div flex="40" layout="" layout-align="center center">
-			        <input flex="" ng-model="DTpow10" step="0.1" ng-change="areactrl.updateDt()" aria-label="red" aria-controls="red-slider" type="number">
+			        <input flex="" ng-model="vm.DTpow10" step="0.1" ng-change="vm.updateDt()" aria-label="red" aria-controls="red-slider" type="number">
 			      </div>
 			    </div>
 
@@ -97,10 +97,10 @@
 			      <div flex="10" layout="" layout-align="center center">
 			        <span class="md-body-1">Grid</span>
 			      </div>
-			      <md-slider flex="100" min="0" step="0.1" max="5" ng-model="GridNbPow10" ng-change="areactrl.updateGridNbPow10()" aria-label="red" id="red-slider" class="">
+			      <md-slider flex="100" min="0" step="0.1" max="5" ng-model="vm.GridNbPow10" ng-change="vm.updateGridNbPow10()" aria-label="red" id="red-slider" class="">
 			      </md-slider>
 			      <div flex="40" layout="" layout-align="center center">
-			        <input flex="" ng-model="GridNbPow10" step="0.1" ng-change="areactrl.updateGridNbPow10()" aria-label="red" aria-controls="red-slider" type="number">
+			        <input flex="" ng-model="vm.GridNbPow10" step="0.1" ng-change="vm.updateGridNbPow10()" aria-label="red" aria-controls="red-slider" type="number">
 			      </div>
 			    </div>
 
@@ -108,10 +108,10 @@
 			      <div flex="10" layout="" layout-align="center center">
 			        <span class="md-body-1">THETA</span>
 			      </div>
-			      <md-slider flex="100" min="0" step="0.1" max="1.5" ng-model="theta" ng-change="areactrl.updateTheta()" aria-label="red" id="red-slider" class="">
+			      <md-slider flex="100" min="0" step="0.1" max="1.5" ng-model="vm.theta" ng-change="vm.updateTheta()" aria-label="red" id="red-slider" class="">
 			      </md-slider>
 			      <div flex="40" layout="" layout-align="center center">
-			        <input flex="" ng-model="theta" step="0.1" ng-change="areactrl.updateTheta()" aria-label="red" aria-controls="red-slider" type="number">
+			        <input flex="" ng-model="vm.theta" step="0.1" ng-change="vm.updateTheta()" aria-label="red" aria-controls="red-slider" type="number">
 			      </div>
 			    </div>
 
@@ -119,10 +119,10 @@
 			      <div flex="10" layout="" layout-align="center center">
 			        <span class="md-body-1">Villages / x</span>
 			      </div>
-			      <md-slider flex="100" min="1" step="10" max="200" ng-model="nbVillagesPerAxe" ng-change="areactrl.updateNbVillagesPerAxe()" aria-label="red" id="red-slider" class="">
+			      <md-slider flex="100" min="1" step="10" max="200" ng-model="vm.nbVillagesPerAxe" ng-change="vm.updateNbVillagesPerAxe()" aria-label="red" id="red-slider" class="">
 			      </md-slider>
 			      <div flex="40" layout="" layout-align="center center">
-			        <input flex="" ng-model="nbVillagesPerAxe" step="1" ng-change="areactrl.updateNbVillagesPerAxe()" aria-label="red" aria-controls="red-slider" type="number">
+			        <input flex="" ng-model="vm.nbVillagesPerAxe" step="1" ng-change="vm.updateNbVillagesPerAxe()" aria-label="red" aria-controls="red-slider" type="number">
 			      </div>
 			    </div>
 
@@ -130,10 +130,10 @@
 			      <div flex="10" layout="" layout-align="center center">
 			        <span class="md-body-1">Ratio Border Bodies</span>
 			      </div>
-			      <md-slider flex="100" min="0" step="0.01" max="1.00" ng-model="ratioBorderBodies" ng-change="areactrl.updateRatioBorderBodies()" aria-label="red" id="red-slider" class="">
+			      <md-slider flex="100" min="0" step="0.01" max="1.00" ng-model="vm.ratioBorderBodies" ng-change="vm.updateRatioBorderBodies()" aria-label="red" id="red-slider" class="">
 			      </md-slider>
 			      <div flex="40" layout="" layout-align="center center">
-			        <input flex="" ng-model="ratioBorderBodies" step="0.01" ng-change="areactrl.updateRatioBorderBodies()" aria-label="red" aria-controls="red-slider" type="number">
+			        <input flex="" ng-model="vm.ratioBorderBodies" step="0.01" ng-change="vm.updateRatioBorderBodies()" aria-label="red" aria-controls="red-slider" type="number">
 			      </div>
 			    </div>
 
@@ -141,27 +141,27 @@
 			      <div flex="10" layout="" layout-align="center center">
 			        <span class="md-body-1">Nb Routines</span>
 			      </div>
-			      <md-slider flex="100" min="1" step="10" max="200" ng-model="nbRoutines" ng-change="areactrl.updateNbRoutines()" aria-label="red" id="red-slider" class="">
+			      <md-slider flex="100" min="1" step="10" max="200" ng-model="vm.nbRoutines" ng-change="vm.updateNbRoutines()" aria-label="red" id="red-slider" class="">
 			      </md-slider>
 			      <div flex="40" layout="" layout-align="center center">
-			        <input flex="" ng-model="nbRoutines" step="1" ng-change="areactrl.updateNbRoutines()" aria-label="red" aria-controls="red-slider" type="number">
+			        <input flex="" ng-model="vm.nbRoutines" step="1" ng-change="vm.updateNbRoutines()" aria-label="red" aria-controls="red-slider" type="number">
 			      </div>
 			    </div>
 
 				<div>
-					<md-button ng-click="areactrl.loadConfig()" class="md-raised"> Load </md-button>
-					<md-button ng-click="areactrl.loadConfigOrig()" class="md-raised"> Load Orig</md-button>
+					<md-button ng-click="vm.loadConfig()" class="md-raised"> Load </md-button>
+					<md-button ng-click="vm.loadConfigOrig()" class="md-raised"> Load Orig</md-button>
 				</div>			     	
 				<div>
-					<md-button ng-click="areactrl.captureConfig()" class="md-raised"> Serialize Bodies </md-button>
+					<md-button ng-click="vm.captureConfig()" class="md-raised"> Serialize Bodies </md-button>
 				</div>			     	
 
 			    <div>
 			    	<div>
 			    		Available configs
 			    	</div>
-			    	<md-radio-group ng-model="selected">
-  						<md-radio-button ng-repeat="d in dirConfig" ng-value="d" aria-label="{{ d }}">
+			    	<md-radio-group ng-model="vm.selected">
+  						<md-radio-button ng-repeat="d in vm.dirConfig" ng-value="d" aria-label="{{ d }}">
          					{{ d }}
   						</md-radio-button>
 					</md-radio-group>
