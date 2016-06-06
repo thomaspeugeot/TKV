@@ -95,6 +95,17 @@
 
 			    <div layout="">
 			      <div flex="10" layout="" layout-align="center center">
+			        <span class="md-body-1">Grid</span>
+			      </div>
+			      <md-slider flex="100" min="0" step="0.1" max="5" ng-model="GridNbPow10" ng-change="areactrl.updateGridNbPow10()" aria-label="red" id="red-slider" class="">
+			      </md-slider>
+			      <div flex="40" layout="" layout-align="center center">
+			        <input flex="" ng-model="GridNbPow10" step="0.1" ng-change="areactrl.updateGridNbPow10()" aria-label="red" aria-controls="red-slider" type="number">
+			      </div>
+			    </div>
+
+			    <div layout="">
+			      <div flex="10" layout="" layout-align="center center">
 			        <span class="md-body-1">THETA</span>
 			      </div>
 			      <md-slider flex="100" min="0" step="0.1" max="1.5" ng-model="theta" ng-change="areactrl.updateTheta()" aria-label="red" id="red-slider" class="">

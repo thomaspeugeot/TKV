@@ -140,7 +140,9 @@ type Run struct {
 	xMin, xMax, yMin, yMax float64 // coordinates of the rendering windows
 	renderState RenderState
 	renderChoice RenderChoice
+
 	fieldRendering bool	// if true, render the repulsion field
+	gridFieldNb int // nb of ticks for the field render area
 
 	minInterBodyDistance float64 // computed at each step (to compute optimal DT value)
 	maxRepulsiveForce MaxRepulsiveForce // computed at each step (to compute optimal DT value)
@@ -151,6 +153,11 @@ type Run struct {
 	updatePositionMode UpdatePositionMode
 
 	status string // status of the run
+}
+
+func (r * Run) SetGridFieldNb( v int)  {
+	r.gridFieldNb = v
+	Trace.Printf("r.gridFieldNb %d", r.gridFieldNb)
 }
 
 func NewRun() * Run {

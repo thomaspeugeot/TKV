@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"math"
 	"encoding/json"
 )
 
@@ -43,6 +44,7 @@ func main() {
 	mux.HandleFunc("/minDistanceCoord", minDistanceCoord)
 	mux.HandleFunc("/nbVillagesPerAxe", nbVillagesPerAxe)
 	mux.HandleFunc("/nbRoutines", nbRoutines)
+	mux.HandleFunc("/fieldGridNb", fieldGridNb)
 	mux.HandleFunc("/updateRatioBorderBodies", updateRatioBorderBodies)
 	mux.HandleFunc("/toggleRenderChoice", toggleRenderChoice)
 	mux.HandleFunc("/toggleFieldRendering", toggleFieldRendering)
@@ -165,6 +167,18 @@ func nbRoutines(w http.ResponseWriter, req *http.Request) {
 		log.Println("error decoding ", err)
 	} else {
 		barnes_hut.SetNbRoutines( nbRoutines)
+	}
+}
+
+func fieldGridNb(w http.ResponseWriter, req *http.Request) {
+	
+	decoder := json.NewDecoder( req.Body)
+	var gridNb float64
+	err := decoder.Decode( &gridNb)
+	if err != nil {
+		log.Println("error decoding ", err)
+	} else {
+		r.SetGridFieldNb( int( math.Floor( gridNb)) )
 	}
 }
 

@@ -29,9 +29,12 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 			x2: 1.0,
 			y1: 0.0,
 			y2: 1.0,
-			zoom: 1.0
+			zoom: 1.0,
+			gridNb: 1
 		}
 		$scope.zoomPow10 = 0
+
+		$scope.GridNbPow10 = 0
 		
 		$scope.ratioBorderBodies = 0.1;
 
@@ -68,6 +71,30 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 
   			);
 		  	console.log('updateDt called');
+	  	};
+
+		this.updateGridNbPow10 = function() {
+
+			console.log( $scope.GridNbPow10);
+			$scope.gridNb = Math.pow( 10, $scope.GridNbPow10);
+			console.log( $scope.gridNb);
+			var jsonGridNb = JSON.stringify( $scope.gridNb);
+			console.log( jsonGridNb);
+			
+		
+			$http.post('http://localhost:8000/fieldGridNb', jsonGridNb ).then
+			(
+				function(response) { // success handler
+	  				console.log(response.status);
+	  				console.log('updating dt');
+	  			}, 
+  				function(errResponse) { // error handler
+      					console.error('error while posting jsonGridNb');
+      					console.error(errResponse);
+  				}
+
+  			);
+		  	console.log('updateGridNbPow10 called');
 	  	};
 
 		this.updateTheta = function() {
