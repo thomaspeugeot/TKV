@@ -140,6 +140,7 @@ type Run struct {
 	xMin, xMax, yMin, yMax float64 // coordinates of the rendering windows
 	renderState RenderState
 	renderChoice RenderChoice
+	fieldRendering bool	// if true, render the repulsion field
 
 	minInterBodyDistance float64 // computed at each step (to compute optimal DT value)
 	maxRepulsiveForce MaxRepulsiveForce // computed at each step (to compute optimal DT value)
@@ -253,6 +254,7 @@ func (r * Run) Init( bodies * ([]quadtree.Body)) {
 	r.SetRenderingWindow( 0.0, 0.0, 1.0, 1.0)
 	r.renderState = WITH_BORDERS // we draw borders
 	r.renderChoice = RUNNING_CONFIGURATION // we draw borders
+	r.fieldRendering = false
 
 	DtAdjustMode = AUTO
 
@@ -270,6 +272,8 @@ func (r * Run) ToggleRenderChoice() {
 		r.renderChoice = RUNNING_CONFIGURATION
 	}
 }
+
+func (r * Run) ToggleFieldRendering() { r.fieldRendering = ! r.fieldRendering }
 
 func (r * Run) ToggleManualAuto() {
 	if DtAdjustMode == MANUAL {

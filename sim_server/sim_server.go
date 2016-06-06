@@ -45,6 +45,7 @@ func main() {
 	mux.HandleFunc("/nbRoutines", nbRoutines)
 	mux.HandleFunc("/updateRatioBorderBodies", updateRatioBorderBodies)
 	mux.HandleFunc("/toggleRenderChoice", toggleRenderChoice)
+	mux.HandleFunc("/toggleFieldRendering", toggleFieldRendering)
 
 	mux.Handle("/", http.FileServer(http.Dir("../tkv-client/")) )
 	log.Fatal(http.ListenAndServe("localhost:8000", mux))
@@ -66,6 +67,7 @@ func play(w http.ResponseWriter, req *http.Request) {
 }
 
 func toggleRenderChoice(w http.ResponseWriter, req *http.Request) { r.ToggleRenderChoice() }
+func toggleFieldRendering(w http.ResponseWriter, req *http.Request) { r.ToggleFieldRendering() }
 func toggleManualAuto(w http.ResponseWriter, req *http.Request) { r.ToggleManualAuto() }
 
 func pause(w http.ResponseWriter, req *http.Request) {

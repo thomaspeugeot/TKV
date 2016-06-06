@@ -196,6 +196,11 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 				function(errResponse) { console.error('error while request toggleRenderChoice');})	
 		};
 
+		this.toggleFieldRendering  = function() {
+			$http.get('http://localhost:8000/toggleFieldRendering').then( function(response) {},
+				function(errResponse) { console.error('error while request toggleFieldRendering');})	
+		};
+
 		this.toggleLocalGlobal  = function() {
 			$http.get('http://localhost:8000/toggleLocalGlobal').then( function(response) {},
 				function(errResponse) { console.error('error while request toggleLocalGlobal');})	
