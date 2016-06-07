@@ -45,9 +45,9 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 
 		vm.dirConfig = ""
 
-		vm.newImageCenter = function() {
-			console.log( "newImageCenter");
-
+		vm.newImageCenter = function($event) {
+			console.log( "newImageCenter ", $event, $event.target.x, $event.target.y );
+			
 		}
 		
 		vm.updateDt = function() {

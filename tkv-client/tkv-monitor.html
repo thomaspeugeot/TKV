@@ -40,8 +40,8 @@
 			</td>
 		</tr>			     	
 		<tr>
-			<td valign="top"  ngClick="vm.newImageCenter()">
-				<img ng-src="{{vm.render}}" />
+			<td valign="top"  >
+				<img ng-src="{{vm.render}}" ng-click="vm.newImageCenter($event)"/>
 			</td>
 			<td>
 
