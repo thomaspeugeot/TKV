@@ -45,6 +45,11 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 
 		vm.dirConfig = ""
 
+		vm.newImageCenter = function() {
+			console.log( "newImageCenter");
+
+		}
+		
 		vm.updateDt = function() {
 
 			console.log( vm.DTpow10);
@@ -332,7 +337,7 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 	  		$timeout( function() {
 				$http.get('http://localhost:8000/getDensityTenciles', '').then( function(response) 
   					{
-  						console.log( response.data)
+  						// console.log( response.data)
 						vm.densityTenciles = response.data
 						pollDensityTenciles()
   					}, 
