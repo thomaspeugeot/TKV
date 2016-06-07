@@ -135,7 +135,7 @@ func (q * Quadtree) setupNodesCoord() {
 // setup quadtree Nodes for levels from 7 to 0
 func (q * Quadtree) setupNodesLinks() {
 	
-	Trace.Println( "setupNodesLinks")
+		Trace.Println( "setupNodesLinks")
 	for level := 7; level >= 0; level-- {
 	
 		// nb of nodes for the current level
