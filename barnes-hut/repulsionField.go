@@ -29,6 +29,8 @@ func NewRepulsionField( XMin, YMin, XMax, YMax float64, GridFieldTicks int, q * 
 	f.YMax = YMax
 
 	f.GridFieldTicks = GridFieldTicks
+	f.q = q
+
 	f.values = make ( [][]float64, GridFieldTicks)
 	for i,_ := range f.values {
 		f.values[i] = make ( []float64, GridFieldTicks)
@@ -70,7 +72,7 @@ func (f * RepulsionField) ComputeField() {
 			
 			var rootCoord quadtree.Coord
 			var fv float64  // field value	
-			f.ComputeFieldAtInterpolationPointRecursive( x, y, f.q, rootCoord, &fv)
+			f.ComputeFieldRecursive( x, y, f.q, rootCoord, &fv)
 			vs[j] = fv
 			Info.Printf("computeField at %d %d %e %e, v = %e\n", i, j, x, y, vs[j])
 		}
@@ -78,9 +80,9 @@ func (f * RepulsionField) ComputeField() {
 }
 
 // compute repulsion field at interpolation point x, y and update v
-func (f * RepulsionField) ComputeFieldAtInterpolationPointRecursive( x, y float64, q * quadtree.Quadtree, coord quadtree.Coord, v * float64) {
+func (f * RepulsionField) ComputeFieldRecursive( x, y float64, q * quadtree.Quadtree, coord quadtree.Coord, v * float64) {
 
-	Info.Printf("ComputeFieldAtInterpolationPointRecursive at %e %e, quadtree %#v, coord %s, input v = %e\n", x, y, q, coord.String(), *v)
+	Info.Printf("ComputeFieldRecursive at %e %e, quadtree %p, coord %s, input v = %e\n", x, y, q, coord.String(), *v)
 	
 	var body quadtree.Body
 	body.X = x
@@ -106,13 +108,13 @@ func (f * RepulsionField) ComputeFieldAtInterpolationPointRecursive( x, y float6
 	} else {		
 		if( level < 8) {
 			// parse sub nodes
-			Trace.Printf("ComputeFieldAtInterpolationPointRecursive go down at node %#v\n", node.Coord())
+			Trace.Printf("ComputeFieldRecursive go down at node %#v\n", node.Coord())
 			
 			coordNW, coordNE, coordSW, coordSE := quadtree.NodesBelow( coord)
-			f.ComputeFieldAtInterpolationPointRecursive( x, y, q, coordNW, v)
-			f.ComputeFieldAtInterpolationPointRecursive( x, y, q, coordNE, v)
-			f.ComputeFieldAtInterpolationPointRecursive( x, y, q, coordSW, v)
-			f.ComputeFieldAtInterpolationPointRecursive( x, y, q, coordSE, v)
+			f.ComputeFieldRecursive( x, y, q, coordNW, v)
+			f.ComputeFieldRecursive( x, y, q, coordNE, v)
+			f.ComputeFieldRecursive( x, y, q, coordSW, v)
+			f.ComputeFieldRecursive( x, y, q, coordSE, v)
 		} else {
 		
 			// parse bodies of the node
@@ -135,7 +137,7 @@ func (f * RepulsionField) ComputeFieldAtInterpolationPointRecursive( x, y float6
 					*v += getRepulsionField( &body, b)
 
 					rank++
-					Trace.Printf("ComputeFieldAtInterpolationPointRecursive at leaf %#v rank %d x %9.3f y %9.3f\n", b.Coord(), rank, x, y)
+					Trace.Printf("ComputeFieldRecursive at leaf %#v rank %d x %9.3f y %9.3f\n", b.Coord(), rank, x, y)
 				} else {
 					rankOfBody = rank
 				}

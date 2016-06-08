@@ -1,21 +1,22 @@
 package barnes_hut
 
 import (
-	"github.com/thomaspeugeot/tkv/quadtree"
 	"testing"
 )
 
 func TestRepulsionFieldInit(t *testing.T) {
 
-	bodies := make([]quadtree.Body, 10 * 10)
-	SpreadOnCircle( & bodies)
-	var r Run
-	r.Init( & bodies)
+	r := NewRun()
+	r.LoadConfig("conf-fra-00000.bods")
+
+	// get pointer on quadtree
+	q := & (r.q)
+	Info.Printf( "TestRepulsionFieldInit pointer on quadtree %p", q)
 
 	f := NewRepulsionField( 0.3, 0.5, 
 							0.4, 0.6, 
 							4,
-							& (r.q)) // quadtree
+							q) // quadtree
 	f.ComputeField()
 
 	cases := make( []struct {
