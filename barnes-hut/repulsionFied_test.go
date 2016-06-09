@@ -13,13 +13,15 @@ func TestRepulsionFieldInit(t *testing.T) {
 	// get pointer on quadtree
 	q := & (r.q)
 	Info.Printf( "TestRepulsionFieldInit pointer on quadtree %p", q)
+	r.gridFieldNb = 4
 
 	f := NewRepulsionField( 0.3, 0.5, 
 							0.4, 0.6, 
-							4,
+							r.gridFieldNb,
 							q) // quadtree
 	f.ComputeField()
 	r.fieldRendering = true
+	Info.Printf("TestRepulsionFieldInit value at 1 1 %e", f.values[1][1])
 
 	r.RenderGif( ioutil.Discard)
 

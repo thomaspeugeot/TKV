@@ -65,7 +65,7 @@ func (r * Run) RenderGif(out io.Writer) {
 			for j:=0;j<size+1;j++ {
 				fx := int(math.Floor( (float64(i)/float64(size+1)) * float64( r.gridFieldNb ) ))
 				fy := int(math.Floor( (float64(j)/float64(size+1)) * float64( r.gridFieldNb ) ))
-				Info.Printf("RenderGif pixel %3d %3d, grid coord %3d %3d", i,j, fx, fy)
+				Trace.Printf("RenderGif pixel %3d %3d, grid coord %3d %3d", i,j, fx, fy)
 
 				field := f.values[fx][fy]
 				img.SetColorIndex( 

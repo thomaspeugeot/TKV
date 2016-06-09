@@ -89,7 +89,7 @@ func (f * RepulsionField) ComputeField() {
 			vs[j] = fv
 			if fv > f.maxValue { f.maxValue = fv}
 			x, y := f.XY( i, j)
-			Info.Printf("computeField at %d %d %e %e, v = %e\n", i, j, x, y, vs[j])
+			Trace.Printf("computeField at %d %d %e %e, v = %e\n", i, j, x, y, vs[j])
 		}
 	}	 
 	Info.Printf("computeField maxValue %e\n", f.maxValue)
