@@ -2,6 +2,7 @@ package barnes_hut
 
 import (
 	"testing"
+	"io/ioutil"
 )
 
 func TestRepulsionFieldInit(t *testing.T) {
@@ -18,6 +19,9 @@ func TestRepulsionFieldInit(t *testing.T) {
 							4,
 							q) // quadtree
 	f.ComputeField()
+	r.fieldRendering = true
+
+	r.RenderGif( ioutil.Discard)
 
 	cases := make( []struct {
 		i, j int

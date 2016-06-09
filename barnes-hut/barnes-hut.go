@@ -11,7 +11,6 @@ package barnes_hut
 
 import (
 	"github.com/thomaspeugeot/tkv/quadtree"
-	"image/color"
 	"fmt"
 	"math"
 	"math/rand"
@@ -70,16 +69,6 @@ type Acc struct {
 	X float64
 	Y float64
 }
-
-
-// var palette = []color.Color{color.White, color.Black}
-var palette = []color.Color{color.White, color.Black, color.RGBA{255,0,0,255}, color.RGBA{0,255,0,255}, }
-const (
-	whiteIndex = 0 // first color in palette
-	blackIndex = 1 // next color in palette
-	redIndex = 2 // next color in palette
-	blueIndex = 3 // next color in palette
-)
 
 // decides wether Dt is set manual or automaticaly
 type DtAdjustModeType string

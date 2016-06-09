@@ -13,8 +13,29 @@ import (
 	"time"
 	"bytes"
 	"encoding/base64"
+	"image/color"
     "github.com/ajstarks/svgo/float"
 	)
+
+
+// var palette = []color.Color{color.White, color.Black}
+var palette = []color.Color{color.White, color.Black, color.RGBA{255,0,0,255}, color.RGBA{0,255,0,255}, }
+const (
+	whiteIndex = 0 // first color in palette
+	blackIndex = 1 // next color in palette
+	redIndex = 2 // next color in palette
+	blueIndex = 3 // next color in palette
+)
+
+const ( NbPaletteGrays = 100 
+		Padding = 4
+		)
+// init the palette with the gray depth
+func init() {
+	for gray := 0; gray < NbPaletteGrays; gray++ {
+		palette = append( palette, color.RGBA{255,255, 0, uint8(10+gray)})
+	}
+}
 
 
 func (r * Run) RenderGif(out io.Writer) {
@@ -30,7 +51,32 @@ func (r * Run) RenderGif(out io.Writer) {
 	anim := gif.GIF{LoopCount: nframes}
 	rect := image.Rect(0, 0, size+1, size+1)
 	img := image.NewPaletted(rect, palette)
-		
+	
+	// compute the field
+	if r.fieldRendering {
+		f := NewRepulsionField( r.xMin, r.yMin, 
+							r.xMax, r.yMax, 
+							r.gridFieldNb,
+							&(r.q)) // quadtree
+		f.ComputeField()
+
+		// parse the image 
+		for i:=0; i<size+1;i++ {
+			for j:=0;j<size+1;j++ {
+				fx := int(math.Floor( (float64(i)/float64(size+1)) * float64( r.gridFieldNb ) ))
+				fy := int(math.Floor( (float64(j)/float64(size+1)) * float64( r.gridFieldNb ) ))
+				Info.Printf("RenderGif pixel %3d %3d, grid coord %3d %3d", i,j, fx, fy)
+
+				field := f.values[fx][fy]
+				img.SetColorIndex( 
+					i, 
+					j,
+					Padding+uint8( math.Floor( field/f.maxValue)))
+			}
+		}
+	} 
+
+
 	for idx, _ := range (*r.bodies) {
 	
 		body := (*r.bodies)[idx]
@@ -51,7 +97,6 @@ func (r * Run) RenderGif(out io.Writer) {
 		// if( (body.X > r.xMin) && (body.X < r.xMax) && (body.Y > r.yMin) && (body.Y < r.yMax) ) {
 		if( (imX > 0.0) && (imX < 1.0) && (imY > 0.0) && (imY < 1.0) ) {
 
-
 			// check wether body is on a border
 			isOnBorder := false
 			coordX := body.X * float64(nbVillagePerAxe)
@@ -63,8 +108,6 @@ func (r * Run) RenderGif(out io.Writer) {
 			distanceToBorderY := coordY - math.Floor( coordY)
 			if( distanceToBorderY < ratioOfBorderVillages / 2.0) { isOnBorder = true }
 			if( distanceToBorderY > 1.0 -  ratioOfBorderVillages /2.0) { isOnBorder = true }
-
-
 
 			// compute village coordinate (from 0 to nbVillagePerAxe-1)
 			x := int( math.Floor(float64( nbVillagePerAxe) * body.X))

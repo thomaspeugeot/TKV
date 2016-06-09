@@ -15,6 +15,7 @@ type RepulsionField struct {
 	GridFieldTicks int // nb of intervals where the field is computed
 	// q * quadtree.Quadtree // quadtree used to compute the field
 	values [][]float64 // values of the field
+	maxValue float64
 	q * quadtree.Quadtree // the quadtree against which the field is computed
 }
 
@@ -65,6 +66,7 @@ func getRepulsionField( A, B *quadtree.Body) (v float64) {
 // concurrently
 func (f * RepulsionField) ComputeField() {
 	Info.Println("ComputeField nbTicks ", f.GridFieldTicks, len( f.values))
+	f.maxValue = 0.0
 
 	done := make( chan float64)
 	for i,vs := range f.values {
@@ -85,10 +87,12 @@ func (f * RepulsionField) ComputeField() {
 			var fv float64  // field value	
 			fv = <- done
 			vs[j] = fv
+			if fv > f.maxValue { f.maxValue = fv}
 			x, y := f.XY( i, j)
 			Info.Printf("computeField at %d %d %e %e, v = %e\n", i, j, x, y, vs[j])
 		}
 	}	 
+	Info.Printf("computeField maxValue %e\n", f.maxValue)
 }
 
 // compute repulsion field at interpolation point x, y and update v
