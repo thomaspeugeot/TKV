@@ -62,27 +62,39 @@ func getRepulsionField( A, B *quadtree.Body) (v float64) {
 }
 
 // compute field for all interpolation points
+// concurrently
 func (f * RepulsionField) ComputeField() {
 	Info.Println("ComputeField nbTicks ", f.GridFieldTicks, len( f.values))
 
+	done := make( chan float64)
 	for i,vs := range f.values {
 		for j,_ := range vs {
-			
+	
 			x, y := f.XY( i, j)
-			
 			var rootCoord quadtree.Coord
+			go func() {
+				var fv float64  // field value
+				// am i sure that have not been changed by the next call to func ?	
+				f.ComputeFieldRecursive( x, y, f.q, rootCoord, &fv)
+				done <- fv
+			}()		
+		}
+	}
+	for i,vs := range f.values {
+		for j,_ := range vs {
 			var fv float64  // field value	
-			f.ComputeFieldRecursive( x, y, f.q, rootCoord, &fv)
+			fv = <- done
 			vs[j] = fv
+			x, y := f.XY( i, j)
 			Info.Printf("computeField at %d %d %e %e, v = %e\n", i, j, x, y, vs[j])
 		}
-	} 
+	}	 
 }
 
 // compute repulsion field at interpolation point x, y and update v
 func (f * RepulsionField) ComputeFieldRecursive( x, y float64, q * quadtree.Quadtree, coord quadtree.Coord, v * float64) {
 
-	Info.Printf("ComputeFieldRecursive at %e %e, quadtree %p, coord %s, input v = %e\n", x, y, q, coord.String(), *v)
+	Trace.Printf("ComputeFieldRecursive at %e %e, quadtree %p, coord %s, input v = %e\n", x, y, q, coord.String(), *v)
 	
 	var body quadtree.Body
 	body.X = x
