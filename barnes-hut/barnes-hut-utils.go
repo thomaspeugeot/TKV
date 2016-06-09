@@ -40,7 +40,7 @@ func init() {
 
 func (r * Run) RenderGif(out io.Writer) {
 
-	Trace.Printf("RenderGif begin")
+	Info.Printf("RenderGif begin with r.gridFieldNb %d", r.gridFieldNb)
 	renderingMutex.Lock()
 
 	const (
