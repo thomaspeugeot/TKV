@@ -237,8 +237,6 @@ func (r * Run) Init( bodies * ([]quadtree.Body)) {
 
 	Info.Printf("Init begin")
 	
-	renderingMutex.Lock()
-
 	r.bodies = bodies
 
 	// create a reference of the bodies
@@ -261,8 +259,7 @@ func (r * Run) Init( bodies * ([]quadtree.Body)) {
 
 	// init measures
 	// r.OneStepOptional( false)
-	renderingMutex.Unlock()
-
+	
 	Info.Printf("Init end")
 }
 

@@ -71,8 +71,10 @@ func (r * Run) CaptureConfigBase64() bool {
 // works only if state is STOPPED
 func (r * Run) LoadConfig(filename string) bool {
 	Info.Printf( "LoadConfig file %s", filename)
+
 	if r.state == STOPPED {
 
+		renderingMutex.Lock()
 		file, err := os.Open(filename)
 		if( err != nil) {
 			log.Fatal(err)
@@ -98,10 +100,12 @@ func (r * Run) LoadConfig(filename string) bool {
 		
 		r.Init( r.bodies)
 
+		renderingMutex.Unlock()
 		return true
 	} else {
 		return false
 	}
+
 }
 
 // load configuration from filename into the original config (for computing borders)
