@@ -20,7 +20,7 @@ type RepulsionField struct {
 }
 
 func NewRepulsionField( XMin, YMin, XMax, YMax float64, GridFieldTicks int, q * quadtree.Quadtree) * RepulsionField {
-	Info.Println("NewRepulsionField")
+	Trace.Println("NewRepulsionField")
 
 	var f RepulsionField
 	// to be replaced with a proper init of struct to 
@@ -65,7 +65,7 @@ func getRepulsionField( A, B *quadtree.Body) (v float64) {
 // compute field for all interpolation points
 // concurrently
 func (f * RepulsionField) ComputeField() {
-	Info.Println("ComputeField nbTicks ", f.GridFieldTicks, len( f.values))
+	Trace.Println("ComputeField nbTicks ", f.GridFieldTicks, len( f.values))
 	f.maxValue = 0.0
 
 	// done := make( chan float64)
@@ -82,7 +82,7 @@ func (f * RepulsionField) ComputeField() {
 			// }()		
 			if fv > f.maxValue { f.maxValue = fv}
 			vs[j] = fv
-			
+
 		}
 	}
 	// for i,vs := range f.values {
@@ -95,7 +95,7 @@ func (f * RepulsionField) ComputeField() {
 	// 		Trace.Printf("computeField at %d %d %e %e, v = %e\n", i, j, x, y, vs[j])
 	// 	}
 	// }	 
-	Info.Printf("computeField maxValue %e\n", f.maxValue)
+	Trace.Printf("computeField maxValue %e\n", f.maxValue)
 }
 
 // compute repulsion field at interpolation point x, y and update v

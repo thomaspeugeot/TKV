@@ -33,14 +33,16 @@ const ( NbPaletteGrays = 100
 // init the palette with the gray depth
 func init() {
 	for gray := 0; gray < NbPaletteGrays; gray++ {
-		palette = append( palette, color.RGBA{255, uint8(10+gray), uint8(10+gray), 255})
+		palette = append( palette, color.RGBA{uint8(250-gray), uint8(250-gray), uint8(250-gray), 255})
 	}
 }
 
 
 func (r * Run) RenderGif(out io.Writer) {
 
-	Info.Printf("RenderGif begin with r.gridFieldNb %d", r.gridFieldNb)
+	t0 := time.Now()
+
+	Trace.Printf("RenderGif begin with r.gridFieldNb %d", r.gridFieldNb)
 	renderingMutex.Lock()
 
 	const (
@@ -67,8 +69,12 @@ func (r * Run) RenderGif(out io.Writer) {
 				fy := int(math.Floor( (float64(j)/float64(size+1)) * float64( r.gridFieldNb ) ))
 				
 				field := f.values[fx][fy]
-				indexPalette := Padding+uint8( math.Floor( (field/f.maxValue)*NbPaletteGrays))
-				Trace.Printf("RenderGif pixel %3d %3d, grid coord %3d %3d f %e, index %d", i,j, fx, fy, field, indexPalette)
+				indexPalette := uint8( Padding + math.Floor( (field/f.maxValue)*(NbPaletteGrays-1)))
+				if ( i % (size/r.gridFieldNb) ==0) {
+					if ( j % (size/r.gridFieldNb) ==0) {
+				 		Trace.Printf("RenderGif pixel %3d %3d, grid coord %3d %3d f %e, index %d", i,j, fx, fy, field, indexPalette)
+					}
+				}
 				
 				img.SetColorIndex( 
 					i, 
@@ -158,7 +164,10 @@ func (r * Run) RenderGif(out io.Writer) {
 
 	renderingMutex.Unlock()
 
-	Trace.Printf("RenderGif end")
+	t1 := time.Now()
+	StepDuration = float64((t1.Sub(t0)).Nanoseconds())
+	
+	Info.Printf("RenderGif %d dur %e", r.gridFieldNb, StepDuration/1000000000)
 }
 
 

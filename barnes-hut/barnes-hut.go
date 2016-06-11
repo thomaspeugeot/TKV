@@ -145,8 +145,11 @@ type Run struct {
 }
 
 func (r * Run) SetGridFieldNb( v int)  {
+	
+	renderingMutex.Lock()
 	r.gridFieldNb = v
 	Trace.Printf("r.gridFieldNb %d", r.gridFieldNb)
+	renderingMutex.Unlock()
 }
 
 func NewRun() * Run {
