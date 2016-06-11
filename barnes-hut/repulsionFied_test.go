@@ -18,7 +18,8 @@ func TestRepulsionFieldInit(t *testing.T) {
 	f := NewRepulsionField( 0.3, 0.5, 
 							0.4, 0.6, 
 							r.gridFieldNb,
-							q) // quadtree
+							q, // quadtree
+							0.00001) 
 	f.ComputeField()
 	r.fieldRendering = true
 	Info.Printf("TestRepulsionFieldInit value at 1 1 %e", f.values[1][1])

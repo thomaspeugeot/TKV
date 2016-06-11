@@ -40,11 +40,11 @@ func init() {
 
 func (r * Run) RenderGif(out io.Writer) {
 
+	renderingMutex.Lock()
 	t0 := time.Now()
 
 	Trace.Printf("RenderGif begin with r.gridFieldNb %d", r.gridFieldNb)
-	renderingMutex.Lock()
-
+	
 	const (
 		size    = 600   // image canvas 
 		delay   = 4    // delay between frames in 10ms units
@@ -59,7 +59,8 @@ func (r * Run) RenderGif(out io.Writer) {
 		f := NewRepulsionField( r.xMin, r.yMin, 
 							r.xMax, r.yMax, 
 							r.gridFieldNb,
-							&(r.q)) // quadtree
+							&(r.q),
+							r.minInterBodyDistance/2.0) // quadtree
 		f.ComputeField()
 
 		// parse the image 
@@ -162,12 +163,13 @@ func (r * Run) RenderGif(out io.Writer) {
 	encodedB64 := base64.StdEncoding.EncodeToString([]byte(b.Bytes()))
 	out.Write( []byte(encodedB64))
 
-	renderingMutex.Unlock()
-
+	
 	t1 := time.Now()
 	StepDuration = float64((t1.Sub(t0)).Nanoseconds())
 	
 	Info.Printf("RenderGif %d dur %e", r.gridFieldNb, StepDuration/1000000000)
+	renderingMutex.Unlock()
+
 }
 
 

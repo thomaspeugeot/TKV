@@ -289,7 +289,9 @@ func (r * Run) ToggleManualAuto() {
 
 
 func (r * Run) OneStep() {
+	renderingMutex.Lock()
 	r.OneStepOptional( true)
+	renderingMutex.Unlock()
 }
 func (r * Run) OneStepOptional( updatePosition bool) {
 

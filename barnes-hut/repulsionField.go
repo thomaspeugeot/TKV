@@ -17,9 +17,10 @@ type RepulsionField struct {
 	values [][]float64 // values of the field
 	maxValue float64
 	q * quadtree.Quadtree // the quadtree against which the field is computed
+	cutoff float64 // the distance to the nearest body with void the repulsion field
 }
 
-func NewRepulsionField( XMin, YMin, XMax, YMax float64, GridFieldTicks int, q * quadtree.Quadtree) * RepulsionField {
+func NewRepulsionField( XMin, YMin, XMax, YMax float64, GridFieldTicks int, q * quadtree.Quadtree, cutoff float64) * RepulsionField {
 	Trace.Println("NewRepulsionField")
 
 	var f RepulsionField
@@ -31,6 +32,8 @@ func NewRepulsionField( XMin, YMin, XMax, YMax float64, GridFieldTicks int, q * 
 
 	f.GridFieldTicks = GridFieldTicks
 	f.q = q
+
+	f.cutoff = cutoff
 
 	f.values = make ( [][]float64, GridFieldTicks)
 	for i,_ := range f.values {
@@ -153,7 +156,16 @@ func (f * RepulsionField) ComputeFieldRecursive( x, y float64, q * quadtree.Quad
 						Error.Printf("Problem at rank %d for body of rank %d on node %#v ", 
 						rank, rankOfBody, *node)
 					}	
-					*v += getRepulsionField( &body, b)
+
+					// if distance is inferior to cutoff, return
+					if( dist < f.cutoff) {
+						*v = 0.0
+						return
+
+					} else {
+						*v += getRepulsionField( &body, b)
+
+					}
 
 					rank++
 					Trace.Printf("ComputeFieldRecursive at leaf %#v rank %d x %9.3f y %9.3f\n", b.Coord(), rank, x, y)
