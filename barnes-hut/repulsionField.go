@@ -68,30 +68,33 @@ func (f * RepulsionField) ComputeField() {
 	Info.Println("ComputeField nbTicks ", f.GridFieldTicks, len( f.values))
 	f.maxValue = 0.0
 
-	done := make( chan float64)
+	// done := make( chan float64)
 	for i,vs := range f.values {
 		for j,_ := range vs {
 	
 			x, y := f.XY( i, j)
 			var rootCoord quadtree.Coord
-			go func() {
+			// go func() {
 				var fv float64  // field value
-				// am i sure that have not been changed by the next call to func ?	
+			// 	// am i sure that have not been changed by the next call to func ?	
 				f.ComputeFieldRecursive( x, y, f.q, rootCoord, &fv)
-				done <- fv
-			}()		
+			// 	done <- fv
+			// }()		
+			if fv > f.maxValue { f.maxValue = fv}
+			vs[j] = fv
+			
 		}
 	}
-	for i,vs := range f.values {
-		for j,_ := range vs {
-			var fv float64  // field value	
-			fv = <- done
-			vs[j] = fv
-			if fv > f.maxValue { f.maxValue = fv}
-			x, y := f.XY( i, j)
-			Trace.Printf("computeField at %d %d %e %e, v = %e\n", i, j, x, y, vs[j])
-		}
-	}	 
+	// for i,vs := range f.values {
+	// 	for j,_ := range vs {
+	// 		var fv float64  // field value	
+	// 		fv = <- done
+	// 		vs[j] = fv
+	// 		if fv > f.maxValue { f.maxValue = fv}
+	// 		x, y := f.XY( i, j)
+	// 		Trace.Printf("computeField at %d %d %e %e, v = %e\n", i, j, x, y, vs[j])
+	// 	}
+	// }	 
 	Info.Printf("computeField maxValue %e\n", f.maxValue)
 }
 

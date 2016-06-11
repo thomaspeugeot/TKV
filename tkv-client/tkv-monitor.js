@@ -46,7 +46,13 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 		vm.dirConfig = ""
 
 		vm.newImageCenter = function($event) {
-			console.log( "newImageCenter ", $event, $event.target.x, $event.target.y );
+			console.info( "newImageCenter ", $event, $event.target.x, $event.target.y,  $event.target.height, $event.target.width);
+			console.info( "newImageCenter ", $event, $event.target.width, $event.target.height,  vm.area.x1, vm.area.x2, vm.area.y1, vm.area.y2);
+            console.info( "newImageCenter ", $event, $event.clientX, $event.clientY, $event.pageX, $event.pageY );
+            console.info( "newImageCenter x ", vm.area.x1 + (($event.pageX - $event.target.x)/$event.target.width)* (vm.area.x2 - vm.area.x1) );
+            console.info( "newImageCenter y ", vm.area.y1 + (($event.pageY - $event.target.y)/$event.target.height)* (vm.area.y2 - vm.area.y1) );
+            vm.area.centerX = vm.area.x1 + (($event.pageX - $event.target.x)/$event.target.width)* (vm.area.x2 - vm.area.x1);
+            vm.area.centerY = vm.area.y1 + (($event.pageY - $event.target.y)/$event.target.height)* (vm.area.y2 - vm.area.y1);
 			
 		}
 		

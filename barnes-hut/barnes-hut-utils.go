@@ -33,7 +33,7 @@ const ( NbPaletteGrays = 100
 // init the palette with the gray depth
 func init() {
 	for gray := 0; gray < NbPaletteGrays; gray++ {
-		palette = append( palette, color.RGBA{255,255, 0, uint8(10+gray)})
+		palette = append( palette, color.RGBA{255, uint8(10+gray), uint8(10+gray), 255})
 	}
 }
 
@@ -65,13 +65,15 @@ func (r * Run) RenderGif(out io.Writer) {
 			for j:=0;j<size+1;j++ {
 				fx := int(math.Floor( (float64(i)/float64(size+1)) * float64( r.gridFieldNb ) ))
 				fy := int(math.Floor( (float64(j)/float64(size+1)) * float64( r.gridFieldNb ) ))
-				Trace.Printf("RenderGif pixel %3d %3d, grid coord %3d %3d", i,j, fx, fy)
-
+				
 				field := f.values[fx][fy]
+				indexPalette := Padding+uint8( math.Floor( (field/f.maxValue)*NbPaletteGrays))
+				Trace.Printf("RenderGif pixel %3d %3d, grid coord %3d %3d f %e, index %d", i,j, fx, fy, field, indexPalette)
+				
 				img.SetColorIndex( 
 					i, 
 					j,
-					Padding+uint8( math.Floor( field/f.maxValue)))
+					indexPalette)
 			}
 		}
 	} 

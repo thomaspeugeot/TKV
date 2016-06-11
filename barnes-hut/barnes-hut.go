@@ -153,8 +153,10 @@ func NewRun() * Run {
 	var r Run
 	r.state = STOPPED
 	r.updatePositionMode = ACROSS_SQUARE_BORDER
+	r.gridFieldNb = 10
 	bodies := make([]quadtree.Body, 0)
 	r.Init( & bodies)
+
 	return &r
 }
 
@@ -269,7 +271,10 @@ func (r * Run) ToggleRenderChoice() {
 	}
 }
 
-func (r * Run) ToggleFieldRendering() { r.fieldRendering = ! r.fieldRendering }
+func (r * Run) ToggleFieldRendering() { 
+	Info.Printf("ToggleFieldRendering new state %b", ! r.fieldRendering)
+	r.fieldRendering = ! r.fieldRendering 
+}
 
 func (r * Run) ToggleManualAuto() {
 	if DtAdjustMode == MANUAL {
