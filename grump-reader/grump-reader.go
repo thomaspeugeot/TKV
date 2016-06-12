@@ -203,6 +203,7 @@ func main() {
 
 	var run barnes_hut.Run
 	run.Init( & bodies)
+	run.SetCountry( country.Name)
 
-	run.CaptureConfigCountry( country.Name)
+	run.CaptureConfig()
 }

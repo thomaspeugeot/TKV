@@ -123,6 +123,7 @@ type Run struct {
 	bodiesVel * []Vel // bodies velocity
 
 	q quadtree.Quadtree // the supporting quadtree
+	country string // the country of interest 
 	state State
 	step int
 	giniOverTime [][]float64 // evolution of the gini distribution over time 
@@ -142,6 +143,10 @@ type Run struct {
 	updatePositionMode UpdatePositionMode
 
 	status string // status of the run
+}
+
+func (r * Run) SetCountry( country string)  {
+	r.country = country
 }
 
 func (r * Run) SetGridFieldNb( v int)  {

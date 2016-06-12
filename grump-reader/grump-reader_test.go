@@ -279,7 +279,8 @@ func BenchmarkReadGrumpNationalities(b * testing.B ) {
 	// capture config
 	var r barnes_hut.Run
 	r.Init( & bodies)
-	r.CaptureConfigCountry( "FRA")
+	r.SetCountry("fra")
+	r.CaptureConfig()
 
 	// indicate the corners of each country
 	for index, boundary := range countryBoundaries {

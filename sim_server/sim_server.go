@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/thomaspeugeot/tkv/barnes-hut"
+	"github.com/thomaspeugeot/tkv/server"
 	"fmt"
 	"log"
 	"net/http"
@@ -214,11 +215,11 @@ func loadConfig(w http.ResponseWriter, req *http.Request) {
 	// get the file
 	fileSlice := req.URL.Query()["file"]
 
-	fmt.Println(fileSlice[0])
+	server.Info.Println(fileSlice[0])
 	// get the file name
 
 	loadResult := r.LoadConfig( fileSlice[0])
-	fmt.Println( "load result ", loadResult )
+	server.Info.Println( "load result ", loadResult )
 }
 
 // list config files in orig
@@ -227,10 +228,10 @@ func loadConfigOrig(w http.ResponseWriter, req *http.Request) {
 	// get the file
 	fileSlice := req.URL.Query()["file"]
 
-	fmt.Println(fileSlice[0])
+	server.Info.Println(fileSlice[0])
 	// get the file name
 
 	loadResult := r.LoadConfigOrig( fileSlice[0])
-	fmt.Println( "load result ", loadResult )
+	server.Info.Println( "load result ", loadResult )
 }
 

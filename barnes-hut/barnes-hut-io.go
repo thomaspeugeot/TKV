@@ -19,11 +19,8 @@ import (
 // return true if operation was successfull 
 // works only if state is STOPPED
 func (r * Run) CaptureConfig() bool {
-	return r.CaptureConfigCountry("TST")
-}
-func (r * Run) CaptureConfigCountry( country string) bool {
 	if r.state == STOPPED {
-		filename := fmt.Sprintf("conf-%s-%05d.bods", country, r.step)
+		filename := fmt.Sprintf("conf-%s-%05d.bods", r.country, r.step)
 		file, err := os.Create(filename)
 		if( err != nil) {
 			log.Fatal(err)
@@ -83,17 +80,25 @@ func (r * Run) LoadConfig(filename string) bool {
 
 		// get the number of steps in the file name
 		// var countryName string
-		nbItems, errScan := fmt.Sscanf(filename, "conf-fra-%05d.bods", & r.step)
+		for index, runeValue := range filename {
+        	Trace.Printf("%#U starts at byte position %d\n", runeValue, index)
+    	}
+    	ctry := filename[5:8]
+    	r.country = ctry
+    	stepString := filename[9:14]
+    	
+		nbItems, errScan := fmt.Sscanf(stepString, "%05d", & r.step)
 		if( errScan != nil) {
 			log.Fatal(errScan)
 			return false			
 		}
-		Info.Printf( "nb item parsed in file name %d (should be one)\n", nbItems)
+		Trace.Printf( "nb item parsed in file name %d (should be one)\n", nbItems)
 		
 		jsonParser := json.NewDecoder(file)
     	if err = jsonParser.Decode(r.bodies); err != nil {
         	log.Fatal( fmt.Sprintf( "parsing config file %s", err.Error()))
     	}
+		Info.Printf("Country is %s, step is %d", ctry, r.step)
 		Info.Printf( "nb item parsed in file %d\n", len( *r.bodies))
 
 		file.Close()
@@ -119,14 +124,18 @@ func (r * Run) LoadConfigOrig(filename string) bool {
 			return false
 		}
 
-		// get the number of steps in the file name
-		nbItems, errScan := fmt.Sscanf(filename, "conf-TST-%05d.bods", & r.step)
+    	ctry := filename[5:8]
+    	if r.country != string(ctry) {
+    		Error.Printf("original country %s should be the same as current country %s", ctry, r.country)
+    	}
+    	stepString := filename[9:14]
+    	
+		_, errScan := fmt.Sscanf(stepString, "%05d", & r.step)
 		if( errScan != nil) {
 			log.Fatal(errScan)
 			return false			
 		}
-		log.Output( 1, fmt.Sprintf( "nb item parsed %d (should be one)", nbItems))
-		
+
 		jsonParser := json.NewDecoder(file)
     	if err = jsonParser.Decode(r.bodiesOrig); err != nil {
         	log.Fatal( fmt.Sprintf( "parsing config file", err.Error()))
