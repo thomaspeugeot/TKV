@@ -167,7 +167,7 @@ func (r * Run) RenderGif(out io.Writer) {
 	t1 := time.Now()
 	StepDuration = float64((t1.Sub(t0)).Nanoseconds())
 	
-	Info.Printf("RenderGif %d dur %e", r.gridFieldNb, StepDuration/1000000000)
+	Trace.Printf("RenderGif %d dur %e", r.gridFieldNb, StepDuration/1000000000)
 	renderingMutex.Unlock()
 
 }

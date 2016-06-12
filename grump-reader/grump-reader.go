@@ -20,6 +20,7 @@ import "bufio"
 import "path/filepath"
 import "github.com/thomaspeugeot/tkv/barnes-hut"
 import "github.com/thomaspeugeot/tkv/quadtree"
+import "github.com/thomaspeugeot/tkv/grump"
 
 // store country code
 type country struct {
@@ -34,7 +35,7 @@ type circleCoord struct {
 
 var targetMaxBodies = 400000
 
-var maxCirclePerCell = 500
+var maxCirclePerCell = 1000
 
 // storage of circle arrangement per number of circle in the square
 type arrangementsStore [][]circleCoord
@@ -55,7 +56,7 @@ func main() {
 	var country country
 
 	flag.Parse()
-	fmt.Println( "country to parse", *countryPtr)
+	grump.Info.Println( "country to parse", *countryPtr)
 	country.Name = *countryPtr
 	fmt.Println( "directory containing tkv data", *dirTKVDataPtr)
 	dirTKVData := *dirTKVDataPtr
@@ -162,6 +163,7 @@ func main() {
 	var bodies []quadtree.Body
 	bodiesInCellMax := 0
 
+	grump.Info.Printf("Preparing the ouput")
 	cumulativePopTotal := 0.0
 	bodiesNb :=0
 	for row :=0; row < country.NRows; row++ {
