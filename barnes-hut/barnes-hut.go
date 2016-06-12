@@ -378,7 +378,7 @@ func (r * Run) ComputeRepulsiveForceConcurrent(nbRoutine int) float64 {
 	for i:=0; i<nbRoutine; i++ {
 	
 		startIndex := (i*sliceLen)/nbRoutine
-		endIndex := ((i+1)*sliceLen)/nbRoutine -1
+		endIndex := ((i+1)*sliceLen)/nbRoutine
 
 		// if nbRoutine is above sliceLen
 		if endIndex < startIndex { endIndex = startIndex }
