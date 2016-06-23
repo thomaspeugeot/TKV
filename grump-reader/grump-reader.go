@@ -35,7 +35,7 @@ type circleCoord struct {
 
 var targetMaxBodies = 400000
 
-var maxCirclePerCell = 1000
+var maxCirclePerCell = 750
 
 // storage of circle arrangement per number of circle in the square
 type arrangementsStore [][]circleCoord
@@ -56,14 +56,14 @@ func main() {
 	var country country
 
 	flag.Parse()
-	grump.Info.Println( "country to parse", *countryPtr)
+	grump.Info.Printf( "country to parse %s", *countryPtr)
 	country.Name = *countryPtr
-	fmt.Println( "directory containing tkv data", *dirTKVDataPtr)
+	grump.Info.Printf("directory containing tkv data %s", *dirTKVDataPtr)
 	dirTKVData := *dirTKVDataPtr
 
 	// create the path to the agragate country count
 	grumpFilePath := fmt.Sprintf( "%s/%s_grumpv1_pcount_00_ascii_30/%sup00ag.asc", dirTKVData, *countryPtr, *countryPtr )
-	fmt.Println("relative path ", filepath.Clean( grumpFilePath))
+	grump.Info.Printf("relative path %s", filepath.Clean( grumpFilePath))
 	var grumpFile *os.File
 	var err error
 	grumpFile, err = os.Open( filepath.Clean( grumpFilePath))
@@ -86,7 +86,7 @@ func main() {
 	scanner.Scan(); scanner.Scan()
 	fmt.Sscanf( scanner.Text(), "%d", & country.YllCorner)
 
-	fmt.Println( country )
+	grump.Info.Println("country struct content is ", country )
 
 	// scan the reamining header
 	for word < 4 {
@@ -113,10 +113,12 @@ func main() {
 			popTotal += count
 
 			countMatrix[ (country.NRows-row-1)*country.NCols + col ] = count
+			
 		}
 		fmt.Printf("\rrow %5d lat %2.3f total %f", row, lat, popTotal)
 	}
-	fmt.Println("")
+	fmt.Printf("\n")
+	grump.Info.Printf("reading grump file is over, closing")
 	grumpFile.Close()
 
 	// get the arrangement
@@ -126,8 +128,6 @@ func main() {
 		fmt.Printf("\rgetting arrangement for %3d circles", nbCircles)
 
 		arrangements[nbCircles] = make( []circleCoord, nbCircles)
-		
-
 		
 		// open the reference file
 		circlePackingFilePath := fmt.Sprintf( "%s/csq_coords/csq%d.txt", dirTKVData, nbCircles )
@@ -154,11 +154,12 @@ func main() {
 			// scan Y coordinate
 			scannerCircle.Scan()
 			fmt.Sscanf( scannerCircle.Text(), "%f", & (arrangements[nbCircles][circle].y))
-			// fmt.Printf("getting arrangement for %d circle %f %f\n", nbCircles, arrangements[nbCircles][circle].x, arrangements[nbCircles][circle].y)
+			// fmt.Printf("getting arrangement for %d circle %3d, coord %f %f\n", nbCircles, circle, arrangements[nbCircles][circle].x, arrangements[nbCircles][circle].y)
 		}
 		circlePackingFile.Close()
 	}
-
+	grump.Info.Printf("reading circle packing files is over")
+	
 	// prepare the output density file
 	var bodies []quadtree.Body
 	bodiesInCellMax := 0
@@ -181,6 +182,10 @@ func main() {
 			// how many bodies ? it is maxBodies *( count / country.PCount) 
 			bodiesInCell := int( math.Floor( float64( targetMaxBodies) * (count/popTotal)))
 			if bodiesInCell > bodiesInCellMax { bodiesInCellMax = bodiesInCell}
+			
+			if (bodiesInCell > maxCirclePerCell ) {
+				grump.Error.Printf("bodiesInCell %d superior to maxCirclePerCell %d", bodiesInCell, maxCirclePerCell)
+			}
 			
 			// initiate the bodies
 			for i :=0; i<bodiesInCell; i++ {
