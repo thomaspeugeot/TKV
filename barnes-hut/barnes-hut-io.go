@@ -13,6 +13,7 @@ import (
 	"strings"
 	)
 
+const ( CountryBodiesNamePattern  = "conf-%s-%05d.bods")
 	
 // serialize bodies's state vector into a file
 // convention is "step-xxxx.bod"
@@ -20,7 +21,8 @@ import (
 // works only if state is STOPPED
 func (r * Run) CaptureConfig() bool {
 	if r.state == STOPPED {
-		filename := fmt.Sprintf("conf-%s-%05d.bods", r.country, r.step)
+
+		filename := fmt.Sprintf( CountryBodiesNamePattern, r.country, r.step)
 		file, err := os.Create(filename)
 		if( err != nil) {
 			log.Fatal(err)

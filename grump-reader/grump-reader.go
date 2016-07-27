@@ -22,12 +22,6 @@ import "github.com/thomaspeugeot/tkv/barnes-hut"
 import "github.com/thomaspeugeot/tkv/quadtree"
 import "github.com/thomaspeugeot/tkv/grump"
 
-// store country code
-type country struct {
-	Name string
-	NCols, NRows, XllCorner, YllCorner int
-}	
-
 // coordinates of arrangement of circle packing in a square
 type circleCoord struct {
 	x,y float64
@@ -53,7 +47,7 @@ func main() {
 	// get the directory containing tkv data through the flag "tkvdata"
 	dirTKVDataPtr := flag.String("tkvdata","/Users/thomaspeugeot/the-mapping-data/","directory containing input tkv data")
 		
-	var country country
+	var country grump.Country
 
 	flag.Parse()
 	grump.Info.Printf( "country to parse %s", *countryPtr)
@@ -86,6 +80,7 @@ func main() {
 	scanner.Scan(); scanner.Scan()
 	fmt.Sscanf( scanner.Text(), "%d", & country.YllCorner)
 
+	country.Serialize()
 	grump.Info.Println("country struct content is ", country )
 
 	// scan the reamining header
