@@ -23,9 +23,6 @@ func main() {
 	// flag "step"
 	stepPtr := flag.String("step","0000","simulation step for the displaced bodies")
 
-	// get the directory containing tkv data through the flag "tkvdata"
-	// dirTKVDataPtr := flag.String("tkvdata","/Users/thomaspeugeot/the-mapping-data/","directory containing input tkv data")
-	
 	flag.Parse()
 
 	var country translation.Country
