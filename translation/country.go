@@ -5,6 +5,7 @@ import (
 	"os"
 	"log"
 	"fmt"
+	"math"
 	// "bufio"
 	"github.com/thomaspeugeot/tkv/barnes-hut"
 	"github.com/thomaspeugeot/tkv/quadtree"
@@ -19,7 +20,8 @@ type Country struct {
 	bodiesOrig * []quadtree.Body // original bodies position in the quatree
 	bodies * []quadtree.Body // bodies position in the quatree
 	Step int // step when the simulation stopped
-	// directory containing tkv data
+	
+	villages [][]Village
 }
 
 type BodySetChoice string
@@ -27,6 +29,21 @@ const (
 	ORIGINAL_CONFIGURATION = "ORIGINAL_CONFIGURATION"
 	SPREAD_CONFIGURATION = "SPREAD_CONFIGURATION"
 )
+
+// number of village per X or Y axis. For 10 000 villages, this number is 100
+// this value can be set interactively during the run
+var nbVillagePerAxe int = 100 
+
+// init variables
+func (country * Country) Init() {
+
+	// get country coordinates
+	country.Unserialize()
+	country.LoadConfig( true )
+	country.LoadConfig( false )
+	country.ComputeBaryCenters()
+	
+}
 
 // load configuration from filename into counry 
 // check that it matches the 
@@ -82,5 +99,26 @@ func (country * Country) LoadConfig( isOriginal bool) bool {
 	file.Close()
 	
 	return true
+}
+
+// compute villages barycenters
+func (country * Country) ComputeBaryCenters() {
+	
+	country.villages = make( [][]Village, nbVillagePerAxe )
+	
+	for x,_  := range country.villages {
+		country.villages[x] = make([]Village, nbVillagePerAxe)
+	}
+
+	// parse bodies
+	for _,b := range *country.bodies {
+		// compute village coordinate (from 0 to nbVillagePerAxe-1)
+		x := int( math.Floor(float64( nbVillagePerAxe) * b.X))
+		y := int( math.Floor(float64( nbVillagePerAxe) * b.Y))
+
+		// add body to the barycenter of the village
+		country.villages[x][y].M += b.M
+	}
+
 
 }

@@ -6,17 +6,13 @@ import (
 )
 
 type Translation struct {
-
-
+	xMin, xMax, yMin, yMax float64 // coordinates of the rendering window
 }
 
 
 func (t * Translation) Init(country Country) {
 
-	// get country coordinates
-	country.Unserialize()
-	country.LoadConfig( true )
-	country.LoadConfig( false )
+	country.Init()
 
 	Info.Printf("Country is %s with step %d", country.Name, country.Step)
 
@@ -25,6 +21,10 @@ func (t * Translation) Init(country Country) {
 
 	// load final config
 	// load initial config
+}
+
+func (t * Translation) SetRenderingWindow( xMin, xMax, yMin, yMax float64) {
+	t.xMin, t.xMax, t.yMin, t.yMax = xMin, xMax, yMin, yMax
 }
 
 

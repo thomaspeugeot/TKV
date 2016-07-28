@@ -7,15 +7,20 @@ import (
 	"log"
 	"flag"
 	"fmt"
+	"encoding/json"
 )
 
+
+// load the data
+var t translation.Translation
+
+// for decoding the rendering window
+type test_struct struct {
+	X1, X2, Y1, Y2 float64
+}
 //
 // go run grump-reader.go -tkvdata="C:\Users\peugeot\tkv-data" -step=
-
 func main() {
-
-	// load the data
-	var t translation.Translation
 
 	// flag "country"
 	countryPtr := flag.String("country","fra","iso 3166 country code")
@@ -45,7 +50,19 @@ func main() {
 
 	mux.Handle("/", http.FileServer(http.Dir("../leaflets/")) )
 	
+	mux.HandleFunc("/area", area)
+	
+	
 	log.Fatal(http.ListenAndServe(port, mux))
 	server.Info.Printf("end")
 }
 
+func area(w http.ResponseWriter, req *http.Request) {
+	decoder := json.NewDecoder( req.Body)
+	var renderingWindow test_struct
+	err := decoder.Decode( &renderingWindow)
+	if err != nil {
+		log.Println("error decoding ", err)
+	}
+	t.SetRenderingWindow( renderingWindow.X1, renderingWindow.X2, renderingWindow.Y1, renderingWindow.Y2)
+}
