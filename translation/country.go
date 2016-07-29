@@ -117,7 +117,7 @@ func (country * Country) ComputeBaryCenters() {
 		y := int( math.Floor(float64( nbVillagePerAxe) * b.Y))
 
 		// add body to the barycenter of the village
-		country.villages[x][y].M += b.M
+		country.villages[x][y].addBody( b)
 	}
 
 
