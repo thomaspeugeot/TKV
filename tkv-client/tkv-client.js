@@ -14,28 +14,14 @@ app.controller("EventsController", [ '$scope', function($scope) {
         },
         events: {
             map: {
-                enable: ['zoomstart', 'drag', 'click', 'mousemove'],
+                enable: ['click'],
                 logic: 'emit'
             }
         }
     });
 
-    $scope.eventDetected = "No events yet...";
 
-    $scope.$on('leafletDirectiveMap.zoomstart', function(event){
-        $scope.eventDetected = "ZoomStart";
-    });
-
-    $scope.$on('leafletDirectiveMap.drag', function(event){
-        $scope.eventDetected = "Drag";
-    });
-
-  
 	$scope.$on('leafletDirectiveMap.click', function(event, args){
     	console.log(args.leafletEvent.latlng);
 	});
-
-    $scope.$on('leafletDirectiveMap.mousemove', function(event){
-        $scope.eventDetected = "MouseMove";
-    });
 }]);
