@@ -18,7 +18,7 @@ type Country struct {
 	grump.Country
 
 	bodiesOrig * []quadtree.Body // original bodies position in the quatree
-	bodies * []quadtree.Body // bodies position in the quatree
+	bodiesSpread * []quadtree.Body // bodies position in the quatree after the spread simulation
 	Step int // step when the simulation stopped
 	
 	villages [][]Village
@@ -39,8 +39,15 @@ func (country * Country) Init() {
 
 	// get country coordinates
 	country.Unserialize()
-	country.LoadConfig( true )
-	country.LoadConfig( false )
+	country.LoadConfig( true ) // load config at the end  of the simulation
+	country.LoadConfig( false ) // load config at the start of the simulation
+
+	// init village array
+	country.villages = make( [][]Village, nbVillagePerAxe )
+	for x,_  := range country.villages {
+		country.villages[x] = make([]Village, nbVillagePerAxe)
+	}
+
 	country.ComputeBaryCenters()
 	
 }
@@ -88,11 +95,11 @@ func (country * Country) LoadConfig( isOriginal bool) bool {
 		}
 		Info.Printf( "nb item parsed in file %d\n", len( *country.bodiesOrig))
 	} else {
-		country.bodies = & bodies
-		if err = jsonParser.Decode( country.bodies); err != nil {
+		country.bodiesSpread = & bodies
+		if err = jsonParser.Decode( country.bodiesSpread); err != nil {
 			log.Fatal( fmt.Sprintf( "parsing config file %s", err.Error()))
 		}
-		Info.Printf( "nb item parsed in file %d\n", len( *country.bodies))
+		Info.Printf( "nb item parsed in file %d\n", len( *country.bodiesSpread))
 	}
 	Info.Printf( "Country is %s, step is %d", ctry, country.Step)
 
@@ -103,21 +110,21 @@ func (country * Country) LoadConfig( isOriginal bool) bool {
 
 // compute villages barycenters
 func (country * Country) ComputeBaryCenters() {
-	
-	country.villages = make( [][]Village, nbVillagePerAxe )
-	
-	for x,_  := range country.villages {
-		country.villages[x] = make([]Village, nbVillagePerAxe)
-	}
+	Info.Printf("ComputeBaryCenters begins for country %s", country.Name)
 
-	// parse bodies
-	for _,b := range *country.bodies {
+	// parse bodiesSpread to compute bary centers 
+	// use bodiesOrig to compute bary centers
+	for index,b := range *country.bodiesSpread {
+
 		// compute village coordinate (from 0 to nbVillagePerAxe-1)
-		x := int( math.Floor(float64( nbVillagePerAxe) * b.X))
-		y := int( math.Floor(float64( nbVillagePerAxe) * b.Y))
+		villageX := int( math.Floor(float64( nbVillagePerAxe) * b.X))
+		villageY := int( math.Floor(float64( nbVillagePerAxe) * b.Y))
 
-		// add body to the barycenter of the village
-		country.villages[x][y].addBody( b)
+		Trace.Printf("Adding body index %d to village %d %d", index, villageX, villageY)
+
+		// add body (original) to the barycenter of the village
+		bOrig := (*country.bodiesOrig)[index]
+		country.villages[villageX][villageY].addBody( bOrig)
 	}
 
 

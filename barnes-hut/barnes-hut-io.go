@@ -13,7 +13,7 @@ import (
 	"strings"
 	)
 
-const ( CountryBodiesNamePattern  = "conf-%s-%05d.bods")
+const ( CountryBodiesNamePattern  = "conf-%s-%08d-%05d.bods")
 	
 // serialize bodies's state vector into a file
 // convention is "step-xxxx.bod"
@@ -22,7 +22,7 @@ const ( CountryBodiesNamePattern  = "conf-%s-%05d.bods")
 func (r * Run) CaptureConfig() bool {
 	if r.state == STOPPED {
 
-		filename := fmt.Sprintf( CountryBodiesNamePattern, r.country, r.step)
+		filename := fmt.Sprintf( CountryBodiesNamePattern, r.country, len(*r.bodies), r.step)
 		file, err := os.Create(filename)
 		if( err != nil) {
 			log.Fatal(err)
@@ -87,8 +87,20 @@ func (r * Run) LoadConfig(filename string) bool {
     	}
     	ctry := filename[5:8]
     	r.country = ctry
-    	stepString := filename[9:14]
-    	
+
+    	// parse the number of elements 
+    	nbElementString := filename[9:17]
+    	var nbBodies int
+		_, errScanNbItems := fmt.Sscanf(nbElementString, "%08d", & nbBodies)
+		if( errScanNbItems != nil) {
+			log.Fatal(errScanNbItems)
+			return false			
+		}
+		Info.Printf( "Nb bodies in filename %d", nbBodies)
+		
+
+    	// parse the step
+    	stepString := filename[18:23]
 		nbItems, errScan := fmt.Sscanf(stepString, "%05d", & r.step)
 		if( errScan != nil) {
 			log.Fatal(errScan)
