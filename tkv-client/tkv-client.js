@@ -1,7 +1,41 @@
-angular.module('MyApp',['ngMaterial', 'ngMessages'])
 
-.controller('RenderImage', ['$scope', '$timeout', '$http', function ($scope, $timeout, $http) {
 
-	var vm = this;
+var app = angular.module("demoapp", ['leaflet-directive']);
 
+app.controller("EventsController", [ '$scope', function($scope) {
+    angular.extend($scope, {
+        center: {
+            lat: 52.374004,
+            lng: 4.890359,
+            zoom: 7
+        },
+        defaults: {
+            scrollWheelZoom: false
+        },
+        events: {
+            map: {
+                enable: ['zoomstart', 'drag', 'click', 'mousemove'],
+                logic: 'emit'
+            }
+        }
+    });
+
+    $scope.eventDetected = "No events yet...";
+
+    $scope.$on('leafletDirectiveMap.zoomstart', function(event){
+        $scope.eventDetected = "ZoomStart";
+    });
+
+    $scope.$on('leafletDirectiveMap.drag', function(event){
+        $scope.eventDetected = "Drag";
+    });
+
+  
+	$scope.$on('leafletDirectiveMap.click', function(event, args){
+    	console.log(args.leafletEvent.latlng);
+	});
+
+    $scope.$on('leafletDirectiveMap.mousemove', function(event){
+        $scope.eventDetected = "MouseMove";
+    });
 }]);

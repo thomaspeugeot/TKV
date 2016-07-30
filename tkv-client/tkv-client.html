@@ -1,49 +1,27 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="demoapp">
 <head>
 	<title>10 000 villages</title>
 	<link rel="stylesheet" href="node_modules/angular-material/angular-material.css">
 	<meta content="width=device-width, initial-scale=1.0" name="viewport">
 	<link href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" rel="stylesheet">
-	<link href="./leafletjs-example-quickstart.css" rel="stylesheet">
 </head>
 
-<body ng-app="MyApp" ng-controller="RenderImage as vm" ng-cloak="">
-	<div id="mapid"></div>
-	<script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
-	<script type="text/javascript">
 
-		var mymap = L.map('mapid').setView([47, 4], 5);
+<body ng-controller="EventsController">
+<leaflet width="100%" height="300px" event-broadcast="events"> </leaflet>
 
-		L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpandmbXliNDBjZWd2M2x6bDk3c2ZtOTkifQ._QA7i5Mpkd_m30IGElHziw', {
-			maxZoom: 18,
-			attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
-			'<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-			'Imagery © <a href="http://mapbox.com">Mapbox</a>',
-			id: 'mapbox.streets'
-		}).addTo(mymap);
-
-		var popup = L.popup();
-
-		function onMapClick(e) {
-			popup
-			.setLatLng(e.latlng)
-			.setContent("You clicked the map at " + e.latlng.toString())
-			.openOn(mymap);
-		}
-
-
-		mymap.on('click', onMapClick);
-
-	</script>
+    <h1>Events example</h1>
+    <p>All map events are propagated by default.</p>
+    <ul>
+        <li><strong ng-bind="eventDetected"></strong> event caught in listener.</li>
+	</ul>
 </body>
 
-<script src="node_modules/angular.js"></script>
-<script src="node_modules/angular-animate.min.js"</script>
-	<script src="node_modules/angular-route.min.js"></script>
-	<script src="node_modules/angular-aria.min.js"></script>
-	<script src="node_modules/angular-messages.min.js"></script>
-
-	<script src="node_modules/angular-material/angular-material.js"></script>
-	  <script src="tkv-client.js"></script>
-	</html>
+<script src="node_modules/leaflet/dist/leaflet.js"></script>
+<script src="node_modules/angular/angular.js"></script>
+<script src="node_modules/angular-leaflet-directive/dist/angular-leaflet-directive.js"></script>
+<script src="node_modules/angular-leaflet-directive/dist/angular-leaflet-directive.min.js"></script>
+<script src="node_modules/angular-leaflet-directive/dist/angular-leaflet-directive.no-header.js"></script>
+<script src="tkv-client.js"></script>
+</html>
