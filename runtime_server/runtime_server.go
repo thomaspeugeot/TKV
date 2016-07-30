@@ -63,9 +63,10 @@ func main() {
 	server.Info.Printf("begin listen on port %s", port)
 	mux := http.NewServeMux()
 
-	mux.Handle("/", http.FileServer(http.Dir("../leaflets/")) )
+	mux.Handle("/", http.FileServer(http.Dir("../tkv-client/")) )
 	
 	mux.HandleFunc("/area", area)
+	mux.HandleFunc("/villageCoordinates", villageCoordinates)
 	
 	
 	log.Fatal(http.ListenAndServe(port, mux))
@@ -80,4 +81,24 @@ func area(w http.ResponseWriter, req *http.Request) {
 		log.Println("error decoding ", err)
 	}
 	t.SetRenderingWindow( renderingWindow.X1, renderingWindow.X2, renderingWindow.Y1, renderingWindow.Y2)
+}
+
+type latLng struct {
+	lat, lng float64
+}
+
+// get village coordinates from lat/long
+func villageCoordinates(w http.ResponseWriter, req *http.Request) {
+	
+	// parse lat long from client
+	decoder := json.NewDecoder( req.Body)
+	var t latLng
+	err := decoder.Decode( &t)
+	if err != nil {
+		log.Println("error decoding ", err)
+	}
+	server.Info.Printf("villageCoordinates for lat %f, lng %d", t.lat, t.lng)
+
+	// dircontent, _ := json.MarshalIndent( r.DirConfig(), "", "	")
+	// fmt.Fprintf(w, "%s", dircontent)
 }
