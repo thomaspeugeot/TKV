@@ -9,13 +9,6 @@
 
 <body ng-app="MyApp" class="sliderdemoBasicUsage" ng-controller="RenderImage as vm" ng-cloak="">
 	<div id="mapid"></div>
-	<script src="node_modules/angular.js"></script>
-	<script src="node_modules/angular-animate.min.js"</script>
-		<script src="node_modules/angular-route.min.js"></script>
-		<script src="node_modules/angular-aria.min.js"></script>
-		<script src="node_modules/angular-messages.min.js"></script>
-
-		<script src="node_modules/angular-material/angular-material.js"></script>
 	<script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
 	<script type="text/javascript">
 
@@ -41,31 +34,6 @@
 
 		mymap.on('click', onMapClick);
 
-		angular.module('MyApp',['ngMaterial', 'ngMessages'])
-
-	.controller('RenderImage', ['$scope', '$timeout', '$http', function ($scope, $timeout, $http) {
-	
-		var vm = this;
-
-		vm.area = {
-			lat: 47.0,
-			lng: 4.0,
-			zoomPow10: 0
-		}
-		vm.GridNbPow10 = 0
-
-		vm.getVillagesCoordinates = function($event) {
-			console.info( "newImageCenter ", $event, $event.target.x, $event.target.y,  $event.target.height, $event.target.width);
-			console.info( "newImageCenter ", $event, $event.target.width, $event.target.height,  vm.area.x1, vm.area.x2, vm.area.y1, vm.area.y2);
-            console.info( "newImageCenter ", $event, $event.clientX, $event.clientY, $event.pageX, $event.pageY );
-            console.info( "newImageCenter x ", vm.area.x1 + (($event.pageX - $event.target.x)/$event.target.width)* (vm.area.x2 - vm.area.x1) );
-            console.info( "newImageCenter y ", vm.area.y1 + (($event.pageY - $event.target.y)/$event.target.height)* (vm.area.y2 - vm.area.y1) );
-            vm.area.centerX = vm.area.x1 + (($event.pageX - $event.target.x)/$event.target.width)* (vm.area.x2 - vm.area.x1);
-            vm.area.centerY = vm.area.y1 + (($event.pageY - $event.target.y)/$event.target.height)* (vm.area.y2 - vm.area.y1);		
-		}
-	
-
-	}]);
 
 	</script>
 	</body>
