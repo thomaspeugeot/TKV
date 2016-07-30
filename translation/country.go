@@ -17,6 +17,8 @@ import (
 type Country struct {
 	grump.Country
 
+	NbBodies int // nb of bodies according to the filename
+
 	bodiesOrig * []quadtree.Body // original bodies position in the quatree
 	bodiesSpread * []quadtree.Body // bodies position in the quatree after the spread simulation
 	Step int // step when the simulation stopped
@@ -61,7 +63,7 @@ func (country * Country) LoadConfig( isOriginal bool) bool {
 	
 	if isOriginal { step = country.Step }
 
-	filename := fmt.Sprintf( barnes_hut.CountryBodiesNamePattern, country.Name, step)
+	filename := fmt.Sprintf( barnes_hut.CountryBodiesNamePattern, country.Name, country.NbBodies, step)
 	Info.Printf( "LoadConfig file %s for country %s at step %d", filename, country.Name, step)
 
 	file, err := os.Open(filename)
