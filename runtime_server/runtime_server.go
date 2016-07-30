@@ -83,8 +83,8 @@ func area(w http.ResponseWriter, req *http.Request) {
 	t.SetRenderingWindow( renderingWindow.X1, renderingWindow.X2, renderingWindow.Y1, renderingWindow.Y2)
 }
 
-type latLng struct {
-	lat, lng float64
+type LatLng struct {
+	Lat, Lng float64
 }
 
 // get village coordinates from lat/long
@@ -92,12 +92,12 @@ func villageCoordinates(w http.ResponseWriter, req *http.Request) {
 	
 	// parse lat long from client
 	decoder := json.NewDecoder( req.Body)
-	var t latLng
+	var t LatLng
 	err := decoder.Decode( &t)
 	if err != nil {
 		log.Println("error decoding ", err)
 	}
-	server.Info.Printf("villageCoordinates for lat %f, lng %d", t.lat, t.lng)
+	server.Info.Printf("villageCoordinates for lat %f, lng %f", t.Lat, t.Lng)
 
 	// dircontent, _ := json.MarshalIndent( r.DirConfig(), "", "	")
 	// fmt.Fprintf(w, "%s", dircontent)
