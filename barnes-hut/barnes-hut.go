@@ -160,7 +160,8 @@ func (r * Run) SetGridFieldNb( v int)  {
 func NewRun() * Run {
 	var r Run
 	r.state = STOPPED
-	r.updatePositionMode = ACROSS_SQUARE_BORDER
+//	r.updatePositionMode = ACROSS_SQUARE_BORDER
+	r.updatePositionMode = WITHIN_SQUARE_BORDER
 	r.gridFieldNb = 10
 	bodies := make([]quadtree.Body, 0)
 	r.Init( & bodies)
