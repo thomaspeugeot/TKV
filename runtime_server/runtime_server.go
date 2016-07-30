@@ -65,22 +65,10 @@ func main() {
 
 	mux.Handle("/", http.FileServer(http.Dir("../tkv-client/")) )
 	
-	mux.HandleFunc("/area", area)
 	mux.HandleFunc("/villageCoordinates", villageCoordinates)
-	
-	
+		
 	log.Fatal(http.ListenAndServe(port, mux))
 	server.Info.Printf("end")
-}
-
-func area(w http.ResponseWriter, req *http.Request) {
-	decoder := json.NewDecoder( req.Body)
-	var renderingWindow test_struct
-	err := decoder.Decode( &renderingWindow)
-	if err != nil {
-		log.Println("error decoding ", err)
-	}
-	t.SetRenderingWindow( renderingWindow.X1, renderingWindow.X2, renderingWindow.Y1, renderingWindow.Y2)
 }
 
 type LatLng struct {
@@ -98,6 +86,10 @@ func villageCoordinates(w http.ResponseWriter, req *http.Request) {
 		log.Println("error decoding ", err)
 	}
 	server.Info.Printf("villageCoordinates for lat %f, lng %f", t.Lat, t.Lng)
+
+	x, y := t.VillageCoordinates( t.Lat, t.Lng)
+
+	server.Info.Printf("is %d %d", x, y)
 
 	// dircontent, _ := json.MarshalIndent( r.DirConfig(), "", "	")
 	// fmt.Fprintf(w, "%s", dircontent)

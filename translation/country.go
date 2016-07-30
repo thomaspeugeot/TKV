@@ -128,6 +128,17 @@ func (country * Country) ComputeBaryCenters() {
 		bOrig := (*country.bodiesOrig)[index]
 		country.villages[villageX][villageY].addBody( bOrig)
 	}
+}
 
+func (country * Country) VillageCoordinates( lat, lng float64) (x, y int) {
 
+	// compute relative coordinates within the square
+	xRel := (lng - float64( country.XllCorner) ) / GrumpSpacing
+	yRel := (lat - float64( country.YllCorner) ) / GrumpSpacing
+
+	Info.Printf( "VillageCoordinates %f %f relative to country %f %f ", lat, lng, xRel, yRel)
+	villageX := int( math.Floor(float64( nbVillagePerAxe) * xRel))
+	villageY := int( math.Floor(float64( nbVillagePerAxe) * yRel))
+
+	return villageX, villageY
 }
