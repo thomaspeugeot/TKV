@@ -75,22 +75,29 @@ type LatLng struct {
 	Lat, Lng float64
 }
 
+type XY struct {
+	X, Y int
+}
+
 // get village coordinates from lat/long
 func villageCoordinates(w http.ResponseWriter, req *http.Request) {
 	
 	// parse lat long from client
 	decoder := json.NewDecoder( req.Body)
-	var t LatLng
-	err := decoder.Decode( &t)
+	var ll LatLng
+	err := decoder.Decode( &ll)
 	if err != nil {
 		log.Println("error decoding ", err)
 	}
-	server.Info.Printf("villageCoordinates for lat %f, lng %f", t.Lat, t.Lng)
+	server.Info.Printf("villageCoordinates for lat %f, lng %f", ll.Lat, ll.Lng)
 
-	x, y := t.VillageCoordinates( t.Lat, t.Lng)
-
+	x, y := t.VillageCoordinates( ll.Lat, ll.Lng)
 	server.Info.Printf("is %d %d", x, y)
 
-	// dircontent, _ := json.MarshalIndent( r.DirConfig(), "", "	")
-	// fmt.Fprintf(w, "%s", dircontent)
+	var xy XY
+	xy.X = x
+	xy.Y = y
+
+	XYjson, _ := json.MarshalIndent( xy, "", "	")
+	fmt.Fprintf(w, "%s", XYjson)
 }
