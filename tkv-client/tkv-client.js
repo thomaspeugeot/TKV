@@ -41,7 +41,10 @@ app.controller("EventsController", [ '$scope', '$http', function($scope, $http) 
 						lng: args.leafletEvent.latlng.lng,
 						message: message, 
 						focus: true,
-						draggable: false
+						draggable: false,
+						options: {
+							noHide: true
+						}
 					};	
 				}, 
   				function(errResponse) { // error handler

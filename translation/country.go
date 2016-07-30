@@ -21,6 +21,7 @@ type Country struct {
 
 	bodiesOrig * []quadtree.Body // original bodies position in the quatree
 	bodiesSpread * []quadtree.Body // bodies position in the quatree after the spread simulation
+	VilCoordinates [][]int
 	Step int // step when the simulation stopped
 	
 	villages [][]Village
@@ -36,11 +37,15 @@ const (
 // this value can be set interactively during the run
 var nbVillagePerAxe int = 100 
 
+
 // init variables
 func (country * Country) Init() {
 
 	// get country coordinates
 	country.Unserialize()
+
+	Info.Printf("Init after Unserialize ", *country)
+
 	country.LoadConfig( true ) // load config at the end  of the simulation
 	country.LoadConfig( false ) // load config at the start of the simulation
 
@@ -48,6 +53,11 @@ func (country * Country) Init() {
 	country.villages = make( [][]Village, nbVillagePerAxe )
 	for x,_  := range country.villages {
 		country.villages[x] = make([]Village, nbVillagePerAxe)
+	}
+
+	country.VilCoordinates = make( [][]int, country.NbBodies)
+	for idx, _ := range country.VilCoordinates {
+		country.VilCoordinates[idx] = make( []int, 2)
 	}
 
 	country.ComputeBaryCenters()
@@ -127,18 +137,40 @@ func (country * Country) ComputeBaryCenters() {
 		// add body (original) to the barycenter of the village
 		bOrig := (*country.bodiesOrig)[index]
 		country.villages[villageX][villageY].addBody( bOrig)
+
+		country.VilCoordinates[index][0] = villageX
+		country.VilCoordinates[index][1] = villageY
 	}
 }
 
 func (country * Country) VillageCoordinates( lat, lng float64) (x, y int) {
 
+	Info.Printf( "VillageCoordinates country size lat %f lng %f", 
+		float64(country.NCols) * GrumpSpacing,
+		float64(country.NRows) * GrumpSpacing)
+
 	// compute relative coordinates within the square
-	xRel := (lng - float64( country.XllCorner) ) / GrumpSpacing
-	yRel := (lat - float64( country.YllCorner) ) / GrumpSpacing
+	xRel := (lng - float64( country.XllCorner) ) / (float64(country.NCols) * GrumpSpacing)
+	yRel := (lat - float64( country.YllCorner) ) / (float64(country.NRows) * GrumpSpacing)
 
-	Info.Printf( "VillageCoordinates %f %f relative to country %f %f ", lat, lng, xRel, yRel)
-	villageX := int( math.Floor(float64( nbVillagePerAxe) * xRel))
-	villageY := int( math.Floor(float64( nbVillagePerAxe) * yRel))
+	// parse all bodies and get closest body
+	closestIndex := -1
+	minDistance := 2.0
+	for index,b := range *country.bodiesOrig {
+		distanceX := b.X - xRel
+		distanceY := b.Y - yRel
+		distance := math.Sqrt( (distanceX*distanceX) + (distanceY*distanceY))
 
+		if( distance < minDistance ) { 
+			closestIndex = index 
+			minDistance = distance
+		}
+	}	
+	Info.Printf("VillageCoordinates closestIndex %d, minDistance %f", closestIndex, minDistance)
+
+	villageX := country.VilCoordinates[closestIndex][0]
+	villageY := country.VilCoordinates[closestIndex][1]
+
+	Info.Printf( "VillageCoordinates %f %f relative to country %f %f village %d %d ", lat, lng, xRel, yRel, villageX, villageY)
 	return villageX, villageY
 }
