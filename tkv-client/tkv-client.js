@@ -6,7 +6,7 @@ app.controller("EventsController", [ '$scope', '$http', function($scope, $http) 
 
 	angular.extend($scope, {
 		center: {
-			lat: 52.374004,
+			lat: 47.374004,
 			lng: 4.890359,
 			zoom: 7
 		},
@@ -34,9 +34,11 @@ app.controller("EventsController", [ '$scope', '$http', function($scope, $http) 
 					console.log(response.status);
 					console.log('village villageCoordinates answer', response.data.X, response.data.Y);
 
-					message = "village "+response.data.X+" "+response.data.Y;
+					message = "village "+response.data.X+" "+response.data.Y+" "+response.data.Distance;
 
-					$scope.markers['user'] = {
+					parseFloat(response.data.LatClosest);
+
+					$scope.markers['clickPos'] = {
 						lat: args.leafletEvent.latlng.lat,
 						lng: args.leafletEvent.latlng.lng,
 						message: message, 
@@ -54,7 +56,4 @@ app.controller("EventsController", [ '$scope', '$http', function($scope, $http) 
   				);
 
 	}); // end of click
-
-
-
 }]);

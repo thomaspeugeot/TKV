@@ -143,7 +143,7 @@ func (country * Country) ComputeBaryCenters() {
 	}
 }
 
-func (country * Country) VillageCoordinates( lat, lng float64) (x, y int) {
+func (country * Country) VillageCoordinates( lat, lng float64) (x, y int, distance, latClosest, lngClosest float64) {
 
 	Info.Printf( "VillageCoordinates country size lat %f lng %f", 
 		float64(country.NCols) * GrumpSpacing,
@@ -170,7 +170,12 @@ func (country * Country) VillageCoordinates( lat, lng float64) (x, y int) {
 
 	villageX := country.VilCoordinates[closestIndex][0]
 	villageY := country.VilCoordinates[closestIndex][1]
+	xRelClosest := (*country.bodiesOrig)[closestIndex].X
+	yRelClosest := (*country.bodiesOrig)[closestIndex].Y
+
+	latOptimClosest := float64( country.XllCorner) + (xRelClosest * float64(country.NCols) * GrumpSpacing)
+	lngOptimClosest := float64( country.YllCorner) + (yRelClosest * float64(country.NRows) * GrumpSpacing)
 
 	Info.Printf( "VillageCoordinates %f %f relative to country %f %f village %d %d ", lat, lng, xRel, yRel, villageX, villageY)
-	return villageX, villageY
+	return villageX, villageY, minDistance, latOptimClosest, lngOptimClosest
 }

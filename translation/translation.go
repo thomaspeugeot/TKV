@@ -34,11 +34,17 @@ func (t * Translation) SetRenderingWindow( xMin, xMax, yMin, yMax float64) {
 
 
 // 
-func (t * Translation) VillageCoordinates( lat, lng float64) (x, y int) {
+func (t * Translation) VillageCoordinates( lat, lng float64) (x, y int, distance, latClosest, lngClosest float64) {
 
 	// we work for france only 
 	// convert from lat lng to x, y in the Country 
 	return t.country.VillageCoordinates( lat, lng)
 }
+
+
+
+
+
+
 
 

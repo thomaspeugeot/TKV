@@ -226,7 +226,7 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 		};
 
 		vm.toggleRenderChoice  = function() {
-			$http.get('http://localhost:8000/toggleRenderChoice').then( function(response) {},
+			$http.get('http://localhost:8000/toggleRenderChoice').then( function(response) { vm.updateArea(); },
 				function(errResponse) { console.error('error while request toggleRenderChoice');})	
 		};
 

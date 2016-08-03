@@ -75,8 +75,10 @@ type LatLng struct {
 	Lat, Lng float64
 }
 
-type XY struct {
+type VillageCoordResponse struct {
 	X, Y int
+	Distance float64
+	LatClosest, LngClosest float64
 }
 
 // get village coordinates from lat/long
@@ -91,13 +93,16 @@ func villageCoordinates(w http.ResponseWriter, req *http.Request) {
 	}
 	server.Info.Printf("villageCoordinates for lat %f, lng %f", ll.Lat, ll.Lng)
 
-	x, y := t.VillageCoordinates( ll.Lat, ll.Lng)
-	server.Info.Printf("is %d %d", x, y)
+	x, y, distance, latClosest, lngClosest := t.VillageCoordinates( ll.Lat, ll.Lng)
+	server.Info.Printf("is %d %d, distance %f", x, y, distance)
 
-	var xy XY
+	var xy VillageCoordResponse
 	xy.X = x
 	xy.Y = y
+	xy.Distance = distance
+	xy.LatClosest = latClosest
+	xy.LngClosest = lngClosest
 
-	XYjson, _ := json.MarshalIndent( xy, "", "	")
-	fmt.Fprintf(w, "%s", XYjson)
+	VillageCoordResponsejson, _ := json.MarshalIndent( xy, "", "	")
+	fmt.Fprintf(w, "%s", VillageCoordResponsejson)
 }
