@@ -27,7 +27,9 @@ type circleCoord struct {
 	x,y float64
 }
 
-var targetMaxBodies = 400000
+//var targetMaxBodies = 400000
+// var targetMaxBodies = 40000
+var targetMaxBodies = 100000
 
 var maxCirclePerCell = 750
 

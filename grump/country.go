@@ -42,7 +42,7 @@ func (country * Country) Unserialize() {
 		log.Fatal( fmt.Sprintf( "parsing config file %s", err.Error()))
 	}
 
-	Info.Printf( "Unserialize country ", *country)
+	Info.Printf( "(Grump) Unserialize country %s", country.Name)
 
 	file.Close()
 }

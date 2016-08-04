@@ -34,7 +34,7 @@ app.controller("EventsController", [ '$scope', '$http', function($scope, $http) 
 					console.log(response.status);
 					console.log('village villageCoordinates answer', response.data.X, response.data.Y);
 
-					message = "village "+response.data.X+" "+response.data.Y+" "+response.data.Distance;
+					message = "village "+response.data.X+" "+response.data.Y+" "+response.data.Distance+" "+response.data.LatClosest+" "+response.data.LngClosest;
 
 					parseFloat(response.data.LatClosest);
 
@@ -48,6 +48,16 @@ app.controller("EventsController", [ '$scope', '$http', function($scope, $http) 
 							noHide: true
 						}
 					};	
+
+					lat = 	parseFloat(response.data.LatClosest);
+					lng =  parseFloat(response.data.LngClosest)
+
+					$scope.markers['closestVillage'] = {
+						lat: lat,
+						lng: lng,
+						message: 'closest village'
+					}
+
 				}, 
   				function(errResponse) { // error handler
   					console.error('error while posting jsonLatLng');
