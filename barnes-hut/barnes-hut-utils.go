@@ -94,14 +94,15 @@ func (r * Run) RenderGif(out io.Writer) {
 		if false { fmt.Printf("Encoding body %d %f %f\n", idx, body.X, body.Y) }
 	
 		// take into account rendering window
+		// in gif, A Point is an (x, y) co-ordinate on the integer grid, with axes increasing right and down.
 		var imX, imY float64
 		if( r.renderChoice == RUNNING_CONFIGURATION) {
 			imX = (body.X - r.xMin)/(r.xMax-r.xMin)
-			imY = (body.Y - r.yMin)/(r.yMax-r.yMin)
+			imY = (r.yMax - body.Y)/(r.yMax-r.yMin) // coordinates in y are down
 		} else { 
 			// we display the original
 			imX = (bodyOrig.X - r.xMin)/(r.xMax-r.xMin)
-			imY = (bodyOrig.Y - r.yMin)/(r.yMax-r.yMin)				
+			imY = (r.yMax - bodyOrig.Y)/(r.yMax-r.yMin)	// coordinates in y are down
 		}
 		// if( (body.X > r.xMin) && (body.X < r.xMax) && (body.Y > r.yMin) && (body.Y < r.yMax) ) {
 		if( (imX > 0.0) && (imX < 1.0) && (imY > 0.0) && (imY < 1.0) ) {

@@ -37,8 +37,6 @@ var maxCirclePerCell = 750
 type arrangementsStore [][]circleCoord
 
 
-
-//
 // on the PC
 //  go run grump-reader.go -tkvdata="C:\Users\peugeot\tkv-data"
 func main() {
@@ -91,7 +89,6 @@ func main() {
 		word++		
 		fmt.Println( fmt.Sprintf("item %d : %s", word, scanner.Text()))
 	}
-	rowLatWidth := 0.0083333333333
 	colLngWidth := 0.0083333333333
 
 	// prepare the count matrix
@@ -100,7 +97,7 @@ func main() {
 	popTotal := 0.0
 	// scan the file and store result in countMatrix
 	for row :=0; row < country.NRows; row++ {
-		lat := float64( country.YllCorner) + (float64( country.NRows - row)*rowLatWidth)
+		lat := country.Row2Lat( row)
 		for col :=0; col < country.NCols ; col++ {
 			scanner.Scan()
 			// lng := float64(country.XllCorner) + (float64(col)*colLngWidth)
@@ -165,14 +162,13 @@ func main() {
 	cumulativePopTotal := 0.0
 	bodiesNb :=0
 	for row :=0; row < country.NRows; row++ {
-		lat := float64( country.YllCorner) + (float64( country.NRows - row)*rowLatWidth)
+		lat := country.Row2Lat( row)
 		for col :=0; col < country.NCols ; col++ {
 			lng := float64(country.XllCorner) + (float64(col)*colLngWidth)
 
 			// compute relative coordinate of the cell
-			relX := (lng - float64(country.XllCorner)) / (float64(country.NCols) * colLngWidth)
-			relY := (lat - float64(country.YllCorner)) / (float64(country.NRows) * rowLatWidth)
-
+			relX, relY := country.LatLng2XY( lat, lng)
+			
 			// fetch count of the cell
 			count := countMatrix[ row*country.NCols + col ]
 

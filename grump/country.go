@@ -15,6 +15,13 @@ type Country struct {
 	NCols, NRows, XllCorner, YllCorner int
 }	
 
+func (country * Country) Row2Lat( row int) (lat float64) {
+		// lat := float64( country.YllCorner) + (float64( country.NRows - row)*rowLatWidth)
+	lat = float64( country.YllCorner) + float64(row)*GrumpSpacing
+	return lat
+}
+
+
 func (country * Country) Serialize() {
 
 	filename := fmt.Sprintf("conf-%s.coord", country.Name)
@@ -44,9 +51,11 @@ func (country * Country) Unserialize() {
 
 	Info.Printf( "(Grump) Unserialize country %s", country.Name)
 
-	Info.Printf("Init Country size lng %f lat %f", 
-		float64(country.NCols) * GrumpSpacing,
-		float64(country.NRows) * GrumpSpacing)
+	Info.Printf("(Grump) Init Country orig lat %f lng %f size lat %f lng %f ", 
+		float64(country.YllCorner),
+		float64(country.XllCorner),
+		float64(country.NRows) * GrumpSpacing,
+		float64(country.NCols) * GrumpSpacing)
 
 	file.Close()
 }
@@ -64,8 +73,8 @@ func (country * Country) LatLng2XY( lat, lng float64) (x, y float64) {
 // given a lat/lng, provides the relative coordinate within the country
 func (country * Country) XY2LatLng(x, y float64) ( lat, lng float64) {
 
-	lat = float64( country.YllCorner) + (y * float64(country.NCols) * GrumpSpacing)
-	lng = float64( country.XllCorner) + (x * float64(country.NRows) * GrumpSpacing)
+	lat = float64( country.YllCorner) + (y * float64(country.NRows) * GrumpSpacing)
+	lng = float64( country.XllCorner) + (x * float64(country.NCols) * GrumpSpacing)
 
 	return lat, lng
 }

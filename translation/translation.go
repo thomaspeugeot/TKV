@@ -19,11 +19,6 @@ func (t * Translation) Init(country Country) {
 
 	Info.Printf("Country is %s with step %d", country.Name, country.Step)
 
-	// rowLatWidth := 0.0083333333333
-	// colLngWidth := 0.0083333333333
-
-	// load final config
-	// load initial config
 }
 
 func (t * Translation) SetRenderingWindow( xMin, xMax, yMin, yMax float64) {
