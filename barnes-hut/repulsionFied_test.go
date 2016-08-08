@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 )
 
-func TestRepulsionFieldInit(t *testing.T) {
+func OldTestRepulsionFieldInit(t *testing.T) {
 
 	r := NewRun()
 	r.LoadConfig("conf-fra-00000.bods")
