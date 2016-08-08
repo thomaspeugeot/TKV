@@ -183,15 +183,6 @@ func TestConcurrentMinDistanceCompute( t *testing.T) {
 
 }
 
-// test to check if the zero distance problem with France is solved.
-func TestZeroDistanceFrance( t *testing.T) {
-
-	r := NewRun()
-	r.LoadConfig("conf-fra-00000.bods")
-	r.OneStep()
-
-}
-
 func TestEmptyBodySet( t *testing.T ) {
 
 	r := NewRun()

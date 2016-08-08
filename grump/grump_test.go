@@ -1,4 +1,4 @@
-package grump_reader
+package grump
 
 import (
 	"image"
