@@ -5,8 +5,6 @@ package translation
 import (
 )
 
-const GrumpSpacing float64 = 0.0083333333333
-
 
 type Translation struct {
 	xMin, xMax, yMin, yMax float64 // coordinates of the rendering window (used to compute liste of villages)

@@ -46,10 +46,6 @@ func (country * Country) Init() {
 
 	Info.Printf("Init after Unserialize %s", country.Name)
 
-	Info.Printf("Init Country size lng %f lat %f", 
-		float64(country.NCols) * GrumpSpacing,
-		float64(country.NRows) * GrumpSpacing)
-
 	country.LoadConfig( true ) // load config at the end  of the simulation
 	country.LoadConfig( false ) // load config at the start of the simulation
 
@@ -148,21 +144,12 @@ func (country * Country) ComputeBaryCenters() {
 	}
 }
 
-// given a lat/lng, provides the relative coordinate within the country
-func (country * Country) LatLng2XY( lat, lng float64) (x, y float64) {
-
-	// compute relative coordinates within the square
-	x = (lng - float64( country.XllCorner)) / (float64(country.NCols) * GrumpSpacing)
-	y = (lat - float64( country.YllCorner)) / (float64(country.NRows) * GrumpSpacing) // y is 0 at northest point and 1.0 at southest point
-
-	return x, y
-}
-
 func (country * Country) VillageCoordinates( lat, lng float64) (x, y int, distance, latClosest, lngClosest float64) {
 
 	// compute relative coordinates within the square
-	xRel := (lng - float64( country.XllCorner) ) / (float64(country.NCols) * GrumpSpacing)
-	yRel := 1.0 - ((lat - float64( country.YllCorner)) / (float64(country.NRows) * GrumpSpacing)) // y is 0 at northest point and 1.0 at southest point
+	xRel, yRel := country.LatLng2XY( lat, lng)
+	Info.Printf("VillageCoordinates lat %f,  lng %f", lat, lng)
+	Info.Printf("Rel x %f, Rel y %f", xRel, yRel)
 
 	// parse all bodies and get closest body
 	closestIndex := -1
@@ -184,8 +171,8 @@ func (country * Country) VillageCoordinates( lat, lng float64) (x, y int, distan
 	xRelClosest := (*country.bodiesOrig)[closestIndex].X
 	yRelClosest := (*country.bodiesOrig)[closestIndex].Y
 
-	lngOptimClosest := float64( country.XllCorner) + (xRelClosest * float64(country.NCols) * GrumpSpacing)
-	latOptimClosest := float64( country.YllCorner) + ((1.0 - yRelClosest) * float64(country.NRows) * GrumpSpacing)
+	latOptimClosest, lngOptimClosest := country.XY2LatLng( xRelClosest, yRelClosest)
+	
 
 	Info.Printf( "VillageCoordinates %f %f relative to country %f %f", lat, lng, xRel, yRel)
 	Info.Printf( "VillageCoordinates rel closest %f %f lat lng Closet %f %f", xRelClosest, yRelClosest, latOptimClosest, lngOptimClosest)
