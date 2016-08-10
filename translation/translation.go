@@ -14,10 +14,12 @@ type Translation struct {
 
 func (t * Translation) Init(country Country) {
 
+	Info.Printf("Init beg: Country is %s with step %d", country.Name, country.Step)
+
 	t.country = country
 	t.country.Init()
 
-	Info.Printf("Country is %s with step %d", country.Name, country.Step)
+	Info.Printf("Init end: Country is %s with step %d", country.Name, country.Step)
 
 }
 

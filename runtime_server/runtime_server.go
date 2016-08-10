@@ -26,10 +26,10 @@ func main() {
 	countryPtr := flag.String("country","fra","iso 3166 country code")
 
 	// flag "nbBodies"
-	nbBodiesPtr := flag.String("nbBodies","222317","nb of bodies")
+	nbBodiesPtr := flag.String("nbBodies","34413","nb of bodies")
 
 	// flag "step"
-	stepPtr := flag.String("step","8542","simulation step for the spread bodies")
+	stepPtr := flag.String("step","3563","simulation step for the spread bodies")
 
 	flag.Parse()
 
@@ -37,14 +37,14 @@ func main() {
 	var country translation.Country
 	country.Name = *countryPtr
 	{
-		_, errScan := fmt.Sscanf(*stepPtr, "%d", & country.Step)
+		_, errScan := fmt.Sscanf(*nbBodiesPtr, "%d", & country.NbBodies)
 		if( errScan != nil) {
 			log.Fatal(errScan)
 			return			
 		}
 	}
 	{
-		_, errScan := fmt.Sscanf(*nbBodiesPtr, "%d", & country.NbBodies)
+		_, errScan := fmt.Sscanf(*stepPtr, "%d", & country.Step)
 		if( errScan != nil) {
 			log.Fatal(errScan)
 			return			
@@ -56,7 +56,11 @@ func main() {
 	server.Info.Printf("nbBodies to parse %d", country.NbBodies)
 	server.Info.Printf("step to parse %d", country.Step)
 
+
 	t.Init(country)
+
+
+
 
 	port := "localhost:8001"
 

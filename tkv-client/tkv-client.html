@@ -4,15 +4,14 @@
 	<title>10 000 villages</title>
 	<link rel="stylesheet" href="node_modules/angular-material/angular-material.css">
 	<meta content="width=device-width, initial-scale=1.0" name="viewport">
-	<link href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" rel="stylesheet">
+	<link href="node_modules/leaflet/dist/leaflet.css" rel="stylesheet">
 </head>
 
 
 <body ng-controller="EventsController">
-<leaflet width="100%" height="300px" markers="markers" event-broadcast="events"> </leaflet>
+<leaflet width="100%" height="100%" markers="markers" event-broadcast="events"> </leaflet>
 
-    <h1>Events example</h1>
-    <p>All map events are propagated by default.</p>
+    <h1>10 000 villages</h1>
     <ul>
         <li><strong ng-bind="eventDetected"></strong> event caught in listener.</li>
 	</ul>

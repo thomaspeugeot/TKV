@@ -41,10 +41,14 @@ var nbVillagePerAxe int = 100
 // init variables
 func (country * Country) Init() {
 
-	// get country coordinates
+	// unserialize from conf-<country trigram>.coord
+	// store step because the unseralize set it to a wrong value
+	step := country.Step
 	country.Unserialize()
+	country.Step = step
 
-	Info.Printf("Init after Unserialize %s", country.Name)
+	Info.Printf("Init after Unserialize name %s", country.Name)
+	Info.Printf("Init after Unserialize step %d", country.Step)
 
 	country.LoadConfig( true ) // load config at the end  of the simulation
 	country.LoadConfig( false ) // load config at the start of the simulation
@@ -60,7 +64,6 @@ func (country * Country) Init() {
 		country.VilCoordinates[idx] = make( []int, 2)
 	}
 
-
 	country.ComputeBaryCenters()
 	
 }
@@ -69,13 +72,16 @@ func (country * Country) Init() {
 // check that it matches the 
 func (country * Country) LoadConfig( isOriginal bool) bool {
 
+	Info.Printf( "Load Config begin : Country is %s, step %d", country.Name, country.Step)
+
 	// computing the file name from the step
-	var step int
+	step := 0
 	
-	if isOriginal { step = country.Step }
+	// if isOrignal load the file with the step number 0, else use spread
+	if ! isOriginal { step = country.Step }
 
 	filename := fmt.Sprintf( barnes_hut.CountryBodiesNamePattern, country.Name, country.NbBodies, step)
-	Info.Printf( "LoadConfig file %s for country %s at step %d", filename, country.Name, step)
+	Info.Printf( "LoadConfig original %t file %s for country %s at step %d", isOriginal, filename, country.Name, step)
 
 	file, err := os.Open(filename)
 	if( err != nil) {
@@ -83,21 +89,6 @@ func (country * Country) LoadConfig( isOriginal bool) bool {
 		return false
 	}
 
-	// get the number of steps in the file name
-	// var countryName string
-	for index, runeValue := range filename {
-    	Trace.Printf("%#U starts at byte position %d\n", runeValue, index)
-	}
-	ctry := filename[5:8]
-	stepString := filename[9:14]
-	
-	nbItems, errScan := fmt.Sscanf(stepString, "%05d", & country.Step)
-	if( errScan != nil) {
-		log.Fatal(errScan)
-		return false			
-	}
-	Trace.Printf( "nb item parsed in file name %d (should be one)\n", nbItems)
-	
 	jsonParser := json.NewDecoder(file)
 
 	bodies := (make([]quadtree.Body, 0))
@@ -106,17 +97,18 @@ func (country * Country) LoadConfig( isOriginal bool) bool {
 		if err = jsonParser.Decode( country.bodiesOrig); err != nil {
 			log.Fatal( fmt.Sprintf( "parsing config file %s", err.Error()))
 		}
-		Info.Printf( "nb item parsed in file %d\n", len( *country.bodiesOrig))
+		Info.Printf( "nb item parsed in file for orig %d\n", len( *country.bodiesOrig))
 	} else {
 		country.bodiesSpread = & bodies
 		if err = jsonParser.Decode( country.bodiesSpread); err != nil {
 			log.Fatal( fmt.Sprintf( "parsing config file %s", err.Error()))
 		}
-		Info.Printf( "nb item parsed in file %d\n", len( *country.bodiesSpread))
+		Info.Printf( "nb item parsed in file for spread %d\n", len( *country.bodiesSpread))
 	}
-	Info.Printf( "Country is %s, step is %d", ctry, country.Step)
 
 	file.Close()
+
+	Info.Printf( "Load Config end : Country is %s, step %d", country.Name, country.Step)
 	
 	return true
 }
@@ -153,7 +145,7 @@ func (country * Country) VillageCoordinates( lat, lng float64) (x, y int, distan
 
 	// parse all bodies and get closest body
 	closestIndex := -1
-	minDistance := 2.0
+	minDistance := 1000000000.0 // we start from away
 	for index,b := range *country.bodiesOrig {
 		distanceX := b.X - xRel
 		distanceY := b.Y - yRel
