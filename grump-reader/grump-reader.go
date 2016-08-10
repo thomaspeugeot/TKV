@@ -27,9 +27,10 @@ type circleCoord struct {
 	x,y float64
 }
 
-//var targetMaxBodies = 400000
+// var targetMaxBodies = 400000
+   var targetMaxBodies = 10000000
 // var targetMaxBodies = 40000
-var targetMaxBodies = 100000
+// var targetMaxBodies = 100000
 
 var maxCirclePerCell = 750
 
@@ -116,8 +117,8 @@ func main() {
 	grumpFile.Close()
 
 	// get the arrangement
-	arrangements := make( arrangementsStore, maxCirclePerCell)
-	for nbCircles := 1; nbCircles < maxCirclePerCell; nbCircles++ {
+	arrangements := make( arrangementsStore, maxCirclePerCell+1)
+	for nbCircles := 1; nbCircles <= maxCirclePerCell; nbCircles++ {
 
 		fmt.Printf("\rgetting arrangement for %3d circles", nbCircles)
 
@@ -173,11 +174,17 @@ func main() {
 			count := countMatrix[ row*country.NCols + col ]
 
 			// how many bodies ? it is maxBodies *( count / country.PCount) 
-			bodiesInCell := int( math.Floor( float64( targetMaxBodies) * (count/popTotal)))
+			bodiesInCell := int( math.Floor( float64( targetMaxBodies) * count/ popTotal))
+
+			massPerBody := float64(count)/float64(bodiesInCell)
+
 			if bodiesInCell > bodiesInCellMax { bodiesInCellMax = bodiesInCell}
 			
 			if (bodiesInCell > maxCirclePerCell ) {
 				grump.Error.Printf("bodiesInCell %d superior to maxCirclePerCell %d", bodiesInCell, maxCirclePerCell)
+
+				bodiesInCell = maxCirclePerCell
+				massPerBody = float64(count)/float64(bodiesInCell)
 			}
 			
 			// initiate the bodies
@@ -186,8 +193,8 @@ func main() {
 				// angle := float64(i) * 2.0 * math.Pi / float64(bodiesInCell)
 				body.X = relX + (1.0/float64(country.NCols))*(0.5 + arrangements[bodiesInCell][i].x)
 				body.Y = relY + (1.0/float64(country.NRows))*(0.5 + arrangements[bodiesInCell][i].y)
-				// body.M = count/float64(bodiesInCell)
-				body.M = float64(targetMaxBodies)
+				body.M = massPerBody
+				
 				bodies = append( bodies,  body)
 			}
 			cumulativePopTotal += count
