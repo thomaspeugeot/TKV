@@ -19,32 +19,51 @@ type test_struct struct {
 	X1, X2, Y1, Y2 float64
 }
 //
-// go run grump-reader.go -tkvdata="C:\Users\peugeot\tkv-data" -nbBodies=222317 -step=8542
+// go run grump-reader.go -tkvdata="C:\Users\peugeot\tkv-data" -sourceCountryNbBodies=222317 -step=8542
 func main() {
 
-	// flag "country"
-	countryPtr := flag.String("country","fra","iso 3166 country code")
+	// flags  for source country
+	sourceCountryPtr := flag.String("sourceCountry","fra","iso 3166 sourceCountry code")
+	sourceCountryNbBodiesPtr := flag.String("sourceCountryNbBodiesPtr","34413","nb of bodies")
+	sourceCountryStepPtr := flag.String("sourceCountryStep","3563","simulation step for the spread bodies for source country")
 
-	// flag "nbBodies"
-	nbBodiesPtr := flag.String("nbBodies","34413","nb of bodies")
-
-	// flag "step"
-	stepPtr := flag.String("step","3563","simulation step for the spread bodies")
+	// flags  for target country
+	targetCountryPtr := flag.String("targetCountry","hti","iso 3166 targetCountry code")
+	targetCountryNbBodiesPtr := flag.String("targetCountryNbBodiesPtr","82990","nb of bodies for target country")
+	targetCountryStepPtr := flag.String("targetCountryStep","36719","simulation step for the spread bodies for target country")
 
 	flag.Parse()
 
-	// init country from flags
-	var country translation.Country
-	country.Name = *countryPtr
+	// init sourceCountry from flags
+	var sourceCountry translation.Country
+	sourceCountry.Name = *sourceCountryPtr
 	{
-		_, errScan := fmt.Sscanf(*nbBodiesPtr, "%d", & country.NbBodies)
+		_, errScan := fmt.Sscanf(*sourceCountryNbBodiesPtr, "%d", & sourceCountry.NbBodies)
 		if( errScan != nil) {
 			log.Fatal(errScan)
 			return			
 		}
 	}
 	{
-		_, errScan := fmt.Sscanf(*stepPtr, "%d", & country.Step)
+		_, errScan := fmt.Sscanf(*sourceCountryStepPtr, "%d", & sourceCountry.Step)
+		if( errScan != nil) {
+			log.Fatal(errScan)
+			return			
+		}
+	}
+
+	// init targetCountry from flags
+	var targetCountry translation.Country
+	targetCountry.Name = *targetCountryPtr
+	{
+		_, errScan := fmt.Sscanf(*targetCountryNbBodiesPtr, "%d", & targetCountry.NbBodies)
+		if( errScan != nil) {
+			log.Fatal(errScan)
+			return			
+		}
+	}
+	{
+		_, errScan := fmt.Sscanf(*targetCountryStepPtr, "%d", & targetCountry.Step)
 		if( errScan != nil) {
 			log.Fatal(errScan)
 			return			
@@ -52,15 +71,15 @@ func main() {
 	}
 
 
-	server.Info.Printf("country to parse %s", country.Name)
-	server.Info.Printf("nbBodies to parse %d", country.NbBodies)
-	server.Info.Printf("step to parse %d", country.Step)
-
-
-	t.Init(country)
-
-
-
+	server.Info.Printf("sourceCountry to parse %s", sourceCountry.Name)
+	server.Info.Printf("nbBodies to parse %d", sourceCountry.NbBodies)
+	server.Info.Printf("step to parse %d", sourceCountry.Step)
+	
+	server.Info.Printf("targetCountry to parse %s", targetCountry.Name)
+	server.Info.Printf("nbBodies to parse %d", targetCountry.NbBodies)
+	server.Info.Printf("step to parse %d", targetCountry.Step)
+	
+	t.Init(sourceCountry, targetCountry)
 
 	port := "localhost:8001"
 

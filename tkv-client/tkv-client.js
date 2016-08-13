@@ -5,10 +5,15 @@ var app = angular.module("demoapp", ['leaflet-directive']);
 app.controller("EventsController", [ '$scope', '$http', function($scope, $http) {
 
 	angular.extend($scope, {
-		center: {
+		france: {
 			lat: 47.374004,
 			lng: 4.890359,
-			zoom: 7
+			zoom: 5
+		},
+		haiti: {
+			lat: 19,
+			lng: -73,
+			zoom: 5
 		},
 		defaults: {
 			scrollWheelZoom: false
