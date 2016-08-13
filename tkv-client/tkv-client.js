@@ -27,6 +27,7 @@ app.controller("EventsController", [ '$scope', '$http', function($scope, $http) 
 	});
 	
 	$scope.markers = {};
+	$scope.targetMarkers = {};
 
 	$scope.$on('leafletDirectiveMap.click', function(event, args){
 
@@ -54,14 +55,25 @@ app.controller("EventsController", [ '$scope', '$http', function($scope, $http) 
 						}
 					};	
 
-					lat = 	parseFloat(response.data.LatClosest);
-					lng =  parseFloat(response.data.LngClosest)
+					lat = parseFloat(response.data.LatClosest);
+					lng = parseFloat(response.data.LngClosest);
+
+					latTarget = parseFloat(response.data.LatTarget);
+					lngTarget = parseFloat(response.data.LngTarget);
 
 					$scope.markers['closestVillage'] = {
 						lat: lat,
 						lng: lng,
-						message: 'closest village'
+						focus: false,
 					}
+
+					$scope.targetMarkers['targetVillage'] = {
+						lat: latTarget,
+						lng: lngTarget,
+						focus: false,
+					}
+
+
 
 				}, 
   				function(errResponse) { // error handler

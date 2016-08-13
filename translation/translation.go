@@ -32,10 +32,22 @@ func (t * Translation) SetRenderingWindow( xMin, xMax, yMin, yMax float64) {
 
 
 // 
-func (t * Translation) VillageCoordinates( lat, lng float64) (x, y int, distance, latClosest, lngClosest float64) {
+func (t * Translation) VillageCoordinates( lat, lng float64) (x, y, distance, latClosest, lngClosest, xSpread, ySpread float64, closestIndex int) {
 
 	// convert from lat lng to x, y in the Country 
 	return t.sourceCountry.VillageCoordinates( lat, lng)
+}
+
+// from a coordinate in source coutry, get closest body, compute
+func (t * Translation) TargetVillage( xSpread, ySpread float64) (latTarget, lngTarget float64) {
+
+	Info.Printf("TargetVillage input xSpread %f ySpread %f", xSpread, ySpread)
+
+	latTarget, lngTarget = t.targetCountry.XYSpreadToLatLngOrig( xSpread, ySpread)
+
+	Info.Printf("TargetVillage output lat %f lng %f", latTarget, lngTarget)
+
+	return latTarget, lngTarget
 }
 
 
