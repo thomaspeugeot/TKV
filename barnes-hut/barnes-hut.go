@@ -143,6 +143,8 @@ type Run struct {
 	updatePositionMode UpdatePositionMode
 
 	status string // status of the run
+	
+	borderHasBeenMet bool // compute wether the border has been met (see issue#4)
 }
 
 func (r * Run) SetCountry( country string)  {
@@ -343,7 +345,7 @@ func (r * Run) OneStepOptional( updatePosition bool) {
 	Gflops = float64( nbComputationPerStep) /  StepDuration
 
 	//	fmt.Printf("step %d speedup %f low 10 %f high 5 %f high 10 %f MFlops %f Dur (s) %f MinDist %f Max Vel %f Optim Dt %f Dt %f ratio %f \n",
-	r.status = fmt.Sprintf("step %d speedup %f Dur (s) %e MaxF %e MinD %e MaxV %e Dt Opt %e Dt %e F/A %e \n",
+	r.status = fmt.Sprintf("step %d speedup %f Dur (s) %e MaxF %e MinD %e MaxV %e Dt Opt %e Dt %e F/A %e border %t\n",
 		r.step, 
 		float64(len(*r.bodies)*len(*r.bodies))/float64(nbComputationPerStep),
 		StepDuration/1000000000	,
@@ -352,7 +354,8 @@ func (r * Run) OneStepOptional( updatePosition bool) {
 		r.maxVelocity,
 		r.dtOptim,
 		Dt,
-		r.ratioOfBodiesWithCapVel)
+		r.ratioOfBodiesWithCapVel,
+		r.borderHasBeenMet)
 	
 	Info.Printf( r.Status())
 
@@ -632,6 +635,8 @@ func (r * Run) UpdateVelocity() {
 
 func (r * Run) UpdatePosition() {
 
+	r.borderHasBeenMet = false
+
 	// parse all bodies
 	for idx, _ := range (*r.bodies) {
 		
@@ -647,18 +652,22 @@ func (r * Run) UpdatePosition() {
 			if body.X >= 1.0 { 
 				body.X = 1.0 - (body.X - 1.0) 
 				vel.X = -vel.X
+				r.borderHasBeenMet = true
 			}
 			if body.X <= 0.0 { 
 				body.X = - body.X 
 				vel.X = -vel.X
+				r.borderHasBeenMet = true
 			}
 			if body.Y >= 1.0 { 
 				body.Y = 1.0 - (body.Y - 1.0) 
 				vel.Y = -vel.Y
+				r.borderHasBeenMet = true
 			}
 			if body.Y <= 0.0 { 
 				body.Y = - body.Y 
 				vel.Y = -vel.Y
+				r.borderHasBeenMet = true
 			}		
 		} else { // move modulo the square
 			if body.X >= 1.0 { 
@@ -675,6 +684,19 @@ func (r * Run) UpdatePosition() {
 			}	
 		}
 
+	}
+	
+	// experimental . if the border has been met shrink all bodies into the square by 10 %
+	if r.borderHasBeenMet {
+		for idx, _ := range (*r.bodies) {
+		
+			body := &((*r.bodies)[idx])
+		
+			body.X *= 0.9
+			body.X += 0.05
+			body.Y *= 0.9
+			body.Y += 0.05
+		}
 	}
 }
 
