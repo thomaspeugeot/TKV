@@ -38,7 +38,7 @@ func init() {
 }
 
 
-func (r * Run) RenderGif(out io.Writer) {
+func (r * Run) RenderGif(out io.Writer, encode64 bool) {
 
 	renderingMutex.Lock()
 	t0 := time.Now()
@@ -159,10 +159,16 @@ func (r * Run) RenderGif(out io.Writer) {
 	}
 	anim.Delay = append(anim.Delay, delay)
 	anim.Image = append(anim.Image, img)
-	var b bytes.Buffer
-	gif.EncodeAll(&b, &anim)
-	encodedB64 := base64.StdEncoding.EncodeToString([]byte(b.Bytes()))
-	out.Write( []byte(encodedB64))
+	
+	if encode64 {
+		var b bytes.Buffer
+		gif.EncodeAll(&b, &anim)
+		encodedB64 := base64.StdEncoding.EncodeToString([]byte(b.Bytes()))
+		out.Write( []byte(encodedB64))
+	} else {
+		Info.Printf("Render Gif into a file")
+		gif.EncodeAll( out, &anim)
+	}
 
 	
 	t1 := time.Now()

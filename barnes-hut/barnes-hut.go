@@ -300,6 +300,9 @@ func (r * Run) OneStep() {
 }
 func (r * Run) OneStepOptional( updatePosition bool) {
 
+	// serialize into a file the gif
+	if r.step % 20 == 0 { r.CaptureGif()}
+
 	t0 := time.Now()
 
 	nbComputationPerStep = 0
@@ -340,6 +343,7 @@ func (r * Run) OneStepOptional( updatePosition bool) {
 	// update the step
 	r.step++
 	
+
 	t1 := time.Now()
 	StepDuration = float64((t1.Sub(t0)).Nanoseconds())
 	Gflops = float64( nbComputationPerStep) /  StepDuration
@@ -687,7 +691,7 @@ func (r * Run) UpdatePosition() {
 	}
 	
 	// experimental . if the border has been met shrink all bodies into the square by 10 %
-	if r.borderHasBeenMet {
+	if r.borderHasBeenMet && false {
 		for idx, _ := range (*r.bodies) {
 		
 			body := &((*r.bodies)[idx])

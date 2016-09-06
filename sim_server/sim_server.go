@@ -90,7 +90,7 @@ func captureConfig(w http.ResponseWriter, req *http.Request) {
 	r.CaptureConfig()
 }
 
-func render(w http.ResponseWriter, req *http.Request) { r.RenderGif( w) }
+func render(w http.ResponseWriter, req *http.Request) { r.RenderGif( w, true) }
 func renderSVG(w http.ResponseWriter, req *http.Request) { r.RenderSVG( w) }
 
 func stats(w http.ResponseWriter, req *http.Request) {
