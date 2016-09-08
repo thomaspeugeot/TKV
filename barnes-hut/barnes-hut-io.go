@@ -15,6 +15,7 @@ import (
 
 const ( CountryBodiesNamePattern  = "conf-%s-%08d-%05d.bods")
 const ( CountryBodiesGifNamePattern  = "conf-%s-%08d-%05d.gif")
+const ( CountryBodiesSVGNamePattern  = "conf-%s-%08d-%05d.svg")
 	
 // serialize bodies's state vector into a file
 // convention is "step-xxxx.bod"
@@ -48,6 +49,18 @@ func (r * Run) CaptureGif() bool {
 		return false
 	}
 	r.RenderGif( file, false)
+	file.Close()
+	return true
+}
+
+func (r * Run) CaptureSVG() bool {
+	filename := fmt.Sprintf( CountryBodiesSVGNamePattern, r.country, len(*r.bodies), r.step)
+	file, err := os.Create(filename)
+	if( err != nil) {
+		log.Fatal(err)
+		return false
+	}
+	r.RenderSVG( file)
 	file.Close()
 	return true
 }

@@ -43,7 +43,7 @@ func (r * Run) RenderGif(out io.Writer, encode64 bool) {
 	renderingMutex.Lock()
 	t0 := time.Now()
 
-	Trace.Printf("RenderGif begin with r.gridFieldNb %d", r.gridFieldNb)
+	Info.Printf("RenderGif begin with r.gridFieldNb %d", r.gridFieldNb)
 	
 	const (
 		size    = 600   // image canvas 
@@ -174,7 +174,7 @@ func (r * Run) RenderGif(out io.Writer, encode64 bool) {
 	t1 := time.Now()
 	StepDuration = float64((t1.Sub(t0)).Nanoseconds())
 	
-	Trace.Printf("RenderGif %d dur %e", r.gridFieldNb, StepDuration/1000000000)
+	Info.Printf("RenderGif %d dur %e", r.gridFieldNb, StepDuration/1000000000)
 	renderingMutex.Unlock()
 
 }
@@ -193,7 +193,7 @@ func (r * Run) RenderSVG(out io.Writer) {
 		body := (*r.bodies)[idx]
 		bodyOrig := (*r.bodiesOrig)[idx]
 	
-		if false { fmt.Printf("Encoding body %d %f %f\n", idx, body.X, body.Y) }
+		Info.Printf("Encoding body %d %f %f\n", idx, body.X, body.Y)
 	
 		// take into account rendering window
 		var imX, imY float64
