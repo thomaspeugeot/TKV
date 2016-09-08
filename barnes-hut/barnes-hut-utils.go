@@ -43,7 +43,7 @@ func (r * Run) RenderGif(out io.Writer, encode64 bool) {
 	renderingMutex.Lock()
 	t0 := time.Now()
 
-	Info.Printf("RenderGif begin with r.gridFieldNb %d", r.gridFieldNb)
+	Trace.Printf("RenderGif begin with r.gridFieldNb %d", r.gridFieldNb)
 	
 	const (
 		size    = 600   // image canvas 
@@ -174,7 +174,7 @@ func (r * Run) RenderGif(out io.Writer, encode64 bool) {
 	t1 := time.Now()
 	StepDuration = float64((t1.Sub(t0)).Nanoseconds())
 	
-	Info.Printf("RenderGif %d dur %e", r.gridFieldNb, StepDuration/1000000000)
+	Trace.Printf("RenderGif %d dur %e", r.gridFieldNb, StepDuration/1000000000)
 	renderingMutex.Unlock()
 
 }

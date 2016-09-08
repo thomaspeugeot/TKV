@@ -734,13 +734,6 @@ func getRepulsionVector( A, B *quadtree.Body) (x, y float64) {
 
 	distQuared := (x*x + y*y)
 	absDistance := math.Sqrt( distQuared + ETA )
-	
-	if absDistance > CutoffDistance {
-		Trace.Printf("CutoffDistance yes")
-		return 0.0, 0.0
-	} else {
-		Trace.Printf("CutoffDistance no")
-	}
 
 	distPow3 := (distQuared + ETA) * absDistance
 	
@@ -755,7 +748,14 @@ func getRepulsionVector( A, B *quadtree.Body) (x, y float64) {
 	y *= massCombined
 
 	// repulsion is inversly proportional to the square of the distance (1/r2)
-	return x/distPow3, y/distPow3
+	x = x/distPow3
+	y = y/distPow3
+	
+	if absDistance > CutoffDistance {
+		x = 0.0
+		y = 0.0
+	}
+	return x, y
 }
 
 // get modulo distance between alpha and beta.
