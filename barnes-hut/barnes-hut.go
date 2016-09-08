@@ -52,6 +52,12 @@ var nbComputationPerStep uint64
 // if true, Barnes-Hut algo is used
 var UseBarnesHut bool = true
 
+// cutoff for influence. According to Bartolo, 1/r2 is very strong on a plane (integration does not convergence on the plane)
+// therefore a cutoff distance for the computation of the force is wellcome
+// first try at 1/10 th
+var CutoffDistance float64 = 0.1
+
+
 //	Bodies's X,Y position coordinates are float64 between 0 & 1
 type Pos struct {
 	X float64
@@ -301,7 +307,7 @@ func (r * Run) OneStep() {
 func (r * Run) OneStepOptional( updatePosition bool) {
 
 	// serialize into a file the gif
-	if r.step % 20 == 0 { r.CaptureGif()}
+	if r.step % 100 == 0 { r.CaptureGif()}
 
 	t0 := time.Now()
 
@@ -483,12 +489,11 @@ func (r * Run) computeAccelerationOnBody(origIndex int) float64 {
 			if dist < minInterbodyDistance {
 				minInterbodyDistance = dist
 			}
-			
+
 			x, y := getRepulsionVector( &body, &body2)
 			
 			acc.X += x
 			acc.Y += y
-
 			// fmt.Printf("computeAccelerationOnBody idx2 %3d x %9.3f y %9.3f \n", idx2, x, y)
 		}
 	}
@@ -690,16 +695,17 @@ func (r * Run) UpdatePosition() {
 
 	}
 	
-	// experimental . if the border has been met shrink all bodies into the square by 10 %
+	// experimental . if the border has been met shrink all bodies into the square by a fraction
 	if r.borderHasBeenMet && false {
 		for idx, _ := range (*r.bodies) {
 		
 			body := &((*r.bodies)[idx])
 		
-			body.X *= 0.9
-			body.X += 0.05
-			body.Y *= 0.9
-			body.Y += 0.05
+			distanceToCenterX := body.X - 0.5
+			distanceToCenterY := body.Y - 0.5
+
+			body.X = 0.5 + distanceToCenterX*0.999
+			body.Y = 0.5 + distanceToCenterY*0.999
 		}
 	}
 }
@@ -729,6 +735,13 @@ func getRepulsionVector( A, B *quadtree.Body) (x, y float64) {
 	distQuared := (x*x + y*y)
 	absDistance := math.Sqrt( distQuared + ETA )
 	
+	if absDistance > CutoffDistance {
+		Trace.Printf("CutoffDistance yes")
+		return 0.0, 0.0
+	} else {
+		Trace.Printf("CutoffDistance no")
+	}
+
 	distPow3 := (distQuared + ETA) * absDistance
 	
 	if false { 
