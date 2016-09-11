@@ -166,7 +166,7 @@ func (r * Run) RenderGif(out io.Writer, encode64 bool) {
 		encodedB64 := base64.StdEncoding.EncodeToString([]byte(b.Bytes()))
 		out.Write( []byte(encodedB64))
 	} else {
-		Info.Printf("Render Gif into a file")
+		Trace.Printf("Render Gif into a file")
 		gif.EncodeAll( out, &anim)
 	}
 
