@@ -55,7 +55,7 @@ var UseBarnesHut bool = true
 // cutoff for influence. According to Bartolo, 1/r2 is very strong on a plane (integration does not convergence on the plane)
 // therefore a cutoff distance for the computation of the force is wellcome
 // first try at 1/10 th
-var CutoffDistance float64 = 0.1
+var CutoffDistance float64 = 0.01
 
 
 //	Bodies's X,Y position coordinates are float64 between 0 & 1

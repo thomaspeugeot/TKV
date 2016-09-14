@@ -3,10 +3,12 @@ package main
 import (
 	"github.com/thomaspeugeot/tkv/barnes-hut"
 	"github.com/thomaspeugeot/tkv/server"
+	"github.com/thomaspeugeot/tkv/translation"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"flag"
 	"math"
 	"encoding/json"
 )
@@ -15,8 +17,37 @@ import (
 var r * barnes_hut.Run
 
 func main() {
+
+	// flags  for source country
+	sourceCountryPtr := flag.String("sourceCountry","fra","iso 3166 sourceCountry code")
+	sourceCountryNbBodiesPtr := flag.String("sourceCountryNbBodies","34413","nb of bodies")
+	sourceCountryStepPtr := flag.String("sourceCountryStep","0","simulation step for the spread bodies for source country")
 	
+	flag.Parse()
+
+	// init sourceCountry from flags
+	var sourceCountry translation.Country
+	sourceCountry.Name = *sourceCountryPtr
+	{
+		_, errScan := fmt.Sscanf(*sourceCountryNbBodiesPtr, "%d", & sourceCountry.NbBodies)
+		if( errScan != nil) {
+			log.Fatal(errScan)
+			return			
+		}
+	}
+	{
+		_, errScan := fmt.Sscanf(*sourceCountryStepPtr, "%d", & sourceCountry.Step)
+		if( errScan != nil) {
+			log.Fatal(errScan)
+			return			
+		}
+	}
 	r = barnes_hut.NewRun()
+
+	// load configuration files.
+	filename := fmt.Sprintf( barnes_hut.CountryBodiesNamePattern, sourceCountry.Name, sourceCountry.NbBodies, sourceCountry.Step)
+	server.Info.Printf("filename for init %s", filename)
+	r.LoadConfig( filename)	
 
 	output, _ := os.Create("essai200Kbody_6Ksteps.gif")
 	go r.OutputGif( output, 100000)
