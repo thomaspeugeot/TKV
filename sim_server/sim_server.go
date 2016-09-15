@@ -16,6 +16,10 @@ import (
 //!+main
 var r * barnes_hut.Run
 
+//
+// to start with haiti 
+// go run sim_server.go -sourceCountry=hti -sourceCountryNbBodies=82990
+// 
 func main() {
 
 	// flags  for source country
@@ -49,6 +53,8 @@ func main() {
 	server.Info.Printf("filename for init %s", filename)
 	r.LoadConfig( filename)	
 
+	r.SetState( barnes_hut.RUNNING)
+	
 	output, _ := os.Create("essai200Kbody_6Ksteps.gif")
 	go r.OutputGif( output, 100000)
 	

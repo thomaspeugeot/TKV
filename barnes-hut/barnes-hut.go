@@ -18,8 +18,10 @@ import (
 	"sync/atomic"
 	"sync"
 	"log"
+	"os"
 	"testing"
-	)
+	"encoding/csv"
+)
 
 // constant to be added to the distance between bodies
 // in order to compute repulsion (avoid near infinite repulsion force)
@@ -132,6 +134,7 @@ type Run struct {
 	country string // the country of interest 
 	state State
 	step int
+	giniFileLog * os.File
 	giniOverTime [][]float64 // evolution of the gini distribution over time 
 	xMin, xMax, yMin, yMax float64 // coordinates of the rendering windows
 	renderState RenderState
@@ -271,8 +274,14 @@ func (r * Run) Init( bodies * ([]quadtree.Body)) {
 
 	DtAdjustMode = AUTO
 
-	// init measures
-	// r.OneStepOptional( false)
+	// init the file storing the gini distribution over time 
+	filename := fmt.Sprintf( "gini_out.csv")
+	file, err := os.Create(filename)
+	if( err != nil) {
+		log.Fatal(err)
+		return
+	}
+	r.giniFileLog = file
 	
 	Info.Printf("Init end")
 }
@@ -310,6 +319,28 @@ func (r * Run) OneStepOptional( updatePosition bool) {
 	if r.step % 100 == 0 { r.CaptureGif()}
 
 	t0 := time.Now()
+
+	// compute gini distribution
+	r.q.ComputeQuadtreeGini()
+
+	// append the new gini elements
+	// create the array
+	giniArray := make( []float64, 10)
+	copy( giniArray, r.q.BodyCountGini[8][:])
+	r.giniOverTime = append( r.giniOverTime, giniArray)
+	w := csv.NewWriter(r.giniFileLog)
+
+	w.Comma = '\t'
+
+	recordStr := make( []string, 10)
+	for idx, record := range r.q.BodyCountGini[8][:] {
+		recordStr[idx] = fmt.Sprintf("%f", record)
+
+	}
+	if errCsv := w.Write( recordStr); errCsv != nil {
+		log.Fatalln("error writing record to csv:", errCsv)
+	}	
+	w.Flush()
 
 	nbComputationPerStep = 0
 	r.maxVelocity = 0.0
