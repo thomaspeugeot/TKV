@@ -339,7 +339,8 @@ func (q* Quadtree) ComputeNbBodiesPerNode() {
 
 // compute the gini of body density par node at level 8
 func (q* Quadtree) ComputeQuadtreeGini() {
-	
+
+	Info.Printf("ComputeQuadtreeGini begin")	
 	q.ComputeNbBodiesPerNode() 
 	
 	// perform some tests on the links of each nodes
@@ -378,6 +379,7 @@ func (q* Quadtree) ComputeQuadtreeGini() {
 			q.BodyCountGini[level][tencile] = float64(nbBodiesInTencile) // /float64(len(*q.bodies))
 		}
 	}
+	Info.Printf("ComputeQuadtreeGini end")	
 }
 
 // consolidate the number of bodies attached to the node

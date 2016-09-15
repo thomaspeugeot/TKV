@@ -7,6 +7,7 @@ import (
 	"image"
 	"image/gif"
 	"io"
+	"os"
 	"log"
 	"fmt"
 	"math"
@@ -241,14 +242,8 @@ func (r * Run) OutputGif(out io.Writer, nbStep int) {
 		for r.state == STOPPED {
 			time.Sleep(100 * time.Millisecond)
 		}
-		r.q.ComputeQuadtreeGini()
-
-		// append the new gini elements
-		// create the array
-		giniArray := make( []float64, 10)
-		copy( giniArray, r.q.BodyCountGini[8][:])
-		r.giniOverTime = append( r.giniOverTime, giniArray)
 
 		r.OneStep()
 	}
+	os.Exit(0)
 }

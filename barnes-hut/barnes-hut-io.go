@@ -100,7 +100,7 @@ func (r * Run) LoadConfig(filename string) bool {
 	if r.state == STOPPED {
 
 		renderingMutex.Lock()
-		file, err := os.Open(filename)
+		file, err := os.Open("../" + filename)
 		if( err != nil) {
 			log.Fatal(err)
 			return false

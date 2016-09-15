@@ -27,6 +27,10 @@ func main() {
 	sourceCountryNbBodiesPtr := flag.String("sourceCountryNbBodies","34413","nb of bodies")
 	sourceCountryStepPtr := flag.String("sourceCountryStep","0","simulation step for the spread bodies for source country")
 	
+	cutoffPtr := flag.String("cutoff","2","cutoff code distance")
+
+	maxStepPtr := flag.String("maxStep","10000","at what step do the simulation stop")
+
 	flag.Parse()
 
 	// init sourceCountry from flags
@@ -46,6 +50,22 @@ func main() {
 			return			
 		}
 	}
+	{
+		_, errScan := fmt.Sscanf(*cutoffPtr, "%f", & barnes_hut.CutoffDistance)
+		if( errScan != nil) {
+			log.Fatal(errScan)
+			return			
+		}
+	}
+	server.Info.Printf("CutoffDistance %f", barnes_hut.CutoffDistance)
+	{
+		_, errScan := fmt.Sscanf(*maxStepPtr, "%d", & barnes_hut.MaxStep)
+		if( errScan != nil) {
+			log.Fatal(errScan)
+			return			
+		}
+	}
+	server.Info.Printf("Max step %d", barnes_hut.MaxStep)
 	r = barnes_hut.NewRun()
 
 	// load configuration files.
@@ -54,9 +74,9 @@ func main() {
 	r.LoadConfig( filename)	
 
 	r.SetState( barnes_hut.RUNNING)
-	
+
 	output, _ := os.Create("essai200Kbody_6Ksteps.gif")
-	go r.OutputGif( output, 100000)
+	go r.OutputGif( output, barnes_hut.MaxStep)
 	
 	mux := http.NewServeMux()
 	mux.HandleFunc("/status", status)

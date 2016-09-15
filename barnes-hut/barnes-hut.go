@@ -21,6 +21,7 @@ import (
 	"os"
 	"testing"
 	"encoding/csv"
+	"syscall"
 )
 
 // constant to be added to the distance between bodies
@@ -59,6 +60,8 @@ var UseBarnesHut bool = true
 // first try at 1/10 th
 var CutoffDistance float64 = 0.01
 
+// at what step do the simulation stoop
+var MaxStep int = 10000
 
 //	Bodies's X,Y position coordinates are float64 between 0 & 1
 type Pos struct {
@@ -175,6 +178,22 @@ func NewRun() * Run {
 	r.updatePositionMode = WITHIN_SQUARE_BORDER
 	r.gridFieldNb = 10
 	bodies := make([]quadtree.Body, 0)
+
+	// create output directory and cwd to it
+	dirname := time.Now().Local().Format(time.RFC3339)
+	Info.Printf("Output dir %s", dirname)
+	syscall.Mkdir( dirname, 0777)
+	os.Chdir( dirname)
+
+	// init the file storing the gini distribution over time 
+	filename := fmt.Sprintf( "gini_out.csv")
+	file, err := os.Create(filename)
+	if( err != nil) {
+		log.Fatal(err)
+		return nil
+	}
+	r.giniFileLog = file
+
 	r.Init( & bodies)
 
 	return &r
@@ -274,15 +293,6 @@ func (r * Run) Init( bodies * ([]quadtree.Body)) {
 
 	DtAdjustMode = AUTO
 
-	// init the file storing the gini distribution over time 
-	filename := fmt.Sprintf( "gini_out.csv")
-	file, err := os.Create(filename)
-	if( err != nil) {
-		log.Fatal(err)
-		return
-	}
-	r.giniFileLog = file
-	
 	Info.Printf("Init end")
 }
 
@@ -328,12 +338,16 @@ func (r * Run) OneStepOptional( updatePosition bool) {
 	giniArray := make( []float64, 10)
 	copy( giniArray, r.q.BodyCountGini[8][:])
 	r.giniOverTime = append( r.giniOverTime, giniArray)
+	
+	// 
 	w := csv.NewWriter(r.giniFileLog)
-
-	w.Comma = '\t'
+	// w.Comma = '\t'
 
 	recordStr := make( []string, 10)
-	for idx, record := range r.q.BodyCountGini[8][:] {
+	// get gini distribution at level 8
+	density := r.ComputeDensityTencilePerVillage()
+	// for idx, record := range r.q.BodyCountGini[8][:] {
+	for idx, record := range density {
 		recordStr[idx] = fmt.Sprintf("%f", record)
 
 	}
