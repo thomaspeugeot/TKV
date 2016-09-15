@@ -31,6 +31,8 @@ func main() {
 
 	maxStepPtr := flag.String("maxStep","10000","at what step do the simulation stop")
 
+	portPtr := flag.String("port","8000","listening port")
+
 	flag.Parse()
 
 	// init sourceCountry from flags
@@ -66,6 +68,15 @@ func main() {
 		}
 	}
 	server.Info.Printf("Max step %d", barnes_hut.MaxStep)
+	var port int =8000
+	{
+		_, errScan := fmt.Sscanf(*portPtr, "%d", & port)
+		if( errScan != nil) {
+			log.Fatal(errScan)
+			return			
+		}
+	}
+	server.Info.Printf("will listen on port %d", port)
 	r = barnes_hut.NewRun()
 
 	// load configuration files.
@@ -107,8 +118,10 @@ func main() {
 	mux.HandleFunc("/toggleRenderChoice", toggleRenderChoice)
 	mux.HandleFunc("/toggleFieldRendering", toggleFieldRendering)
 
-	mux.Handle("/", http.FileServer(http.Dir("../tkv-client/")) )
-	log.Fatal(http.ListenAndServe("localhost:8000", mux))
+	mux.Handle("/", http.FileServer(http.Dir("../../tkv-client/")) )
+	adressToListen := fmt.Sprintf("localhost:%d", port)
+	server.Info.Printf("adressToListen %s", adressToListen)
+	log.Fatal(http.ListenAndServe( adressToListen, mux))
 }
 //!-main
 
