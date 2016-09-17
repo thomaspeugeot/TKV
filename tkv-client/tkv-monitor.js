@@ -20,8 +20,8 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 		// );	
 
 		vm.area = {
-			centerX: 0.492,
-			centerY: 0.267,
+			centerX: 0.5,
+			centerY: 0.5,
 			x1: 0.0,
 			x2: 1.0,
 			y1: 0.0,

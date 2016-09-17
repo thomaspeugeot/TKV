@@ -109,7 +109,7 @@ const (
 	WITHOUT_BORDERS = "WITHOUT_BORDERS"
 	WITH_BORDERS = "WITH_BORDERS"
 )
-var ratioOfBorderVillages = 0.1 // ratio of villages that are eligible for marking a border 
+var ratioOfBorderVillages = 0.0 // ratio of villages that are eligible for marking a border 
 
 // decide wether to display the original configuration or the running configruation
 type RenderChoice string
@@ -287,7 +287,7 @@ func (r * Run) Init( bodies * ([]quadtree.Body)) {
 	r.bodiesVel = &vel
 	r.q.Init(bodies)
 	r.state = STOPPED
-	r.SetRenderingWindow( 0.0, 0.0, 1.0, 1.0)
+	r.SetRenderingWindow( 0.0, 1.0, 0.0, 1.0)
 	r.renderState = WITH_BORDERS // we draw borders
 	r.renderChoice = RUNNING_CONFIGURATION // we draw borders
 	r.fieldRendering = false

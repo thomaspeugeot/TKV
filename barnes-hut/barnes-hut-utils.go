@@ -87,6 +87,7 @@ func (r * Run) RenderGif(out io.Writer, encode64 bool) {
 	} 
 
 
+	Info.Printf("RenderGif with x min %f x max %f", r.xMin, r.xMax)
 	for idx, _ := range (*r.bodies) {
 	
 		body := (*r.bodies)[idx]
