@@ -118,7 +118,7 @@ func main() {
 	mux.HandleFunc("/toggleRenderChoice", toggleRenderChoice)
 	mux.HandleFunc("/toggleFieldRendering", toggleFieldRendering)
 
-	mux.Handle("/", http.FileServer(http.Dir("../../tkv-client/")) )
+	mux.Handle("/", http.FileServer(http.Dir("../tkv-client/")) )
 	adressToListen := fmt.Sprintf("localhost:%d", port)
 	server.Info.Printf("adressToListen %s", adressToListen)
 	log.Fatal(http.ListenAndServe( adressToListen, mux))
