@@ -10,15 +10,6 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 			}, true // http://stackoverflow.com/questions/19455501/watch-an-object
 		);	
 
-		// adjust values of x min compared to x max
-		// $scope.$watch( function() {
-	  
-		// 	return $scope.area.y1 > $scope.area.y2;
-		// }, function() {	
-		// 		$scope.area.y1 = $scope.area.y2-0.01;
-		// 	}
-		// );	
-
 		vm.area = {
 			centerX: 0.5,
 			centerY: 0.5,
@@ -43,7 +34,11 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 
 		vm.toto = "toto";
 
+		// target port for request
+		vm.url = document.location.origin + "/"
+
 		vm.dirConfig = ""
+
 
 		vm.newImageCenter = function($event) {
 			console.info( "newImageCenter ", $event, $event.target.x, $event.target.y,  $event.target.height, $event.target.width);
@@ -65,7 +60,7 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 			console.log( jsondt);
 			
 		
-			$http.post('http://localhost:8000/dt', jsondt ).then
+			$http.post(vm.url + 'dt', jsondt ).then
 			(
 				function(response) { // success handler
 	  				console.log(response.status);
@@ -89,7 +84,7 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 			console.log( jsonGridNb);
 			
 		
-			$http.post('http://localhost:8000/fieldGridNb', jsonGridNb ).then
+			$http.post(vm.url + 'fieldGridNb', jsonGridNb ).then
 			(
 				function(response) { // success handler
 	  				console.log(response.status);
@@ -110,7 +105,7 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 			var jsontheta = JSON.stringify( vm.theta);
 			console.log( jsontheta);
 			
-			$http.post('http://localhost:8000/theta', jsontheta ).then
+			$http.post(vm.url + 'theta', jsontheta ).then
 			(
 				function(response) { // success handler
 	  				console.log(response.status);
@@ -131,7 +126,7 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 			var json = JSON.stringify( vm.nbVillagesPerAxe);
 			console.log( json);
 			
-			$http.post('http://localhost:8000/nbVillagesPerAxe', json ).then
+			$http.post(vm.url + 'nbVillagesPerAxe', json ).then
 			(
 				function(response) { // success handler
 	  				console.log(response.status);
@@ -152,7 +147,7 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 			var json = JSON.stringify( vm.nbRoutines);
 			console.log( json);
 			
-			$http.post('http://localhost:8000/nbRoutines', json ).then
+			$http.post(vm.url + 'nbRoutines', json ).then
 			(
 				function(response) { // success handler
 	  				console.log(response.status);
@@ -174,7 +169,7 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 			var json = JSON.stringify( vm.ratioBorderBodies);
 			console.log( json);
 			
-			$http.post('http://localhost:8000/updateRatioBorderBodies', json ).then
+			$http.post(vm.url + 'updateRatioBorderBodies', json ).then
 			(
 				function(response) { // success handler
 	  				console.log(response.status);
@@ -191,7 +186,7 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 
 
 		vm.run = function() {
-			$http.get('http://localhost:8000/play').then(
+			$http.get(vm.url + 'play').then(
 				function(response) { // success handler
 				},
 				function(errResponse) { // error handler
@@ -201,7 +196,7 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 		};
 
 		vm.oneStep = function() {
-			$http.get('http://localhost:8000/oneStep').then(
+			$http.get(vm.url + 'oneStep').then(
 				function(response) { // success handler
 				},
 				function(errResponse) { // error handler
@@ -211,7 +206,7 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 		};
 
 		vm.pause = function() {
-			$http.get('http://localhost:8000/pause').then(
+			$http.get(vm.url + 'pause').then(
 				function(response) { // success handler
 				},
 				function(errResponse) { // error handler
@@ -221,33 +216,33 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 		};
 
 		vm.captureConfig = function() {
-			$http.get('http://localhost:8000/captureConfig').then( function(response) {},
+			$http.get(vm.url + 'captureConfig').then( function(response) {},
 				function(errResponse) { console.error('error while request captureConfig');})	
 		};
 
 		vm.toggleRenderChoice  = function() {
-			$http.get('http://localhost:8000/toggleRenderChoice').then( function(response) { vm.updateArea(); 	},
+			$http.get(vm.url + 'toggleRenderChoice').then( function(response) { vm.updateArea(); 	},
 				function(errResponse) { console.error('error while request toggleRenderChoice');})	
 		};
 
 		vm.toggleFieldRendering  = function() {
-			$http.get('http://localhost:8000/toggleFieldRendering').then( function(response) {},
+			$http.get(vm.url + 'toggleFieldRendering').then( function(response) {},
 				function(errResponse) { console.error('error while request toggleFieldRendering');})	
 		};
 
 		vm.toggleLocalGlobal  = function() {
-			$http.get('http://localhost:8000/toggleLocalGlobal').then( function(response) {},
+			$http.get(vm.url + 'toggleLocalGlobal').then( function(response) {},
 				function(errResponse) { console.error('error while request toggleLocalGlobal');})	
 		};
 
 		vm.toggleManualAuto  = function() {
-			$http.get('http://localhost:8000/toggleManualAuto').then( function(response) {},
+			$http.get(vm.url + 'toggleManualAuto').then( function(response) {},
 				function(errResponse) { console.error('error while request toggleManualAuto');})	
 		};
 
 		// fetch coordinates of minimal distance
 		vm.zoomSpecial = function() {
-			$http.get('http://localhost:8000/minDistanceCoord').then( function(response) {
+			$http.get(vm.url + 'minDistanceCoord').then( function(response) {
 				// get X and Y
 				vm.area.centerX = parseFloat(response.data.X);
 				vm.area.centerY = parseFloat(response.data.Y);
@@ -276,12 +271,12 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 			console.log( jsonarea);
 			
 		
-			$http.post('http://localhost:8000/area', jsonarea ).then
+			$http.post(vm.url + 'area', jsonarea ).then
 			(
 				function(response) { // success handler
 	  				console.log(response.status);
 	  				console.log('updating area');
-	  				return $http.get('http://localhost:8000/render', '');
+	  				return $http.get(vm.url + 'render', '');
   				}).then( function(renderResponse) 
   					{
 						vm.render = 'data:image/gif;base64,' + renderResponse.data
@@ -299,7 +294,7 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 	  	var pollRender = function() {
 
 	  		$timeout( function() {
-				$http.get('http://localhost:8000/render', '').then( function(renderResponse) 
+				$http.get(vm.url + 'render', '').then( function(renderResponse) 
   					{
 						vm.render = 'data:image/gif;base64,' + renderResponse.data
 						pollRender()
@@ -320,7 +315,7 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 	  	var pollStatus = function() {
 
 	  		$timeout( function() {
-				$http.get('http://localhost:8000/status', '').then( function(StatusResponse) 
+				$http.get(vm.url + 'status', '').then( function(StatusResponse) 
   					{
 						vm.status = StatusResponse.data
 						pollStatus()
@@ -341,7 +336,7 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 	  	var pollDensityTenciles = function() {
 
 	  		$timeout( function() {
-				$http.get('http://localhost:8000/getDensityTenciles', '').then( function(response) 
+				$http.get(vm.url + 'getDensityTenciles', '').then( function(response) 
   					{
   						// console.log( response.data)
 						vm.densityTenciles = response.data
@@ -364,7 +359,7 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 
 		// function that list the files available
 		var pullConfigs = function() {
-			$http.get('http://localhost:8000/dirConfig', '').then( function(response) 
+			$http.get(vm.url + 'dirConfig', '').then( function(response) 
 				{
 					vm.dirConfig = response.data
 					vm.selected = response.data[0]
@@ -383,7 +378,7 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 
 		vm.loadConfig = function() {
 
-			$http.get('http://localhost:8000/loadConfig'+'?file='+vm.selected, '').then( function(response) 
+			$http.get(vm.url + 'loadConfig'+'?file='+vm.selected, '').then( function(response) 
 				{
 					console.log("file loaded " + vm.selected);
 				}, 
@@ -397,7 +392,7 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 
 		vm.loadConfigOrig = function() {
 
-			$http.get('http://localhost:8000/loadConfigOrig'+'?file='+vm.selected, '').then( function(response) 
+			$http.get(vm.url + 'loadConfigOrig'+'?file='+vm.selected, '').then( function(response) 
 				{
 					console.log("file orig loaded " + vm.selected);
 				}, 
