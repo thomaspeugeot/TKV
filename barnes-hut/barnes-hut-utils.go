@@ -246,5 +246,7 @@ func (r * Run) OutputGif(out io.Writer, nbStep int) {
 
 		r.OneStep()
 	}
+	r.state = STOPPED
+	r.CaptureConfig()
 	os.Exit(0)
 }

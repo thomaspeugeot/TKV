@@ -24,7 +24,7 @@ const ( CountryBodiesSVGNamePattern  = "conf-%s-%08d-%05d.svg")
 func (r * Run) CaptureConfig() bool {
 	if r.state == STOPPED {
 
-		filename := fmt.Sprintf( CountryBodiesNamePattern, r.country, len(*r.bodies), r.step)
+		filename := fmt.Sprintf( r.OutputDir + "/" + CountryBodiesNamePattern, r.country, len(*r.bodies), r.step)
 		file, err := os.Create(filename)
 		if( err != nil) {
 			log.Fatal(err)

@@ -1,8 +1,6 @@
 package barnes_hut
 
 import (
-	"os"
-	"github.com/thomaspeugeot/tkv/quadtree"
 	"testing"
 	"encoding/json"
 )
@@ -23,25 +21,3 @@ func TestEncodingSliceOfSlice(t *testing.T) {
 	if( err != nil) { t.Errorf("error") }
 	// fmt.Println( string( stats))
 }
-
-// test gif output
-func TestEncodingGini(t *testing.T) {
-
-	bodies := make([]quadtree.Body, 20000)
-	SpreadOnCircle( & bodies)
-	
-	var r Run
-	r.Init( & bodies)
-	
-	var output *os.File
-	output, _ = os.Create("essai.gif")
-	
-	r.SetState( RUNNING)
-	r.OutputGif( output, 3)
-
-	_, err := json.MarshalIndent( r.giniOverTime, "","\t")
-	if( err != nil) { t.Errorf("error") }
-
-	// visual verification
-}
-

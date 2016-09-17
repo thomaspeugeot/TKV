@@ -24,7 +24,7 @@ func OldTestRepulsionFieldInit(t *testing.T) {
 	r.fieldRendering = true
 	Info.Printf("TestRepulsionFieldInit value at 1 1 %e", f.values[1][1])
 
-	r.RenderGif( ioutil.Discard)
+	r.RenderGif( ioutil.Discard, false)
 
 	cases := make( []struct {
 		i, j int
