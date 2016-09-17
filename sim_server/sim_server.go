@@ -86,7 +86,7 @@ func main() {
 
 	r.SetState( barnes_hut.RUNNING)
 
-	output, _ := os.Create("essai200Kbody_6Ksteps.gif")
+	output, _ := os.Create( r.OutputDir + "/" + "essai200Kbody_6Ksteps.gif")
 	go r.OutputGif( output, barnes_hut.MaxStep)
 	
 	mux := http.NewServeMux()
