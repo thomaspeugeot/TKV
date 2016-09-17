@@ -43,7 +43,7 @@ func (r * Run) CaptureConfig() bool {
 
 func (r * Run) CaptureGif() bool {
 	filename := fmt.Sprintf( CountryBodiesGifNamePattern, r.country, len(*r.bodies), r.step)
-	file, err := os.Create(filename)
+	file, err := os.Create( r.OutputDir + "/" + filename)
 	if( err != nil) {
 		log.Fatal(err)
 		return false
@@ -100,7 +100,7 @@ func (r * Run) LoadConfig(filename string) bool {
 	if r.state == STOPPED {
 
 		renderingMutex.Lock()
-		file, err := os.Open("../" + filename)
+		file, err := os.Open( filename)
 		if( err != nil) {
 			log.Fatal(err)
 			return false

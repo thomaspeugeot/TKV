@@ -60,7 +60,7 @@ var UseBarnesHut bool = true
 // first try at 1/10 th
 var CutoffDistance float64 = 0.01
 
-// at what step do the simulation stoop
+// at what step do the simulation stop
 var MaxStep int = 10000
 
 //	Bodies's X,Y position coordinates are float64 between 0 & 1
@@ -157,6 +157,8 @@ type Run struct {
 	status string // status of the run
 	
 	borderHasBeenMet bool // compute wether the border has been met (see issue#4)
+
+	OutputDir string // output dir for the run
 }
 
 func (r * Run) SetCountry( country string)  {
@@ -180,13 +182,12 @@ func NewRun() * Run {
 	bodies := make([]quadtree.Body, 0)
 
 	// create output directory and cwd to it
-	dirname := time.Now().Local().Format(time.RFC3339)
-	Info.Printf("Output dir %s", dirname)
-	syscall.Mkdir( dirname, 0777)
-	os.Chdir( dirname)
+	r.OutputDir = time.Now().Local().Format(time.RFC3339)
+	Info.Printf("Output dir %s", r.OutputDir)
+	syscall.Mkdir( r.OutputDir, 0777)
 
 	// init the file storing the gini distribution over time 
-	filename := fmt.Sprintf( "gini_out.csv")
+	filename := fmt.Sprintf( r.OutputDir + "/gini_out.csv")
 	file, err := os.Create(filename)
 	if( err != nil) {
 		log.Fatal(err)
