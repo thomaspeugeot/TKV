@@ -126,12 +126,25 @@ var ConcurrentRoutines int = 100
 // this value can be set interactively during the run
 var nbVillagePerAxe int = 100 
 
+// relative to a body of interest, the storage for a neighbor with its distance 
+// nota : this is used to measure the stiring of the bodies along the simulation
+type Neighbor struct {
+	Rank int // rank in the []quadtree.Body
+	Distance float64
+}
+// the measure of stiring is computed with a finite number of neighbors
+// no stiring is that the neighbors at the end of the run are the same neighbors
+// that at the begining
+var NbOfNeighborsPerBody int = 10
+
 // a simulation run
 type Run struct {
 	bodies * []quadtree.Body // bodies position in the quatree
 	bodiesOrig * []quadtree.Body // original bodies position in the quatree
 	bodiesAccel * []Acc // bodies acceleration
 	bodiesVel * []Vel // bodies velocity
+	bodiesNeighbors * [][]Neighbor // storage for neighbor of all bodies
+	bodiesNeighborsOrig * [][]Neighbor // storage for neighbor of all bodies at init
 
 	q quadtree.Quadtree // the supporting quadtree
 	country string // the country of interest 
@@ -211,6 +224,49 @@ func NewRun() * Run {
 	return &r
 }
 
+
+// init the run with an array of quadtree bodies
+func (r * Run) Init( bodies * ([]quadtree.Body)) {
+
+	Info.Printf("Init begin")
+	
+	r.bodies = bodies
+
+	// create a reference of the bodies
+	copySliceOfBodies := make( []quadtree.Body, len(*bodies))
+	r.bodiesOrig = &copySliceOfBodies
+	copy(  *r.bodiesOrig, *r.bodies)
+
+	acc := make([]Acc, len(*bodies))
+	vel := make([]Vel, len(*bodies))
+	r.bodiesAccel = &acc
+	r.bodiesVel = &vel
+	r.q.Init(bodies)
+
+	// init neighbor array
+	neighbors := make([][]Neighbor, len(*bodies))
+	r.bodiesNeighbors = &neighbors
+	for idx,_  := range *r.bodiesNeighbors {
+		(*r.bodiesNeighbors)[idx] = make( []Neighbor, NbOfNeighborsPerBody)
+	}
+	neighborsOrig := make([][]Neighbor, len(*bodies))
+	r.bodiesNeighborsOrig = &neighborsOrig
+	for idx,_  := range *r.bodiesNeighborsOrig {
+		(*r.bodiesNeighborsOrig)[idx] = make( []Neighbor, NbOfNeighborsPerBody)
+	}
+
+	r.state = STOPPED
+	r.SetRenderingWindow( 0.0, 1.0, 0.0, 1.0)
+	r.renderState = WITH_BORDERS // we draw borders
+	r.renderChoice = RUNNING_CONFIGURATION // we draw borders
+	r.fieldRendering = false
+
+	DtAdjustMode = AUTO
+
+	Info.Printf("Init end")
+}
+
+
 // rendering the data set can be done only outside the load config xxx function
 var renderingMutex sync.Mutex						
 
@@ -278,34 +334,6 @@ func (r * Run) GiniOverTimeTransposed() [][]float64 {
 func (r * Run) GiniOverTime() [][]float64 {
 
 	return r.giniOverTime
-}
-
-// init the run with an array of quadtree bodies
-func (r * Run) Init( bodies * ([]quadtree.Body)) {
-
-	Info.Printf("Init begin")
-	
-	r.bodies = bodies
-
-	// create a reference of the bodies
-	copySliceOfBodies := make( []quadtree.Body, len(*bodies))
-	r.bodiesOrig = &copySliceOfBodies
-	copy(  *r.bodiesOrig, *r.bodies)
-
-	acc := make([]Acc, len(*bodies))
-	vel := make([]Vel, len(*bodies))
-	r.bodiesAccel = &acc
-	r.bodiesVel = &vel
-	r.q.Init(bodies)
-	r.state = STOPPED
-	r.SetRenderingWindow( 0.0, 1.0, 0.0, 1.0)
-	r.renderState = WITH_BORDERS // we draw borders
-	r.renderChoice = RUNNING_CONFIGURATION // we draw borders
-	r.fieldRendering = false
-
-	DtAdjustMode = AUTO
-
-	Info.Printf("Init end")
 }
 
 func (r * Run) ToggleRenderChoice() {
