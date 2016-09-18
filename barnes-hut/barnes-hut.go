@@ -137,6 +137,7 @@ type Run struct {
 	country string // the country of interest 
 	state State
 	step int
+
 	giniFileLog * os.File
 	giniOverTime [][]float64 // evolution of the gini distribution over time 
 	xMin, xMax, yMin, yMax float64 // coordinates of the rendering windows
@@ -159,6 +160,7 @@ type Run struct {
 	borderHasBeenMet bool // compute wether the border has been met (see issue#4)
 
 	OutputDir string // output dir for the run
+	StatusFileLog * os.File
 }
 
 func (r * Run) SetCountry( country string)  {
@@ -194,6 +196,15 @@ func NewRun() * Run {
 		return nil
 	}
 	r.giniFileLog = file
+
+	// init the file storing status of the run at all steps
+	filename = fmt.Sprintf( r.OutputDir + "/status_out.csv")
+	file, err = os.Create(filename)
+	if( err != nil) {
+		log.Fatal(err)
+		return nil
+	}
+	r.StatusFileLog = file
 
 	r.Init( & bodies)
 
@@ -413,6 +424,7 @@ func (r * Run) OneStepOptional( updatePosition bool) {
 		r.ratioOfBodiesWithCapVel,
 		r.borderHasBeenMet)
 	
+	fmt.Fprintf( r.StatusFileLog, r.Status())
 	Info.Printf( r.Status())
 
 }
