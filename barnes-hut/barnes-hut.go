@@ -132,8 +132,8 @@ type Run struct {
 	bodiesOrig * []quadtree.Body // original bodies position in the quatree
 	bodiesAccel * []Acc // bodies acceleration
 	bodiesVel * []Vel // bodies velocity
-	bodiesNeighbours NeighbourDico // storage for neighbour of all bodies
-	bodiesNeighboursOrig NeighbourDico // storage for neighbour of all bodies at init
+	bodiesNeighbours * NeighbourDico // storage for neighbour of all bodies
+	bodiesNeighboursOrig * NeighbourDico // storage for neighbour of all bodies at init
 
 	q quadtree.Quadtree // the supporting quadtree
 	country string // the country of interest 
