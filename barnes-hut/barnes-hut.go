@@ -411,6 +411,18 @@ func (r * Run) OneStepOptional( updatePosition bool) {
 	// compute new position
 	if( updatePosition) { r.UpdatePosition() }
 
+	// check does not work when nodes are implied
+	// r.bodiesNeighbours.Check()
+	
+	// init neighbours original
+	if r.step == 0 { 
+		r.bodiesNeighboursOrig.Copy( r.bodiesNeighbours)
+	}
+
+
+	// compute stirring
+	stirring := r.bodiesNeighbours.ComputeStirring( r.bodiesNeighboursOrig)
+
 	// update the step
 	r.step++
 	
@@ -420,7 +432,7 @@ func (r * Run) OneStepOptional( updatePosition bool) {
 	Gflops = float64( nbComputationPerStep) /  StepDuration
 
 	//	fmt.Printf("step %d speedup %f low 10 %f high 5 %f high 10 %f MFlops %f Dur (s) %f MinDist %f Max Vel %f Optim Dt %f Dt %f ratio %f \n",
-	r.status = fmt.Sprintf("step %d speedup %f Dur (s) %e MaxF %e MinD %e MaxV %e Dt Opt %e Dt %e F/A %e border %t\n",
+	r.status = fmt.Sprintf("step %d speedup %f Dur (s) %e MaxF %e MinD %e MaxV %e Dt Opt %e Dt %e F/A %e border %t stirring %f \n",
 		r.step, 
 		float64(len(*r.bodies)*len(*r.bodies))/float64(nbComputationPerStep),
 		StepDuration/1000000000	,
@@ -430,7 +442,8 @@ func (r * Run) OneStepOptional( updatePosition bool) {
 		r.dtOptim,
 		Dt,
 		r.ratioOfBodiesWithCapVel,
-		r.borderHasBeenMet)
+		r.borderHasBeenMet,
+		stirring)
 	
 	fmt.Fprintf( r.StatusFileLog, r.Status())
 	Info.Printf( r.Status())
@@ -640,6 +653,9 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 				if( *b != body) {
 	
 					dist := getModuloDistanceBetweenBodies( &body, b)
+
+					// update the neighbour
+					r.bodiesNeighbours.Insert( idx, b, dist)
 
 					if dist == 0.0 {
 						var t testing.T

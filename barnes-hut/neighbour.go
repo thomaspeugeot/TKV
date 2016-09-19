@@ -58,6 +58,10 @@ func (dicoTarget * NeighbourDico) Copy(dicoSource * NeighbourDico) {
 // insert body at index in the dico according to the distance
 func (dico * NeighbourDico) Insert(index int, body * quadtree.Body, distance float64) {
 
+	if( index == 0) {
+		Trace.Printf( "Insert begin with distance %f", distance)
+	}
+
 	// check if body is eligible to the last rank
 	// replace if last rank is nil or if distance is greater 
 	if( (*dico)[index][NbOfNeighboursPerBody-1].n == nil || 
@@ -76,6 +80,30 @@ func (dico * NeighbourDico) Insert(index int, body * quadtree.Body, distance flo
 			(*dico)[index][rank] = (*dico)[index][rank+1]
 			(*dico)[index][rank+1] = tmp
 		}
+	}
+}
+
+// check integrity
+// not twice the same neighbor
+func (dico * NeighbourDico) Check() {
+
+	for idx,_  := range *dico {
+		for n, _ := range (*dico)[idx] {
+
+			body := (*dico)[idx][n].n
+			if body == nil {
+				Info.Printf("nil neighbour at index %d rank %d, with distance %f", idx, n, (*dico)[idx][n].Distance)
+			}
+
+			// check to see if neighbor is present twice
+			for nOrig , _ := range (*dico)[idx] {
+				if (*dico)[idx][nOrig].n == body && nOrig != n {
+
+					Info.Printf("neighbour found twice at index %d rank %d and rank %d", idx, n, nOrig)
+					
+				}
+			}
+		}	
 	}
 }
 
