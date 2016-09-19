@@ -126,16 +126,16 @@ var ConcurrentRoutines int = 100
 // this value can be set interactively during the run
 var nbVillagePerAxe int = 100 
 
-// relative to a body of interest, the storage for a neighbor with its distance 
+// relative to a body of interest, the storage for a neighbour with its distance 
 // nota : this is used to measure the stiring of the bodies along the simulation
-type Neighbor struct {
-	Rank int // rank in the []quadtree.Body
+type Neighbour struct {
+	n * quadtree.Body // rank in the []quadtree.Body
 	Distance float64
 }
-// the measure of stiring is computed with a finite number of neighbors
-// no stiring is that the neighbors at the end of the run are the same neighbors
+// the measure of stiring is computed with a finite number of neighbours
+// no stiring is that the neighbours at the end of the run are the same neighbours
 // that at the begining
-var NbOfNeighborsPerBody int = 10
+var NbOfNeighboursPerBody int = 10
 
 // a simulation run
 type Run struct {
@@ -143,8 +143,8 @@ type Run struct {
 	bodiesOrig * []quadtree.Body // original bodies position in the quatree
 	bodiesAccel * []Acc // bodies acceleration
 	bodiesVel * []Vel // bodies velocity
-	bodiesNeighbors * [][]Neighbor // storage for neighbor of all bodies
-	bodiesNeighborsOrig * [][]Neighbor // storage for neighbor of all bodies at init
+	bodiesNeighbours * [][]Neighbour // storage for neighbour of all bodies
+	bodiesNeighboursOrig * [][]Neighbour // storage for neighbour of all bodies at init
 
 	q quadtree.Quadtree // the supporting quadtree
 	country string // the country of interest 
@@ -243,16 +243,16 @@ func (r * Run) Init( bodies * ([]quadtree.Body)) {
 	r.bodiesVel = &vel
 	r.q.Init(bodies)
 
-	// init neighbor array
-	neighbors := make([][]Neighbor, len(*bodies))
-	r.bodiesNeighbors = &neighbors
-	for idx,_  := range *r.bodiesNeighbors {
-		(*r.bodiesNeighbors)[idx] = make( []Neighbor, NbOfNeighborsPerBody)
+	// init neighbour array
+	neighbours := make([][]Neighbour, len(*bodies))
+	r.bodiesNeighbours = &neighbours
+	for idx,_  := range *r.bodiesNeighbours {
+		(*r.bodiesNeighbours)[idx] = make( []Neighbour, NbOfNeighboursPerBody)
 	}
-	neighborsOrig := make([][]Neighbor, len(*bodies))
-	r.bodiesNeighborsOrig = &neighborsOrig
-	for idx,_  := range *r.bodiesNeighborsOrig {
-		(*r.bodiesNeighborsOrig)[idx] = make( []Neighbor, NbOfNeighborsPerBody)
+	neighboursOrig := make([][]Neighbour, len(*bodies))
+	r.bodiesNeighboursOrig = &neighboursOrig
+	for idx,_  := range *r.bodiesNeighboursOrig {
+		(*r.bodiesNeighboursOrig)[idx] = make( []Neighbour, NbOfNeighboursPerBody)
 	}
 
 	r.state = STOPPED
