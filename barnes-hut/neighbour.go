@@ -53,5 +53,51 @@ func (dicoTarget * NeighbourDico) Copy(dicoSource * NeighbourDico) {
 			(*dicoTarget)[idx][n].Distance = (*dicoSource)[idx][n].Distance 			
 		}	
 	}
+}
 
+// insert body at index in the dico according to the distance
+func (dico * NeighbourDico) Insert(index int, body * quadtree.Body, distance float64) {
+
+	// check if body is eligible to the last rank
+	// replace if last rank is nil or if distance is greater 
+	if( (*dico)[index][NbOfNeighboursPerBody-1].n == nil || 
+		(*dico)[index][NbOfNeighboursPerBody-1].Distance > distance ) {
+
+		(*dico)[index][NbOfNeighboursPerBody-1].n = body
+		(*dico)[index][NbOfNeighboursPerBody-1].Distance = distance
+	}
+
+	// swap from last rank to rank 0
+	for rank := NbOfNeighboursPerBody-2; rank >=0; rank-- {
+		if( (*dico)[index][rank].n == nil || 
+			(*dico)[index][rank].Distance > (*dico)[index][rank+1].Distance ) {
+
+			tmp := (*dico)[index][rank]
+			(*dico)[index][rank] = (*dico)[index][rank+1]
+			(*dico)[index][rank+1] = tmp
+		}
+	}
+}
+
+// compute stirring
+// parse all bodies and count the number of neighbors that are still 
+// the neighbours at the origin
+func (dico * NeighbourDico) ComputeStirring(dicoOrig * NeighbourDico) float64 {
+
+	numberOfKeptNeighbors := 0 
+	for idx,_  := range *dico {
+		for n, _ := range (*dico)[idx] {
+
+			body := (*dico)[idx][n].n
+			// parse dico orig to check is the body is present
+			for nOrig , _ := range (*dicoOrig)[idx] {
+				if (*dicoOrig)[idx][nOrig].n == body {
+					numberOfKeptNeighbors++
+					continue
+				}
+			}
+		}	
+	}
+
+	return float64(numberOfKeptNeighbors)/float64(len(*dico))
 }
