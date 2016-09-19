@@ -107,6 +107,22 @@ func (dico * NeighbourDico) Check() {
 	}
 }
 
+func (dico * NeighbourDico) ComputeRatioOfNilNeighbours() float64 {
+
+	nbOfNil := 0
+	for idx,_  := range *dico {
+		for n, _ := range (*dico)[idx] {
+
+			if (*dico)[idx][n].n == nil {
+				nbOfNil++
+			}
+		}	
+	}
+	return float64(nbOfNil)/float64(len(*dico))
+}
+
+
+
 // compute stirring
 // parse all bodies and count the number of neighbors that are still 
 // the neighbours at the origin

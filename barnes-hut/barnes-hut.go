@@ -422,6 +422,7 @@ func (r * Run) OneStepOptional( updatePosition bool) {
 
 	// compute stirring
 	stirring := r.bodiesNeighbours.ComputeStirring( r.bodiesNeighboursOrig)
+	ratioOfNil := r.bodiesNeighbours.ComputeRatioOfNilNeighbours()
 
 	// update the step
 	r.step++
@@ -432,7 +433,7 @@ func (r * Run) OneStepOptional( updatePosition bool) {
 	Gflops = float64( nbComputationPerStep) /  StepDuration
 
 	//	fmt.Printf("step %d speedup %f low 10 %f high 5 %f high 10 %f MFlops %f Dur (s) %f MinDist %f Max Vel %f Optim Dt %f Dt %f ratio %f \n",
-	r.status = fmt.Sprintf("step %d speedup %f Dur (s) %e MaxF %e MinD %e MaxV %e Dt Opt %e Dt %e F/A %e border %t stirring %f \n",
+	r.status = fmt.Sprintf("step %d speedup %f Dur (s) %e MaxF %e MinD %e MaxV %e Dt Opt %e Dt %e F/A %e border %t stirring %f nils %f \n",
 		r.step, 
 		float64(len(*r.bodies)*len(*r.bodies))/float64(nbComputationPerStep),
 		StepDuration/1000000000	,
@@ -443,7 +444,8 @@ func (r * Run) OneStepOptional( updatePosition bool) {
 		Dt,
 		r.ratioOfBodiesWithCapVel,
 		r.borderHasBeenMet,
-		stirring)
+		stirring,
+		ratioOfNil)
 	
 	fmt.Fprintf( r.StatusFileLog, r.Status())
 	Info.Printf( r.Status())
