@@ -92,6 +92,7 @@ func main() {
 	mux.Handle("/", http.FileServer(http.Dir("../tkv-client/")) )
 	
 	mux.HandleFunc("/villageCoordinates", villageCoordinates)
+	mux.HandleFunc("/villageBorder", villageBorder)
 		
 	log.Fatal(http.ListenAndServe(port, mux))
 	server.Info.Printf("end")
@@ -110,6 +111,8 @@ type VillageCoordResponse struct {
 
 // get village coordinates from lat/long
 func villageCoordinates(w http.ResponseWriter, req *http.Request) {
+	
+	server.Info.Printf("Response headers: %#v", req.Body)
 	
 	// parse lat long from client
 	decoder := json.NewDecoder( req.Body)
@@ -136,4 +139,32 @@ func villageCoordinates(w http.ResponseWriter, req *http.Request) {
 
 	VillageCoordResponsejson, _ := json.MarshalIndent( xy, "", "	")
 	fmt.Fprintf(w, "%s", VillageCoordResponsejson)
+}
+
+// get village border from lat/long
+func villageBorder(w http.ResponseWriter, req *http.Request) {
+
+	// parse lat long from client
+	decoder := json.NewDecoder( req.Body)
+	var ll LatLng
+	err := decoder.Decode( &ll)
+	if err != nil {
+		log.Println("error decoding ", err)
+	}
+	server.Info.Printf("villageBorder for lat %f, lng %f", ll.Lat, ll.Lng)
+	
+	x, y, distance, latClosest, lngClosest, xSpread, ySpread, _ := t.VillageCoordinates( ll.Lat, ll.Lng)
+	server.Info.Printf("is %f %f, distance %f", x, y, distance)
+
+	var xy VillageCoordResponse
+	xy.X = x
+	xy.Y = y
+	xy.Distance = distance
+	xy.LatClosest = latClosest
+	xy.LngClosest = lngClosest
+
+	points := t.TargetBorder( xSpread, ySpread)
+
+	VillageBorderResponsejson, _ := json.MarshalIndent( points, "", "	")
+	fmt.Fprintf(w, "%s", VillageBorderResponsejson)
 }
