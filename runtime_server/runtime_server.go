@@ -19,7 +19,10 @@ type test_struct struct {
 	X1, X2, Y1, Y2 float64
 }
 //
-// go run grump-reader.go -tkvdata="C:\Users\peugeot\tkv-data" -sourceCountryNbBodies=222317 -step=8542
+//
+// on pc
+// go run runtime_server.go -targetCountryStep=43439
+// 
 func main() {
 
 	// flags  for source country
