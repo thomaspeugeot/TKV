@@ -2,9 +2,9 @@
 <html ng-app="demoapp">
 <head>
 	<title>10 000 villages</title>
-	<link rel="stylesheet" href="node_modules/angular-material/angular-material.css">
+	<link rel="stylesheet" href="css/angular-material.css">
 	<meta content="width=device-width, initial-scale=1.0" name="viewport">
-	<link href="node_modules/leaflet/dist/leaflet.css" rel="stylesheet">
+	<link href="css/leaflet.css" rel="stylesheet">
 </head>
 
 
@@ -13,10 +13,10 @@
 <leaflet lf-center="haiti" width="100%" height="50%" markers="targetMarkers"> </leaflet>
 </body>
 
-<script src="node_modules/leaflet/dist/leaflet.js"></script>
-<script src="node_modules/angular/angular.js"></script>
-<script src="node_modules/angular-leaflet-directive/dist/angular-leaflet-directive.js"></script>
-<script src="node_modules/angular-leaflet-directive/dist/angular-leaflet-directive.min.js"></script>
-<script src="node_modules/angular-leaflet-directive/dist/angular-leaflet-directive.no-header.js"></script>
-<script src="tkv-client.js"></script>
+<!-- shall load leaflet first according to -->
+<script src="js/angular.min.js"></script>
+<script src="js/leaflet.js"></script>
+<script src="js/angular-leaflet-directive.min.js"></script>
+
+<script src="js/tkv-client.js"></script>
 </html>

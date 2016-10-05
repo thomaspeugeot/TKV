@@ -50,5 +50,7 @@ _testmain.go
 bower_components
 
 node_modules
+node_modules.old
 
 *.bods
+*.zip
