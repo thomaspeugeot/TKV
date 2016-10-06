@@ -114,7 +114,7 @@ type VillageCoordResponse struct {
 // get village coordinates from lat/long
 func villageCoordinates(w http.ResponseWriter, req *http.Request) {
 	
-	server.Info.Printf("Response headers: %#v", req.Body)
+	server.Info.Printf("villageCoordinates begin")
 	
 	// parse lat long from client
 	decoder := json.NewDecoder( req.Body)
@@ -126,7 +126,7 @@ func villageCoordinates(w http.ResponseWriter, req *http.Request) {
 	server.Info.Printf("villageCoordinates for lat %f, lng %f", ll.Lat, ll.Lng)
 
 	x, y, distance, latClosest, lngClosest, xSpread, ySpread, _ := t.VillageCoordinates( ll.Lat, ll.Lng)
-	server.Info.Printf("is %f %f, distance %f", x, y, distance)
+	server.Info.Printf("villageCoordinates is %f %f, distance %f", x, y, distance)
 
 	var xy VillageCoordResponse
 	xy.X = x
@@ -141,6 +141,8 @@ func villageCoordinates(w http.ResponseWriter, req *http.Request) {
 
 	VillageCoordResponsejson, _ := json.MarshalIndent( xy, "", "	")
 	fmt.Fprintf(w, "%s", VillageCoordResponsejson)
+	
+	server.Info.Printf("villageCoordinates end")
 }
 
 // get target village border from lat/long
@@ -153,10 +155,10 @@ func villageTargetBorder(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		log.Println("error decoding ", err)
 	}
-	server.Info.Printf("villageBorder for lat %f, lng %f", ll.Lat, ll.Lng)
+	server.Info.Printf("villageTargetBorder for lat %f, lng %f", ll.Lat, ll.Lng)
 	
 	x, y, distance, _, _, xSpread, ySpread, _ := t.VillageCoordinates( ll.Lat, ll.Lng)
-	server.Info.Printf("is %f %f, distance %f", x, y, distance)
+	server.Info.Printf("villageTargetBorder is %f %f, distance %f", x, y, distance)
 
 	points := t.TargetBorder( xSpread, ySpread)
 	hull := make(convexhull.PointList, 0)
@@ -169,6 +171,8 @@ func villageTargetBorder(w http.ResponseWriter, req *http.Request) {
 // get target village border from lat/long
 func villageSourceBorder(w http.ResponseWriter, req *http.Request) {
 
+	server.Info.Printf("villageSourceBorder begin")
+	
 	// parse lat long from client
 	decoder := json.NewDecoder( req.Body)
 	var ll LatLng
@@ -185,6 +189,8 @@ func villageSourceBorder(w http.ResponseWriter, req *http.Request) {
 
 	VillageBorderResponsejson, _ := json.MarshalIndent( toGeoJSONCoordinates( hull), "", "	")
 	fmt.Fprintf(w, "%s", VillageBorderResponsejson)
+	
+	server.Info.Printf("villageSourceBorder end")
 }
 
 

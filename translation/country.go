@@ -143,7 +143,7 @@ func (country * Country) VillageCoordinates( lat, lng float64) (x, y, distance, 
 	// compute relative coordinates within the square
 	xRel, yRel := country.LatLng2XY( lat, lng)
 	Info.Printf("VillageCoordinates lat %f,  lng %f", lat, lng)
-	Info.Printf("Rel x %f, Rel y %f", xRel, yRel)
+	Info.Printf("VillageCoordinates Rel x %f, Rel y %f", xRel, yRel)
 
 	// parse all bodies and get closest body
 	closestIndex = -1
@@ -240,23 +240,26 @@ func (country * Country) XYSpreadToLatLngOrigVillage( x, y float64) convexhull.P
 }
 
 // given x, y of a point, return the border in the country
-func (country * Country) VillageBorder( x, y float64) convexhull.PointList {
+func (country * Country) VillageBorder( lat, lng float64) convexhull.PointList {
 
 	Info.Printf( "")
-	Info.Printf( "VillageBorder country %s ninput x %f y %f", country.Name, x, y)
+	Info.Printf( "VillageBorder country %s input lat %f lng %f", country.Name, lat, lng)
 	
-	points := make(convexhull.PointList, 0)
+	// from input lat, lng, get the xSpread, ySpread
+	_, _, _, _, _, xSpread, ySpread, _ := country.VillageCoordinates(lat, lng)
+	Info.Printf( "VillageBorder country %s input xSpread %f ySpread %f", country.Name, xSpread, ySpread)
 
 	// compute village min & max coord
 	numberOfVillagePerAxe := 10.0
-	xMinVillage := float64( int( x*numberOfVillagePerAxe))/numberOfVillagePerAxe
-	xMaxVillage := float64( int( x*numberOfVillagePerAxe + 1.0))/numberOfVillagePerAxe
-	yMinVillage := float64( int( y*numberOfVillagePerAxe))/numberOfVillagePerAxe
-	yMaxVillage := float64( int( y*numberOfVillagePerAxe + 1.0))/numberOfVillagePerAxe
+	xMinVillage := float64( int( xSpread*numberOfVillagePerAxe))/numberOfVillagePerAxe
+	xMaxVillage := float64( int( xSpread*numberOfVillagePerAxe + 1.0))/numberOfVillagePerAxe
+	yMinVillage := float64( int( ySpread*numberOfVillagePerAxe))/numberOfVillagePerAxe
+	yMaxVillage := float64( int( ySpread*numberOfVillagePerAxe + 1.0))/numberOfVillagePerAxe
 	
 	Info.Printf( "VillageBorder input village Min x %f Max x %f", xMinVillage, xMaxVillage)
 	
-	// parse all bodies and get closest body
+	// parse all bodies and if bodies has x & y spead close to input spread, include them in point list
+	points := make(convexhull.PointList, 0)
 	for index,b := range *country.bodiesSpread {
 		if (xMinVillage <= b.X) && (b.X < xMaxVillage) && (yMinVillage <= b.Y) && (b.Y < yMaxVillage) {
 
