@@ -93,7 +93,8 @@ func main() {
 	mux.Handle("/", http.FileServer(http.Dir("../tkv-client/")) )
 	
 	mux.HandleFunc("/villageCoordinates", villageCoordinates)
-	mux.HandleFunc("/villageBorder", villageBorder)
+	mux.HandleFunc("/villageTargetBorder", villageTargetBorder)
+	mux.HandleFunc("/villageSourceBorder", villageSourceBorder)
 		
 	log.Fatal(http.ListenAndServe(port, mux))
 	server.Info.Printf("end")
@@ -142,8 +143,8 @@ func villageCoordinates(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(w, "%s", VillageCoordResponsejson)
 }
 
-// get village border from lat/long
-func villageBorder(w http.ResponseWriter, req *http.Request) {
+// get target village border from lat/long
+func villageTargetBorder(w http.ResponseWriter, req *http.Request) {
 
 	// parse lat long from client
 	decoder := json.NewDecoder( req.Body)
@@ -165,6 +166,28 @@ func villageBorder(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(w, "%s", VillageBorderResponsejson)
 }
 
+// get target village border from lat/long
+func villageSourceBorder(w http.ResponseWriter, req *http.Request) {
+
+	// parse lat long from client
+	decoder := json.NewDecoder( req.Body)
+	var ll LatLng
+	err := decoder.Decode( &ll)
+	if err != nil {
+		log.Println("error decoding ", err)
+	}
+	server.Info.Printf("villageSourceBorder for lat %f, lng %f", ll.Lat, ll.Lng)
+	
+	points := t.SourceBorder( ll.Lat, ll.Lng)
+
+	hull := make(convexhull.PointList, 0)
+	hull, _ = points.Compute()
+
+	VillageBorderResponsejson, _ := json.MarshalIndent( toGeoJSONCoordinates( hull), "", "	")
+	fmt.Fprintf(w, "%s", VillageBorderResponsejson)
+}
+
+
 // convert pointList to array of array of array of float
 // this is necessary since the client only understand a border expressed as [][][]float
 type GeoJSONBorderCoordinates [][][]float64
@@ -177,9 +200,6 @@ func toGeoJSONCoordinates(points convexhull.PointList) GeoJSONBorderCoordinates 
 		coord[0][idx][0] = points[idx].Y // Y is longitude
 		coord[0][idx][1] = points[idx].X // X is latitude
 	}
-	
-	
-	
 	return coord
 	
 }

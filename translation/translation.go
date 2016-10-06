@@ -60,7 +60,12 @@ func (t * Translation) TargetBorder( xSpread, ySpread float64) convexhull.PointL
 	return points
 }
 
+func (t * Translation) SourceBorder( lat, lng float64) convexhull.PointList {
 
+	points := t.sourceCountry.VillageBorder( (t.sourceCountry).LatLng2XY( lat, lng))
+
+	return points
+}
 
 
 

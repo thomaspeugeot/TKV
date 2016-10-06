@@ -66,9 +66,9 @@ app.controller("EventsController", [ '$scope', '$http', function($scope, $http) 
 				fillColor: "green",
 					weight: 2,
 					opacity: 1,
-					color: 'white',
+					color: 'blue',
 					dashArray: '3',
-					fillOpacity: 0.7
+					fillOpacity: 0.0
 			}
 		}
 	});
@@ -133,16 +133,11 @@ app.controller("EventsController", [ '$scope', '$http', function($scope, $http) 
 		
 		console.log("post for villageCoordinates is over");
 		
-		$http.post('http://localhost:8001/villageBorder', jsonLatLng ).then
+		$http.post('http://localhost:8001/villageTargetBorder', jsonLatLng ).then
 		(
 			function(response) { // success handler
 				console.log(response.status);
-				console.log('village villageCoordinates answer nb of points', response.data.length);
-				
-				console.log('village villageCoordinates answer ', response.data)
-
-				console.log('village villageCoordinates before ', $scope.targetVillageBorder.data.features[0].geometry.coordinates[0] )
-				
+				console.log('village villageCoordinates before ', $scope.targetVillageBorder.data.features[0].geometry.coordinates[0] )		
 						
 				$scope.targetVillageBorder.data.features[0].geometry.coordinates = response.data;
 				
