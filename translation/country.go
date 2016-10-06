@@ -216,7 +216,7 @@ func (country * Country) XYSpreadToLatLngOrigVillage( x, y float64) convexhull.P
 	points := make(convexhull.PointList, 0)
 
 	// compute village min & max coord
-	numberOfVillagePerAxe := 100.0
+	numberOfVillagePerAxe := 10.0
 	xMinVillage := float64( int( x*numberOfVillagePerAxe))/numberOfVillagePerAxe
 	xMaxVillage := float64( int( x*numberOfVillagePerAxe + 1.0))/numberOfVillagePerAxe
 	yMinVillage := float64( int( y*numberOfVillagePerAxe))/numberOfVillagePerAxe

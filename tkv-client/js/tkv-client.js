@@ -141,14 +141,23 @@ app.controller("EventsController", [ '$scope', '$http', function($scope, $http) 
 				
 				console.log('village villageCoordinates answer ', response.data)
 
-				console.log('village villageCoordinates answer ', $scope.targetVillageBorder.data.features[0].geometry.coordinates )
+				console.log('village villageCoordinates before ', $scope.targetVillageBorder.data.features[0].geometry.coordinates[0] )
 				
 						
 				$scope.targetVillageBorder.data.features[0].geometry.coordinates = response.data;
 				
 				// convert response data field to float
+				$scope.targetVillageBorder.data.features[0].geometry.coordinates = [ [ [] ] ];
+				$scope.targetVillageBorder.data.features[0].geometry.coordinates[0] = new Array()
+				$scope.targetVillageBorder.data.features[0].geometry.coordinates[0].length = response.data[0].length
+				
+				for (var i = 0; i < response.data[0].length; i++) {
+					$scope.targetVillageBorder.data.features[0].geometry.coordinates[0][i] = new Array(2)
+					$scope.targetVillageBorder.data.features[0].geometry.coordinates[0][i][0] = parseFloat(response.data[0][i][0]);
+					$scope.targetVillageBorder.data.features[0].geometry.coordinates[0][i][1] = parseFloat(response.data[0][i][1]);
+				}
 
-				console.log('village villageCoordinates answer ', $scope.targetVillageBorder.data.features[0].geometry.coordinates )
+				console.log('village villageCoordinates answer ', $scope.targetVillageBorder.data.features[0].geometry.coordinates[0] )
 
 			}, 
 			function(errResponse) { // error handler
