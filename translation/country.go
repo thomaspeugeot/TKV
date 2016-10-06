@@ -38,7 +38,7 @@ const (
 // number of village per X or Y axis. For 10 000 villages, this number is 100
 // this value can be set interactively during the run
 var nbVillagePerAxe int = 100 
-
+var numberOfVillagePerAxe float64 = 50.0
 
 // init variables
 func (country * Country) Init() {
@@ -216,7 +216,6 @@ func (country * Country) XYSpreadToLatLngOrigVillage( x, y float64) convexhull.P
 	points := make(convexhull.PointList, 0)
 
 	// compute village min & max coord
-	numberOfVillagePerAxe := 10.0
 	xMinVillage := float64( int( x*numberOfVillagePerAxe))/numberOfVillagePerAxe
 	xMaxVillage := float64( int( x*numberOfVillagePerAxe + 1.0))/numberOfVillagePerAxe
 	yMinVillage := float64( int( y*numberOfVillagePerAxe))/numberOfVillagePerAxe
@@ -250,7 +249,6 @@ func (country * Country) VillageBorder( lat, lng float64) convexhull.PointList {
 	Info.Printf( "VillageBorder country %s input xSpread %f ySpread %f", country.Name, xSpread, ySpread)
 
 	// compute village min & max coord
-	numberOfVillagePerAxe := 10.0
 	xMinVillage := float64( int( xSpread*numberOfVillagePerAxe))/numberOfVillagePerAxe
 	xMaxVillage := float64( int( xSpread*numberOfVillagePerAxe + 1.0))/numberOfVillagePerAxe
 	yMinVillage := float64( int( ySpread*numberOfVillagePerAxe))/numberOfVillagePerAxe
