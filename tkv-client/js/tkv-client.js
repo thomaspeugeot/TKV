@@ -25,7 +25,7 @@ app.controller("EventsController", [ '$scope', '$http', function($scope, $http) 
 			}
 		},
 		
-		targetVillageBorder : {
+		villageBorders : {
 			data: {
 			  "type": "FeatureCollection",
 			  "features": [
@@ -59,7 +59,39 @@ app.controller("EventsController", [ '$scope', '$http', function($scope, $http) 
                                           ]
                                         ]
 				  }
+				},
+				{
+				  "type": "Feature",
+				  "properties": {},
+				  "geometry": {
+					"type": "Polygon",
+					"coordinates": [
+                                          [
+                                            [
+                                              -51.8359375,
+                                              28.92163128242129
+                                            ],
+                                            [
+                                              -51.8359375,
+                                              38.272688535980976
+                                            ],
+                                            [
+                                              -36.015625,
+                                              38.272688535980976
+                                            ],
+                                            [
+                                              -36.015625,
+                                              28.92163128242129
+                                            ],
+                                            [
+                                              -31.8359375,
+                                              28.92163128242129
+                                            ]
+                                          ]
+                                        ]
+				  }
 				}
+				
 			  ]
 			},
 			style: {
@@ -137,22 +169,46 @@ app.controller("EventsController", [ '$scope', '$http', function($scope, $http) 
 		(
 			function(response) { // success handler
 				console.log(response.status);
-				console.log('village villageCoordinates before ', $scope.targetVillageBorder.data.features[0].geometry.coordinates[0] )		
-						
-				$scope.targetVillageBorder.data.features[0].geometry.coordinates = response.data;
+				console.log('target village villageCoordinates before ', $scope.villageBorders.data.features[0].geometry.coordinates[0] )
 				
 				// convert response data field to float
-				$scope.targetVillageBorder.data.features[0].geometry.coordinates = [ [ [] ] ];
-				$scope.targetVillageBorder.data.features[0].geometry.coordinates[0] = new Array()
-				$scope.targetVillageBorder.data.features[0].geometry.coordinates[0].length = response.data[0].length
+				$scope.villageBorders.data.features[0].geometry.coordinates = [ [ [] ] ];
+				$scope.villageBorders.data.features[0].geometry.coordinates[0] = new Array()
+				$scope.villageBorders.data.features[0].geometry.coordinates[0].length = response.data[0].length
 				
 				for (var i = 0; i < response.data[0].length; i++) {
-					$scope.targetVillageBorder.data.features[0].geometry.coordinates[0][i] = new Array(2)
-					$scope.targetVillageBorder.data.features[0].geometry.coordinates[0][i][0] = parseFloat(response.data[0][i][0]);
-					$scope.targetVillageBorder.data.features[0].geometry.coordinates[0][i][1] = parseFloat(response.data[0][i][1]);
+					$scope.villageBorders.data.features[0].geometry.coordinates[0][i] = new Array(2)
+					$scope.villageBorders.data.features[0].geometry.coordinates[0][i][0] = parseFloat(response.data[0][i][0]);
+					$scope.villageBorders.data.features[0].geometry.coordinates[0][i][1] = parseFloat(response.data[0][i][1]);
 				}
 
-				console.log('village villageCoordinates answer ', $scope.targetVillageBorder.data.features[0].geometry.coordinates[0] )
+				console.log('target village villageCoordinates answer ', $scope.villageBorders.data.features[0].geometry.coordinates[0] )
+
+			}, 
+			function(errResponse) { // error handler
+				console.error('error while posting jsonLatLng');
+				console.error(errResponse);
+			}
+		);
+		
+		$http.post('http://localhost:8001/villageSourceBorder', jsonLatLng ).then
+		(
+			function(response) { // success handler
+				console.log(response.status);
+				console.log('source village villageCoordinates before ', $scope.villageBorders.data.features[1].geometry.coordinates[0] )		
+						
+				// convert response data field to float
+				$scope.villageBorders.data.features[1].geometry.coordinates = [ [ [] ] ];
+				$scope.villageBorders.data.features[1].geometry.coordinates[0] = new Array()
+				$scope.villageBorders.data.features[1].geometry.coordinates[0].length = response.data[0].length
+				
+				for (var i = 0; i < response.data[0].length; i++) {
+					$scope.villageBorders.data.features[1].geometry.coordinates[0][i] = new Array(2)
+					$scope.villageBorders.data.features[1].geometry.coordinates[0][i][0] = parseFloat(response.data[0][i][0]);
+					$scope.villageBorders.data.features[1].geometry.coordinates[0][i][1] = parseFloat(response.data[0][i][1]);
+				}
+
+				console.log('source village villageCoordinates answer ', $scope.villageBorders.data.features[1].geometry.coordinates[0] )
 
 			}, 
 			function(errResponse) { // error handler

@@ -242,7 +242,8 @@ func (country * Country) XYSpreadToLatLngOrigVillage( x, y float64) convexhull.P
 // given x, y of a point, return the border in the country
 func (country * Country) VillageBorder( x, y float64) convexhull.PointList {
 
-	Info.Printf( "VillageBorder input x %f y %f", x, y)
+	Info.Printf( "")
+	Info.Printf( "VillageBorder country %s ninput x %f y %f", country.Name, x, y)
 	
 	points := make(convexhull.PointList, 0)
 
@@ -253,7 +254,7 @@ func (country * Country) VillageBorder( x, y float64) convexhull.PointList {
 	yMinVillage := float64( int( y*numberOfVillagePerAxe))/numberOfVillagePerAxe
 	yMaxVillage := float64( int( y*numberOfVillagePerAxe + 1.0))/numberOfVillagePerAxe
 	
-	Info.Printf( "XYSpreadToLatLngOrig input village Min x %f Max x %f", xMinVillage, xMaxVillage)
+	Info.Printf( "VillageBorder input village Min x %f Max x %f", xMinVillage, xMaxVillage)
 	
 	// parse all bodies and get closest body
 	for index,b := range *country.bodiesSpread {
@@ -266,6 +267,9 @@ func (country * Country) VillageBorder( x, y float64) convexhull.PointList {
 			points = append(points, convexhull.MakePoint(latOptimClosest, lngOptimClosest))
 		}
 	}	
+
+	Info.Printf( "VillageBorder nb of border points %d", len(points))
+	Info.Printf( "")
 
 	return points
 }
