@@ -10,6 +10,7 @@ import (
 	"os"
 	"log"
 	"fmt"
+	"strings"
 	"math"
 	"time"
 	"bytes"
@@ -38,6 +39,53 @@ func init() {
 	}
 }
 
+//parse and concenate all gif file into an animated movie
+func (r * Run) CreateMovieFromGif() {
+
+    // open the current working directory
+    cwd, error := os.Open(".")
+
+    if( error != nil ) {
+        panic( "not able to open current working directory")
+    }
+
+    // get files with their names
+    names, err := cwd.Readdirnames(0)
+
+    if( err != nil ) {
+        panic( "cannot read names in current working directory")
+    }
+
+    // parse the list of names and pick the ones that match the 
+    var files []string
+
+    for _, dirname := range(names) {
+        if strings.Contains( dirname, r.country) && strings.Contains( dirname, "gif") {
+            fmt.Printf("dirname %s\n", dirname)
+            files = append( files, dirname)
+        }
+    }
+
+    // load static image and construct outGif
+    outGif := &gif.GIF{}
+    for _, name := range files {
+        f, errOpen := os.Open( name)
+    	if( errOpen != nil ) {
+        	panic( fmt.Sprintf("cannot read file %s", name))
+    	}
+        inGif, _ := gif.Decode(f)
+        f.Close()
+
+        outGif.Image = append(outGif.Image, inGif.(*image.Paletted))
+        outGif.Delay = append(outGif.Delay, 100)
+    }
+
+    // save to out.gif
+    f, _ := os.OpenFile("hti.gif", os.O_WRONLY|os.O_CREATE, 0600)
+    defer f.Close()
+    gif.EncodeAll(f, outGif)
+
+}
 
 func (r * Run) RenderGif(out io.Writer, encode64 bool) {
 
@@ -248,5 +296,6 @@ func (r * Run) OutputGif(out io.Writer, nbStep int) {
 	}
 	r.state = STOPPED
 	r.CaptureConfig()
+	r.CreateMovieFromGif()
 	os.Exit(0)
 }
