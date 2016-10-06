@@ -8,6 +8,7 @@ import (
 	"flag"
 	"fmt"
 	"encoding/json"
+	convexhull "github.com/thomaspeugeot/go-convexhull/convexhull"
 )
 
 
@@ -153,18 +154,32 @@ func villageBorder(w http.ResponseWriter, req *http.Request) {
 	}
 	server.Info.Printf("villageBorder for lat %f, lng %f", ll.Lat, ll.Lng)
 	
-	x, y, distance, latClosest, lngClosest, xSpread, ySpread, _ := t.VillageCoordinates( ll.Lat, ll.Lng)
+	x, y, distance, _, _, xSpread, ySpread, _ := t.VillageCoordinates( ll.Lat, ll.Lng)
 	server.Info.Printf("is %f %f, distance %f", x, y, distance)
 
-	var xy VillageCoordResponse
-	xy.X = x
-	xy.Y = y
-	xy.Distance = distance
-	xy.LatClosest = latClosest
-	xy.LngClosest = lngClosest
-
 	points := t.TargetBorder( xSpread, ySpread)
+	hull := make(convexhull.PointList, 0)
+	hull, _ = points.Compute()
 
-	VillageBorderResponsejson, _ := json.MarshalIndent( points, "", "	")
+	VillageBorderResponsejson, _ := json.MarshalIndent( toGeoJSONCoordinates( hull), "", "	")
 	fmt.Fprintf(w, "%s", VillageBorderResponsejson)
+}
+
+// convert pointList to array of array of array of float
+// this is necessary since the client only understand a border expressed as [][][]float
+type GeoJSONBorderCoordinates [][][]float64
+func toGeoJSONCoordinates(points convexhull.PointList) GeoJSONBorderCoordinates {
+
+	coord := make( GeoJSONBorderCoordinates, 1)
+	coord[0] = make( [][]float64, len(points))
+	for idx, _ := range coord[0] {
+		coord[0][idx] = make( []float64, 2)
+		coord[0][idx][0] = points[idx].Y // Y is longitude
+		coord[0][idx][1] = points[idx].X // X is latitude
+	}
+	
+	
+	
+	return coord
+	
 }

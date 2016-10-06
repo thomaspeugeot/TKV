@@ -9,12 +9,12 @@
 
 
 <body ng-controller="EventsController">
-<leaflet lf-center="france" width="100%" height="50%" markers="markers" event-broadcast="events"> </leaflet>
-<leaflet lf-center="haiti" width="100%" height="50%" markers="targetMarkers"> </leaflet>
+<leaflet lf-center="france" width="100%" height="50%" markers="markers" event-broadcast="events" > </leaflet>
+<leaflet lf-center="haiti" width="100%" height="50%" markers="targetMarkers" geojson="targetVillageBorder"> </leaflet>
 </body>
 
 <!-- shall load leaflet first according to -->
-<script src="js/angular.min.js"></script>
+<script src="js/angular.js"></script>
 <script src="js/leaflet.js"></script>
 <script src="js/angular-leaflet-directive.js"></script>
 
