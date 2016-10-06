@@ -44,13 +44,23 @@ func main() {
 
 	// flag "country"
 	countryPtr := flag.String("country","fra","iso 3166 country code")
-
+	targetMaxBodiesPtr := flag.String("targetMaxBodies","100000","target nb of bodies")
+	
 	// get the directory containing tkv data through the flag "tkvdata"
 	dirTKVDataPtr := flag.String("tkvdata","/Users/thomaspeugeot/the-mapping-data/","directory containing input tkv data")
 		
 	var country grump.Country
 
 	flag.Parse()
+	
+	{
+		_, errScan := fmt.Sscanf(*targetMaxBodiesPtr, "%d", & targetMaxBodies)
+		if( errScan != nil) {
+			log.Fatal(errScan)
+			return			
+		}
+	}
+	
 	grump.Info.Printf( "country to parse %s", *countryPtr)
 	country.Name = *countryPtr
 	grump.Info.Printf("directory containing tkv data %s", *dirTKVDataPtr)
@@ -210,6 +220,7 @@ func main() {
 
 	var run barnes_hut.Run
 	run.Init( & bodies)
+	run.OutputDir  = "."
 	run.SetCountry( country.Name)
 
 	run.CaptureConfig()

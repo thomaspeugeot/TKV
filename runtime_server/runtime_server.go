@@ -8,6 +8,7 @@ import (
 	"flag"
 	"fmt"
 	"encoding/json"
+	convexhull "github.com/thomaspeugeot/go-convexhull/convexhull"
 )
 
 
@@ -19,7 +20,10 @@ type test_struct struct {
 	X1, X2, Y1, Y2 float64
 }
 //
-// go run grump-reader.go -tkvdata="C:\Users\peugeot\tkv-data" -sourceCountryNbBodies=222317 -step=8542
+//
+// on pc
+// go run runtime_server.go -targetCountryStep=43439
+// 
 func main() {
 
 	// flags  for source country
@@ -89,6 +93,8 @@ func main() {
 	mux.Handle("/", http.FileServer(http.Dir("../tkv-client/")) )
 	
 	mux.HandleFunc("/villageCoordinates", villageCoordinates)
+	mux.HandleFunc("/villageTargetBorder", villageTargetBorder)
+	mux.HandleFunc("/villageSourceBorder", villageSourceBorder)
 		
 	log.Fatal(http.ListenAndServe(port, mux))
 	server.Info.Printf("end")
@@ -108,6 +114,8 @@ type VillageCoordResponse struct {
 // get village coordinates from lat/long
 func villageCoordinates(w http.ResponseWriter, req *http.Request) {
 	
+	server.Info.Printf("villageCoordinates begin")
+	
 	// parse lat long from client
 	decoder := json.NewDecoder( req.Body)
 	var ll LatLng
@@ -118,7 +126,7 @@ func villageCoordinates(w http.ResponseWriter, req *http.Request) {
 	server.Info.Printf("villageCoordinates for lat %f, lng %f", ll.Lat, ll.Lng)
 
 	x, y, distance, latClosest, lngClosest, xSpread, ySpread, _ := t.VillageCoordinates( ll.Lat, ll.Lng)
-	server.Info.Printf("is %f %f, distance %f", x, y, distance)
+	server.Info.Printf("villageCoordinates is %f %f, distance %f", x, y, distance)
 
 	var xy VillageCoordResponse
 	xy.X = x
@@ -133,4 +141,71 @@ func villageCoordinates(w http.ResponseWriter, req *http.Request) {
 
 	VillageCoordResponsejson, _ := json.MarshalIndent( xy, "", "	")
 	fmt.Fprintf(w, "%s", VillageCoordResponsejson)
+	
+	server.Info.Printf("villageCoordinates end")
+}
+
+// get target village border from lat/long
+func villageTargetBorder(w http.ResponseWriter, req *http.Request) {
+
+	// parse lat long from client
+	decoder := json.NewDecoder( req.Body)
+	var ll LatLng
+	err := decoder.Decode( &ll)
+	if err != nil {
+		log.Println("error decoding ", err)
+	}
+	server.Info.Printf("villageTargetBorder for lat %f, lng %f", ll.Lat, ll.Lng)
+	
+	x, y, distance, _, _, xSpread, ySpread, _ := t.VillageCoordinates( ll.Lat, ll.Lng)
+	server.Info.Printf("villageTargetBorder is %f %f, distance %f", x, y, distance)
+
+	points := t.TargetBorder( xSpread, ySpread)
+	hull := make(convexhull.PointList, 0)
+	hull, _ = points.Compute()
+
+	VillageBorderResponsejson, _ := json.MarshalIndent( toGeoJSONCoordinates( hull), "", "	")
+	fmt.Fprintf(w, "%s", VillageBorderResponsejson)
+}
+
+// get target village border from lat/long
+func villageSourceBorder(w http.ResponseWriter, req *http.Request) {
+
+	server.Info.Printf("villageSourceBorder begin")
+	
+	// parse lat long from client
+	decoder := json.NewDecoder( req.Body)
+	var ll LatLng
+	err := decoder.Decode( &ll)
+	if err != nil {
+		log.Println("error decoding ", err)
+	}
+	server.Info.Printf("villageSourceBorder for lat %f, lng %f", ll.Lat, ll.Lng)
+	
+	points := t.SourceBorder( ll.Lat, ll.Lng)
+
+	hull := make(convexhull.PointList, 0)
+	hull, _ = points.Compute()
+
+	VillageBorderResponsejson, _ := json.MarshalIndent( toGeoJSONCoordinates( hull), "", "	")
+	fmt.Fprintf(w, "%s", VillageBorderResponsejson)
+	
+	server.Info.Printf("villageSourceBorder end")
+}
+
+
+// convert pointList to array of array of array of float
+// this is necessary since the client only understand a border expressed as [][][]float
+type GeoJSONBorderCoordinates [][][]float64
+func toGeoJSONCoordinates(points convexhull.PointList) GeoJSONBorderCoordinates {
+
+	coord := make( GeoJSONBorderCoordinates, 1)
+	coord[0] = make( [][]float64, len(points))
+	for idx, _ := range coord[0] {
+		coord[0][idx] = make( []float64, 2)
+		coord[0][idx][0] = points[idx].Y // Y is longitude
+		coord[0][idx][1] = points[idx].X // X is latitude
+	}
+	return coord
+	
 }

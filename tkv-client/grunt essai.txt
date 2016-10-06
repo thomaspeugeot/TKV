@@ -1,0 +1,15 @@
+copy: {
+  main: {
+    files: [
+      // includes files within path
+      {expand: true, src: ['node_modules/**/*.js'], dest: '../sim-server/client/js', filter: 'isFile'},
+
+      // includes files within path and its sub-directories
+      {expand: true, src: ['node_modules/**/*.css'], dest: '../sim-server/client/css', filter: 'isFile'},
+
+{expand: true, src: ['tkv.js'], dest: '../sim-server/client/js', filter: 'isFile'},
+{expand: true, src: ['tkv.html'], dest: '../sim-server/client', filter: 'isFile'},
+
+    ],
+  },
+},

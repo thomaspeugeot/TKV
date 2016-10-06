@@ -12,6 +12,8 @@ import (
 	"github.com/thomaspeugeot/tkv/grump"
 	// "path/filepath"
 	"encoding/json"
+	
+	convexhull "github.com/thomaspeugeot/go-convexhull/convexhull"
 )
 
 type Country struct {
@@ -36,7 +38,7 @@ const (
 // number of village per X or Y axis. For 10 000 villages, this number is 100
 // this value can be set interactively during the run
 var nbVillagePerAxe int = 100 
-
+var numberOfVillagePerAxe float64 = 50.0
 
 // init variables
 func (country * Country) Init() {
@@ -141,7 +143,7 @@ func (country * Country) VillageCoordinates( lat, lng float64) (x, y, distance, 
 	// compute relative coordinates within the square
 	xRel, yRel := country.LatLng2XY( lat, lng)
 	Info.Printf("VillageCoordinates lat %f,  lng %f", lat, lng)
-	Info.Printf("Rel x %f, Rel y %f", xRel, yRel)
+	Info.Printf("VillageCoordinates Rel x %f, Rel y %f", xRel, yRel)
 
 	// parse all bodies and get closest body
 	closestIndex = -1
@@ -205,4 +207,70 @@ func (country * Country) XYSpreadToLatLngOrig( x, y float64) (lat, lng float64) 
 	Info.Printf("XYSpreadToLatLngOrig target lat %f lng %f", latOptimClosest, lngOptimClosest)
 
 	return latOptimClosest, lngOptimClosest
+}
+
+func (country * Country) XYSpreadToLatLngOrigVillage( x, y float64) convexhull.PointList {
+
+	Info.Printf( "XYSpreadToLatLngOrig input x %f y %f", x, y)
+	
+	points := make(convexhull.PointList, 0)
+
+	// compute village min & max coord
+	xMinVillage := float64( int( x*numberOfVillagePerAxe))/numberOfVillagePerAxe
+	xMaxVillage := float64( int( x*numberOfVillagePerAxe + 1.0))/numberOfVillagePerAxe
+	yMinVillage := float64( int( y*numberOfVillagePerAxe))/numberOfVillagePerAxe
+	yMaxVillage := float64( int( y*numberOfVillagePerAxe + 1.0))/numberOfVillagePerAxe
+	
+	Info.Printf( "XYSpreadToLatLngOrig input village Min x %f Max x %f", xMinVillage, xMaxVillage)
+	
+	// parse all bodies and get closest body
+	for index,b := range *country.bodiesSpread {
+		if (xMinVillage <= b.X) && (b.X < xMaxVillage) && (yMinVillage <= b.Y) && (b.Y < yMaxVillage) {
+
+			xRelClosest := (*country.bodiesOrig)[index].X
+			yRelClosest := (*country.bodiesOrig)[index].Y
+			latOptimClosest, lngOptimClosest := country.XY2LatLng( xRelClosest, yRelClosest)
+			
+			points = append(points, convexhull.MakePoint(latOptimClosest, lngOptimClosest))
+		}
+	}	
+
+	return points
+}
+
+// given x, y of a point, return the border in the country
+func (country * Country) VillageBorder( lat, lng float64) convexhull.PointList {
+
+	Info.Printf( "")
+	Info.Printf( "VillageBorder country %s input lat %f lng %f", country.Name, lat, lng)
+	
+	// from input lat, lng, get the xSpread, ySpread
+	_, _, _, _, _, xSpread, ySpread, _ := country.VillageCoordinates(lat, lng)
+	Info.Printf( "VillageBorder country %s input xSpread %f ySpread %f", country.Name, xSpread, ySpread)
+
+	// compute village min & max coord
+	xMinVillage := float64( int( xSpread*numberOfVillagePerAxe))/numberOfVillagePerAxe
+	xMaxVillage := float64( int( xSpread*numberOfVillagePerAxe + 1.0))/numberOfVillagePerAxe
+	yMinVillage := float64( int( ySpread*numberOfVillagePerAxe))/numberOfVillagePerAxe
+	yMaxVillage := float64( int( ySpread*numberOfVillagePerAxe + 1.0))/numberOfVillagePerAxe
+	
+	Info.Printf( "VillageBorder input village Min x %f Max x %f", xMinVillage, xMaxVillage)
+	
+	// parse all bodies and if bodies has x & y spead close to input spread, include them in point list
+	points := make(convexhull.PointList, 0)
+	for index,b := range *country.bodiesSpread {
+		if (xMinVillage <= b.X) && (b.X < xMaxVillage) && (yMinVillage <= b.Y) && (b.Y < yMaxVillage) {
+
+			xRelClosest := (*country.bodiesOrig)[index].X
+			yRelClosest := (*country.bodiesOrig)[index].Y
+			latOptimClosest, lngOptimClosest := country.XY2LatLng( xRelClosest, yRelClosest)
+			
+			points = append(points, convexhull.MakePoint(latOptimClosest, lngOptimClosest))
+		}
+	}	
+
+	Info.Printf( "VillageBorder nb of border points %d", len(points))
+	Info.Printf( "")
+
+	return points
 }

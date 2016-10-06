@@ -3,6 +3,7 @@
 package translation
 
 import (
+	convexhull "github.com/thomaspeugeot/go-convexhull/convexhull"
 )
 
 
@@ -11,7 +12,6 @@ type Translation struct {
 	sourceCountry Country
 	targetCountry Country
 }
-
 
 func (t * Translation) Init(sourceCountry, targetCountry Country) {
 
@@ -50,7 +50,24 @@ func (t * Translation) TargetVillage( xSpread, ySpread float64) (latTarget, lngT
 	return latTarget, lngTarget
 }
 
+// from a coordinate in source coutry, get border
+func (t * Translation) TargetBorder( xSpread, ySpread float64) convexhull.PointList {
 
+	Info.Printf("TargetBorder input xSpread %f ySpread %f", xSpread, ySpread)
+
+	points := t.targetCountry.XYSpreadToLatLngOrigVillage( xSpread, ySpread)
+
+	return points
+}
+
+func (t * Translation) SourceBorder( lat, lng float64) convexhull.PointList {
+
+	Info.Printf("Source Border for lat %f lng %f", lat, lng)
+
+	points := t.sourceCountry.VillageBorder( lat, lng)
+
+	return points
+}
 
 
 
