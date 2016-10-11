@@ -205,7 +205,7 @@ func villageSourceBorder(w http.ResponseWriter, req *http.Request) {
 	
 	points := t.SourceBorder( ll.Lat, ll.Lng)
 
-		// availble convex hull code (in perfect precision but robust)
+	// availble convex hull code (in perfect precision but robust)
 	ps := make([]pq.Point2q, len(points))
 	for i := 0; i < len(points); i++ {
 		//

@@ -2,11 +2,6 @@
 // translation 
 package translation
 
-import (
-	convexhull "github.com/thomaspeugeot/go-convexhull/convexhull"
-)
-
-
 type Translation struct {
 	xMin, xMax, yMin, yMax float64 // coordinates of the rendering window (used to compute liste of villages)
 	sourceCountry Country
@@ -51,7 +46,7 @@ func (t * Translation) TargetVillage( xSpread, ySpread float64) (latTarget, lngT
 }
 
 // from a coordinate in source coutry, get border
-func (t * Translation) TargetBorder( xSpread, ySpread float64) convexhull.PointList {
+func (t * Translation) TargetBorder( xSpread, ySpread float64) PointList {
 
 	Info.Printf("TargetBorder input xSpread %f ySpread %f", xSpread, ySpread)
 
@@ -60,7 +55,7 @@ func (t * Translation) TargetBorder( xSpread, ySpread float64) convexhull.PointL
 	return points
 }
 
-func (t * Translation) SourceBorder( lat, lng float64) convexhull.PointList {
+func (t * Translation) SourceBorder( lat, lng float64) PointList {
 
 	Info.Printf("Source Border for lat %f lng %f", lat, lng)
 
