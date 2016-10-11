@@ -9,6 +9,9 @@ import (
 	"fmt"
 	"encoding/json"
 	convexhull "github.com/thomaspeugeot/go-convexhull/convexhull"
+	"github.com/thomaspeugeot/pq"
+	"time"
+
 )
 
 
@@ -160,11 +163,30 @@ func villageTargetBorder(w http.ResponseWriter, req *http.Request) {
 	x, y, distance, _, _, xSpread, ySpread, _ := t.VillageCoordinates( ll.Lat, ll.Lng)
 	server.Info.Printf("villageTargetBorder is %f %f, distance %f", x, y, distance)
 
+	
 	points := t.TargetBorder( xSpread, ySpread)
-	hull := make(convexhull.PointList, 0)
-	hull, _ = points.Compute()
+	
+	// availble convex hull code (in perfect precision but robust)
+	ps := make([]pq.Point2q, len(points))
+	for i := 0; i < len(points); i++ {
+		//
+		xf, yf := points[i].X, points[i].Y
+		//
+		xq, yq := pq.FtoQ(xf), pq.FtoQ(yf)
+		ps[i] = pq.XYtoP(xq, yq)
+	}
+	
+	T := time.Now()
+	lower, upper := pq.ParConvHull2q(4, ps)
+	TT := time.Since(T)
+	server.Info.Printf("villageTargetBorder time to compute convex hull %s", time.Now().Format("2006-01-02 15:04:05") + " Ready; T=" + TT.String())
+	
+	server.Info.Printf("Lower# %d", len(lower))
+	server.Info.Printf("Upper# %d", len(upper))
 
-	VillageBorderResponsejson, _ := json.MarshalIndent( toGeoJSONCoordinates( hull), "", "	")
+	PQtoGeoJSONBorderCoordinates(lower, upper)
+
+	VillageBorderResponsejson, _ := json.MarshalIndent( PQtoGeoJSONBorderCoordinates(lower, upper), "", "	")
 	fmt.Fprintf(w, "%s", VillageBorderResponsejson)
 }
 
@@ -184,10 +206,25 @@ func villageSourceBorder(w http.ResponseWriter, req *http.Request) {
 	
 	points := t.SourceBorder( ll.Lat, ll.Lng)
 
-	hull := make(convexhull.PointList, 0)
-	hull, _ = points.Compute()
+		// availble convex hull code (in perfect precision but robust)
+	ps := make([]pq.Point2q, len(points))
+	for i := 0; i < len(points); i++ {
+		//
+		xf, yf := points[i].X, points[i].Y
+		//
+		xq, yq := pq.FtoQ(xf), pq.FtoQ(yf)
+		ps[i] = pq.XYtoP(xq, yq)
+	}
+	
+	T := time.Now()
+	lower, upper := pq.ParConvHull2q(4, ps)
+	TT := time.Since(T)
+	server.Info.Printf("villageTargetBorder time to compute convex hull %s", time.Now().Format("2006-01-02 15:04:05") + " Ready; T=" + TT.String())
+	
+	server.Info.Printf("Lower# %d", len(lower))
+	server.Info.Printf("Upper# %d", len(upper))
 
-	VillageBorderResponsejson, _ := json.MarshalIndent( toGeoJSONCoordinates( hull), "", "	")
+	VillageBorderResponsejson, _ := json.MarshalIndent( PQtoGeoJSONBorderCoordinates(lower, upper), "", "	")
 	fmt.Fprintf(w, "%s", VillageBorderResponsejson)
 	
 	server.Info.Printf("villageSourceBorder end")
@@ -207,5 +244,22 @@ func toGeoJSONCoordinates(points convexhull.PointList) GeoJSONBorderCoordinates 
 		coord[0][idx][1] = points[idx].X // X is latitude
 	}
 	return coord
+}
+
+func PQtoGeoJSONBorderCoordinates(lower, upper []pq.Point2q) GeoJSONBorderCoordinates {
+
+	coord := make( GeoJSONBorderCoordinates, 1)
+	coord[0] = make( [][]float64, len(lower)+len(upper))
+	for idx, _ := range lower {
+		coord[0][idx] = make( []float64, 2)
+		coord[0][idx][0] = lower[idx].Y().Float64() // Y is longitude
+		coord[0][idx][1] = lower[idx].X().Float64() // X is latitude
+	}
+	for idx, _ := range upper{
+		coord[0][len(lower)+idx] = make( []float64, 2)
+		coord[0][len(lower)+idx][0] = upper[idx].Y().Float64() // Y is longitude
+		coord[0][len(lower)+idx][1] = upper[idx].X().Float64() // X is latitude
+	}
 	
+	return coord
 }
