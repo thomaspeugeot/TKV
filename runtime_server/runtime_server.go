@@ -8,7 +8,6 @@ import (
 	"flag"
 	"fmt"
 	"encoding/json"
-	convexhull "github.com/thomaspeugeot/go-convexhull/convexhull"
 	"github.com/thomaspeugeot/pq"
 	"time"
 
@@ -234,17 +233,6 @@ func villageSourceBorder(w http.ResponseWriter, req *http.Request) {
 // convert pointList to array of array of array of float
 // this is necessary since the client only understand a border expressed as [][][]float
 type GeoJSONBorderCoordinates [][][]float64
-func toGeoJSONCoordinates(points convexhull.PointList) GeoJSONBorderCoordinates {
-
-	coord := make( GeoJSONBorderCoordinates, 1)
-	coord[0] = make( [][]float64, len(points))
-	for idx, _ := range coord[0] {
-		coord[0][idx] = make( []float64, 2)
-		coord[0][idx][0] = points[idx].Y // Y is longitude
-		coord[0][idx][1] = points[idx].X // X is latitude
-	}
-	return coord
-}
 
 func PQtoGeoJSONBorderCoordinates(lower, upper []pq.Point2q) GeoJSONBorderCoordinates {
 
