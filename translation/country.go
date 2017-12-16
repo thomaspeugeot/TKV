@@ -46,7 +46,7 @@ const (
 // number of village per X or Y axis. For 10 000 villages, this number is 100
 // this value can be set interactively during the run
 var nbVillagePerAxe int = 100 
-var numberOfVillagePerAxe float64 = 50.0
+var numberOfVillagePerAxe float64 = 100.0
 
 // init variables
 func (country * Country) Init() {
