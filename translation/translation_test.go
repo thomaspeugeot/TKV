@@ -3,6 +3,7 @@ package translation
 import (
 	"testing"
 	"math"
+	"fmt"
 )
 
 var epsilon float64 = 0.0000001
@@ -73,7 +74,7 @@ func TestBrestVillageProximity(t * testing.T) {
 
 	// fra.LatLng2XY( lat, lng)
 
-	x, y, distance, latClosest, lngClosest := fra.VillageCoordinates( lat, lng)
+	x, y, distance, latClosest, lngClosest, _, _, _ := fra.VillageCoordinates( lat, lng)
 
 	deltaLat := math.Abs(latClosest-lat)
 	if deltaLat > 0.1 { // we tolerate one 10th of a degree
@@ -86,3 +87,31 @@ func TestBrestVillageProximity(t * testing.T) {
 	} 
 }
 // test that middle of the atlantic has far distance to nearest village 
+
+// test that the nb of bodies of each village match the total number of bodies for a country
+// test that brest lat long has close proximity to nearest village
+func TestBallBodiesCount(t * testing.T) {
+
+	var fra Country
+	fra.Name = "fra"
+	fra.NbBodies = 154301
+	fra.Step = 96962
+
+	fra.Init()
+
+	var totalBodies int
+
+	for _,vRow := range fra.villages {
+		for _,v := range vRow {
+			totalBodies+=v.NbBodies
+			fmt.Printf("%d;", v.NbBodies)
+		}
+		fmt.Println()
+	}
+
+	if totalBodies != fra.NbBodies {
+		t.Errorf("total bodies %d not matching nb bodies of country %d", totalBodies, fra.NbBodies)
+	}
+
+}
+

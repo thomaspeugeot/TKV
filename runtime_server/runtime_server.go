@@ -97,6 +97,7 @@ func main() {
 	mux.HandleFunc("/villageCoordinates", villageCoordinates)
 	mux.HandleFunc("/villageTargetBorder", villageTargetBorder)
 	mux.HandleFunc("/villageSourceBorder", villageSourceBorder)
+	mux.HandleFunc("/allSourcPointsCoordinates", allSourcPointsCoordinates)
 		
 	log.Fatal(http.ListenAndServe(port, mux))
 	server.Info.Printf("end")
@@ -105,6 +106,8 @@ func main() {
 type LatLng struct {
 	Lat, Lng float64
 }
+
+var lastReqest LatLng // store last request.
 
 type VillageCoordResponse struct {
 	X, Y float64
@@ -124,6 +127,8 @@ func villageCoordinates(w http.ResponseWriter, req *http.Request) {
 	err := decoder.Decode( &ll)
 	if err != nil {
 		log.Println("error decoding ", err)
+	} else {
+		lastReqest = ll
 	}
 	server.Info.Printf("villageCoordinates for lat %f, lng %f", ll.Lat, ll.Lng)
 
@@ -145,6 +150,38 @@ func villageCoordinates(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(w, "%s", VillageCoordResponsejson)
 	
 	server.Info.Printf("villageCoordinates end")
+}
+
+// return all points within source borders
+// get village coordinates from lat/long
+func allSourcPointsCoordinates(w http.ResponseWriter, req *http.Request) {
+	
+	server.Info.Printf("allSourcPointsCoordinates begin")
+	
+	// parse lat long from client
+	decoder := json.NewDecoder( req.Body)
+	var ll LatLng
+	err := decoder.Decode( &ll)
+	if err != nil {
+		log.Println("error decoding ", err)
+		ll = lastReqest
+	}
+	server.Info.Printf("allSourcPointsCoordinates for lat %f, lng %f", ll.Lat, ll.Lng)
+
+	points := t.SourceBorder( ll.Lat, ll.Lng)
+
+	coord := make( GeoJSONBorderCoordinates, 1)
+	coord[0] = make( [][]float64, len(points))
+	for idx, _ := range points {
+		coord[0][idx] = make( []float64, 2)
+		coord[0][idx][0] = points[idx].Y // Y is longitude
+		coord[0][idx][1] = points[idx].X // X is latitude
+	}
+
+	allSourcPointsCoordinatesResponsejson, _ := json.MarshalIndent( coord, "", "	")
+	fmt.Fprintf(w, "%s", allSourcPointsCoordinatesResponsejson)
+
+	server.Info.Printf("allSourcPointsCoordinates end")
 }
 
 // get target village border from lat/long
@@ -178,7 +215,7 @@ func villageTargetBorder(w http.ResponseWriter, req *http.Request) {
 	T := time.Now()
 	lower, upper := pq.ParConvHull2q(4, ps)
 	TT := time.Since(T)
-	server.Info.Printf("villageTargetBorder time to compute convex hull %s", time.Now().Format("2006-01-02 15:04:05") + " Ready; T=" + TT.String())
+	server.Info.Printf("villageTargetBorder time to compute convex hull %s", TT.String())
 	
 	server.Info.Printf("Lower# %d", len(lower))
 	server.Info.Printf("Upper# %d", len(upper))
@@ -218,7 +255,7 @@ func villageSourceBorder(w http.ResponseWriter, req *http.Request) {
 	T := time.Now()
 	lower, upper := pq.ParConvHull2q(4, ps)
 	TT := time.Since(T)
-	server.Info.Printf("villageTargetBorder time to compute convex hull %s", time.Now().Format("2006-01-02 15:04:05") + " Ready; T=" + TT.String())
+	server.Info.Printf("villageTargetBorder time to compute convex hull %s", TT.String())
 	
 	server.Info.Printf("Lower# %d", len(lower))
 	server.Info.Printf("Upper# %d", len(upper))
