@@ -52,5 +52,5 @@ bower_components
 node_modules
 node_modules.old
 
-*.bods
+# we need to keep some bods file for tests *.bods
 *.zip
