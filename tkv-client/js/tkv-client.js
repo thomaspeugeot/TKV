@@ -54,7 +54,7 @@ app.controller("EventsController", [ '$scope', '$http', function($scope, $http) 
 					opacity: 1,
 					color: 'blue',
 					dashArray: '3',
-					fillOpacity: 0.0
+					fillOpacity: 0.1
 			}
 		}
 	});
