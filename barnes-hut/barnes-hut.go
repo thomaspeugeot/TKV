@@ -150,6 +150,8 @@ type Run struct {
 	gridFieldNb int // nb of ticks for the field render area
 
 	minInterBodyDistance float64 // computed at each step (to compute optimal DT value)
+	// (in order to solve issue "over accumulation of bodies at border slows dow spreading #5")
+	maxMinInterBodyDistance float64 // this variable store the max of the previous value 
 	maxRepulsiveForce MaxRepulsiveForce // computed at each step (to compute optimal DT value)
 	maxVelocity float64 // max velocity
 	dtOptim float64 // optimal dt
@@ -433,12 +435,13 @@ func (r * Run) OneStepOptional( updatePosition bool) {
 	Gflops = float64( nbComputationPerStep) /  StepDuration
 
 	//	fmt.Printf("step %d speedup %f low 10 %f high 5 %f high 10 %f MFlops %f Dur (s) %f MinDist %f Max Vel %f Optim Dt %f Dt %f ratio %f \n",
-	r.status = fmt.Sprintf("step %d speedup %f Dur (s) %e MaxF %e MinD %e MaxV %e Dt Opt %e Dt %e F/A %e border %t stirring %f nils %f \n",
+	r.status = fmt.Sprintf("step %d speedup %f Dur (s) %e MaxF %e MinD %e MaxMinD %e MaxV %e Dt Opt %e Dt %e F/A %e border %t stirring %f nils %f \n",
 		r.step, 
 		float64(len(*r.bodies)*len(*r.bodies))/float64(nbComputationPerStep),
 		StepDuration/1000000000	,
 		r.maxRepulsiveForce.Norm,
 		r.minInterBodyDistance,
+		r.maxMinInterBodyDistance,
 		r.maxVelocity,
 		r.dtOptim,
 		Dt,
@@ -495,6 +498,10 @@ func (r * Run) ComputeRepulsiveForceConcurrent(nbRoutine int) float64 {
 		}
 	}
 	// log.Printf( "minInterbodyDistance by mutex %e, by concurency %e\n", r.minInterBodyDistance, minInterbodyDistance)
+
+	// update maxMinInterBodyDistance
+	if r.maxMinInterBodyDistance == 0 { r.maxMinInterBodyDistance = r.minInterBodyDistance}
+	if r.maxMinInterBodyDistance < r.minInterBodyDistance { r.maxMinInterBodyDistance = r.minInterBodyDistance}
 
 	return r.minInterBodyDistance
 }
