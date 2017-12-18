@@ -150,8 +150,6 @@ type Run struct {
 	gridFieldNb int // nb of ticks for the field render area
 
 	minInterBodyDistance float64 // computed at each step (to compute optimal DT value)
-	// (in order to solve issue "over accumulation of bodies at border slows dow spreading #5")
-	maxMinInterBodyDistance float64 // this variable store the max of the previous value 
 	maxRepulsiveForce MaxRepulsiveForce // computed at each step (to compute optimal DT value)
 	maxVelocity float64 // max velocity
 	dtOptim float64 // optimal dt
@@ -166,6 +164,10 @@ type Run struct {
 	OutputDir string // output dir for the run
 	StatusFileLog * os.File
 }
+
+// (in order to solve issue "over accumulation of bodies at border slows dow spreading #5")
+var	maxMinInterBodyDistance float64 // this variable store the max of the previous value 
+
 
 func (r * Run) SetCountry( country string)  {
 	r.country = country
@@ -441,7 +443,7 @@ func (r * Run) OneStepOptional( updatePosition bool) {
 		StepDuration/1000000000	,
 		r.maxRepulsiveForce.Norm,
 		r.minInterBodyDistance,
-		r.maxMinInterBodyDistance,
+		maxMinInterBodyDistance,
 		r.maxVelocity,
 		r.dtOptim,
 		Dt,
@@ -500,8 +502,8 @@ func (r * Run) ComputeRepulsiveForceConcurrent(nbRoutine int) float64 {
 	// log.Printf( "minInterbodyDistance by mutex %e, by concurency %e\n", r.minInterBodyDistance, minInterbodyDistance)
 
 	// update maxMinInterBodyDistance
-	if r.maxMinInterBodyDistance == 0 { r.maxMinInterBodyDistance = r.minInterBodyDistance}
-	if r.maxMinInterBodyDistance < r.minInterBodyDistance { r.maxMinInterBodyDistance = r.minInterBodyDistance}
+	if maxMinInterBodyDistance == 0 { maxMinInterBodyDistance = r.minInterBodyDistance}
+	if maxMinInterBodyDistance < r.minInterBodyDistance { maxMinInterBodyDistance = r.minInterBodyDistance}
 
 	return r.minInterBodyDistance
 }
@@ -845,6 +847,10 @@ func getRepulsionVector( A, B *quadtree.Body) (x, y float64) {
 	if absDistance > CutoffDistance {
 		x = 0.0
 		y = 0.0
+	}
+	if absDistance < maxMinInterBodyDistance {
+		x *= 1.0
+		y *= 1.0		
 	}
 	return x, y
 }
