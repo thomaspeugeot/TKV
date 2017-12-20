@@ -144,10 +144,10 @@ type Run struct {
 	// creation of two mirror mirror body set : vertical and horyzontal
 	// with their respective quadtree. This mirror repulsion is computed only
 	// when bodies are near the border
-	bodiesMirrorVertical * []quadtree.Body // bodies position in the quatree
-	bodiesMirrorHorizontal * []quadtree.Body // bodies position in the quatree
-	quadtreeMirrorVertical quadtree.Quadtree // the supporting vertical quadtree
-	quadtreeMirrorHorizontal quadtree.Quadtree // the supporting horizontal quadtree
+	bodiesMirroredVertical * []quadtree.Body // bodies position in the quatree
+	bodiesMirroredHorizontal * []quadtree.Body // bodies position in the quatree
+	quadtreeMirroredVertical quadtree.Quadtree // the supporting vertical quadtree
+	quadtreeMirroredHorizontal quadtree.Quadtree // the supporting horizontal quadtree
 
 	giniFileLog * os.File
 	giniOverTime [][]float64 // evolution of the gini distribution over time 
@@ -244,14 +244,20 @@ func (r * Run) Init( bodies * ([]quadtree.Body)) {
 	copy(  *r.bodiesOrig, *r.bodies)
 
 	// init mirror bodies
-	makeBodiesMemory( & r.bodiesMirrorVertical )
-	makeBodiesMemory( & r.bodiesMirrorHorizontal )
+	makeBodiesMemory( & r.bodiesMirroredVertical )
+	makeBodiesMemory( & r.bodiesMirroredHorizontal )
+	r.mirrorBodies()
 
 	acc := make([]Acc, len(*bodies))
 	vel := make([]Vel, len(*bodies))
 	r.bodiesAccel = &acc
 	r.bodiesVel = &vel
+
+	// init quatrees
 	r.q.Init(bodies)
+
+	r.quadtreeMirroredHorizontal.Init( r.bodiesMirroredHorizontal)
+	r.quadtreeMirroredVertical.Init( r.bodiesMirroredVertical)
 
 	// init neighbour array
 	r.InitNeighbourDico( bodies)
@@ -405,6 +411,10 @@ func (r * Run) OneStepOptional( updatePosition bool) {
 	
 	// compute the quadtree from the bodies
 	r.q.UpdateNodesListsAndCOM()
+
+	// init for mirror bodies
+	r.quadtreeMirroredHorizontal.UpdateNodesListsAndCOM()
+	r.quadtreeMirroredVertical.UpdateNodesListsAndCOM()
 	
 	// compute repulsive forces & acceleration
 	r.ComputeRepulsiveForceConcurrent( ConcurrentRoutines)
@@ -428,13 +438,10 @@ func (r * Run) OneStepOptional( updatePosition bool) {
 	// compute velocity
 	r.UpdateVelocity()
 		
-	
 	// compute new position
 	if( updatePosition) { r.UpdatePosition() }
+	r.mirrorBodies()
 
-	// check does not work when nodes are implied
-	// r.bodiesNeighbours.Check()
-	
 	// init neighbours original
 	if r.step == 0 { 
 		r.bodiesNeighboursOrig.Copy( r.bodiesNeighbours)
@@ -621,7 +628,8 @@ func (r * Run) computeAccelerationOnBodyBarnesHut(idx int) float64 {
 	// Coord is initialized at the Root coord
 	var rootCoord quadtree.Coord
 	
-	return r.computeAccelationWithNodeRecursive( idx, rootCoord)
+	result := r.computeAccelationWithNodeRecursive( idx, rootCoord)
+	return result
 }
 
 // given a body and a node in the quadtree, compute the repulsive force
@@ -885,6 +893,13 @@ func getModuloDistance( alpha, beta float64) (dist float64) {
 	return dist
 }
 
+// get modulo distance from border
+//
+// alpha and beta are between 0.0 and 1.0
+func getModuloDistanceFromBoder( A *quadtree.Body ) (distX, distY float64) {
+	return getModuloDistance( A.X, 0.0), getModuloDistance( A.Y, 0.0)
+}
+
 // get modulo distance between alpha and beta in a given village.
 //
 // alpha and beta are between left and rigth
@@ -931,3 +946,17 @@ func (r * Run) BodyCountGini() quadtree.QuadtreeGini {
 }
 
 var CurrentCountry = "bods"
+
+func (r * Run) mirrorBodies() {
+	for idx, _ := range * r.bodies {
+		
+		body := &((*r.bodies)[idx])
+		bodyMirrorHorizontal := &((*r.bodiesMirroredHorizontal)[idx])
+		bodyMirrorVertical := &((*r.bodiesMirroredVertical)[idx])
+
+		bodyMirrorHorizontal.X = 1.0 - body.X
+		bodyMirrorHorizontal.Y = body.Y
+		bodyMirrorVertical.X = body.X
+		bodyMirrorVertical.Y = 1.0 - body.Y
+	}
+}
