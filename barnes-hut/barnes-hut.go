@@ -60,6 +60,8 @@ var UseBarnesHut bool = true
 // first try at 1/10 th
 var CutoffDistance float64 = 0.01
 
+var MirrorCutoffDistance float64 = 0.1
+
 // at what step do the simulation stop
 var MaxStep int = 10000
 
@@ -629,6 +631,18 @@ func (r * Run) computeAccelerationOnBodyBarnesHut(idx int) float64 {
 	var rootCoord quadtree.Coord
 	
 	result := r.computeAccelationWithNodeRecursive( idx, rootCoord)
+
+	// compute mirrored repulsion
+	body := &(*r.bodies)[idx]
+	distX, distY := getModuloDistanceFromBoder( body)
+	if( distX < MirrorCutoffDistance ) {
+		// var rootCoordHorizontal quadtree.Coord
+	}
+	if( distY < MirrorCutoffDistance ) {
+		// var rootCoordHorizontal quadtree.Coord
+	}
+
+
 	return result
 }
 
