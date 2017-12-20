@@ -22,8 +22,6 @@ import (
 	"testing"
 	"encoding/csv"
 	"syscall"
-	// "path/filepath"
-	"strings"
 )
 
 // constant to be added to the distance between bodies
@@ -192,9 +190,7 @@ func NewRun() * Run {
 	bodies := make([]quadtree.Body, 0)
 
 	// create output directory and cwd to it
-	r.OutputDir = time.Now().Local().Format(time.ANSIC)
-	r.OutputDir = strings.Replace(r.OutputDir, ":", "_", -1)
-	r.OutputDir = strings.Replace(r.OutputDir, " ", "_", -1)
+	r.OutputDir = time.Now().Local().Format("2006_01_02_040506")
 	Info.Printf("Output dir %s", r.OutputDir)
 	syscall.Mkdir( r.OutputDir, 0777)
 
