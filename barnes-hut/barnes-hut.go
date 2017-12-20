@@ -140,6 +140,15 @@ type Run struct {
 	state State
 	step int
 
+	// in order to solve the "front row rock concert packing issue #5"
+	// creation of two mirror mirror body set : vertical and horyzontal
+	// with their respective quadtree. This mirror repulsion is computed only
+	// when bodies are near the border
+	bodiesMirrorVertical * []quadtree.Body // bodies position in the quatree
+	bodiesMirrorHorizontal * []quadtree.Body // bodies position in the quatree
+	quadtreeMirrorVertical quadtree.Quadtree // the supporting vertical quadtree
+	quadtreeMirrorHorizontal quadtree.Quadtree // the supporting horizontal quadtree
+
 	giniFileLog * os.File
 	giniOverTime [][]float64 // evolution of the gini distribution over time 
 	xMin, xMax, yMin, yMax float64 // coordinates of the rendering windows
@@ -225,10 +234,18 @@ func (r * Run) Init( bodies * ([]quadtree.Body)) {
 	
 	r.bodies = bodies
 
+	makeBodiesMemory := func( varAddress ** []quadtree.Body) {
+		tmp := make( []quadtree.Body, len(*bodies))
+		*varAddress = & tmp
+	}
+
 	// create a reference of the bodies
-	copySliceOfBodies := make( []quadtree.Body, len(*bodies))
-	r.bodiesOrig = &copySliceOfBodies
+	makeBodiesMemory( & r.bodiesOrig )
 	copy(  *r.bodiesOrig, *r.bodies)
+
+	// init mirror bodies
+	makeBodiesMemory( & r.bodiesMirrorVertical )
+	makeBodiesMemory( & r.bodiesMirrorHorizontal )
 
 	acc := make([]Acc, len(*bodies))
 	vel := make([]Vel, len(*bodies))
