@@ -606,7 +606,7 @@ func (r * Run) computeAccelerationOnBody(origIndex int) float64 {
 				minInterbodyDistance = dist
 			}
 
-			x, y := getRepulsionVector( &body, &body2)
+			x, y := getRepulsionVector( &body, &body2, &r.q)
 			
 			acc.X += x
 			acc.Y += y
@@ -632,15 +632,23 @@ func (r * Run) computeAccelerationOnBodyBarnesHut(idx int) float64 {
 	
 	result := r.computeAccelationWithNodeRecursive( idx, rootCoord, & r.q)
 
+	// store computed accelertation
+	accTmp := *acc
+
 	// compute mirrored repulsion
 	body := &(*r.bodies)[idx]
 	distX, distY := getModuloDistanceFromBoder( body)
 	if( distX < MirrorCutoffDistance ) {
-		// var rootCoordHorizontal quadtree.Coord
+		r.computeAccelationWithNodeRecursive( idx, rootCoord, & r.quadtreeMirroredHorizontal)
+		// Info.Printf("Computed X mirror repulsion %f", minDist)
 	}
 	if( distY < MirrorCutoffDistance ) {
-		// var rootCoordHorizontal quadtree.Coord
+		r.computeAccelationWithNodeRecursive( idx, rootCoord, & r.quadtreeMirroredVertical)
+		// Info.Printf("Computed Y mirror repulsion %f", minDist)
 	}
+
+	// reset computed acceleration without mirrors
+	*acc = accTmp
 
 
 	return result
@@ -672,7 +680,7 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 	// check if the COM of the node can be used
 	if (boxSize / distToNode) < BN_THETA {
 	
-		x, y := getRepulsionVector( &body, &(node.Body))
+		x, y := getRepulsionVector( &body, &(node.Body), q)
 			
 		acc.X += x
 		acc.Y += y
@@ -722,7 +730,7 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 						if dist < minInterbodyDistance { minInterbodyDistance = dist }
 					}
 					
-					x, y := getRepulsionVector( &body, b)
+					x, y := getRepulsionVector( &body, b, q)
 			
 					acc.X += x
 					acc.Y += y
@@ -858,7 +866,7 @@ func getModuloDistanceBetweenBodies( A, B *quadtree.Body) float64 {
 // applied to body A
 // proportional to the inverse of the distance squared
 // return x, y of repulsion vector and distance between A & B
-func getRepulsionVector( A, B *quadtree.Body) (x, y float64) {
+func getRepulsionVector( A, B *quadtree.Body, q *quadtree.Quadtree) (x, y float64) {
 
 	atomic.AddUint64( &nbComputationPerStep, 1)
 
