@@ -132,6 +132,7 @@ type Run struct {
 	bodiesOrig * []quadtree.Body // original bodies position in the quatree
 	bodiesAccel * []Acc // bodies acceleration
 	bodiesVel * []Vel // bodies velocity
+	bodiesEnergy *[]float64 // bodies energy
 	bodiesNeighbours * NeighbourDico // storage for neighbour of all bodies
 	bodiesNeighboursOrig * NeighbourDico // storage for neighbour of all bodies at init
 
@@ -236,8 +237,10 @@ func (r * Run) Init( bodies * ([]quadtree.Body)) {
 
 	acc := make([]Acc, len(*bodies))
 	vel := make([]Vel, len(*bodies))
+	energy := make([]float64, len(*bodies))
 	r.bodiesAccel = &acc
 	r.bodiesVel = &vel
+	r.bodiesEnergy = &energy
 
 	// init quatrees
 	r.q.Init(bodies)
@@ -425,6 +428,13 @@ func (r * Run) OneStepOptional( updatePosition bool) {
 		r.bodiesNeighboursOrig.Copy( r.bodiesNeighbours)
 	}
 
+	// compute total energy
+	totalEnergy := 0.0
+	// parse all bodies
+	for idx, _ := range (*r.bodies) {
+		e := &((*r.bodiesEnergy)[idx])
+		totalEnergy += *e
+	}
 
 	// compute stirring
 	stirring := r.bodiesNeighbours.ComputeStirring( r.bodiesNeighboursOrig)
@@ -433,24 +443,22 @@ func (r * Run) OneStepOptional( updatePosition bool) {
 	// update the step
 	r.step++
 	
-
 	t1 := time.Now()
 	StepDuration = float64((t1.Sub(t0)).Nanoseconds())
 	Gflops = float64( nbComputationPerStep) /  StepDuration
 
 	//	fmt.Printf("step %d speedup %f low 10 %f high 5 %f high 10 %f MFlops %f Dur (s) %f MinDist %f Max Vel %f Optim Dt %f Dt %f ratio %f \n",
-	r.status = fmt.Sprintf("step %d speedup %f Dur (s) %e MaxF %e MinD %e MaxMinD %e MaxV %e Dt Opt %e Dt %e F/A %e border %t stirring %f nils %f \n",
+	r.status = fmt.Sprintf("step %d speedup %f Dur %e E %e MinD %e MaxMinD %e MaxV %e Dt Opt %e Dt %e F/A %e stirring %f nils %f \n",
 		r.step, 
 		float64(len(*r.bodies)*len(*r.bodies))/float64(nbComputationPerStep),
 		StepDuration/1000000000	,
-		r.maxRepulsiveForce.Norm,
+		totalEnergy,
 		r.minInterBodyDistance,
 		maxMinInterBodyDistance,
 		r.maxVelocity,
 		r.dtOptim,
 		Dt,
 		r.ratioOfBodiesWithCapVel,
-		r.borderHasBeenMet,
 		stirring,
 		ratioOfNil)
 	
@@ -565,6 +573,10 @@ func (r * Run) computeAccelerationOnBody(origIndex int) float64 {
 	acc.X = 0
 	acc.Y = 0
 	
+	// reset energy
+	energy := &((*r.bodiesEnergy)[origIndex])
+	*energy = 0.0
+	
 	// parse all other bodies for repulsions
 	// accumulate repulsion on acceleration
 	for idx2, _ := range (*r.bodies) {
@@ -582,10 +594,11 @@ func (r * Run) computeAccelerationOnBody(origIndex int) float64 {
 				minInterbodyDistance = dist
 			}
 
-			x, y := getRepulsionVector( &body, &body2)
+			x, y, e := getRepulsionVector( &body, &body2)
 			
 			acc.X += x
 			acc.Y += y
+			*energy += e
 			// fmt.Printf("computeAccelerationOnBody idx2 %3d x %9.3f y %9.3f \n", idx2, x, y)
 		}
 	}
@@ -602,6 +615,10 @@ func (r * Run) computeAccelerationOnBodyBarnesHut(idx int) float64 {
 	acc := &((*r.bodiesAccel)[idx])
 	acc.X = 0
 	acc.Y = 0
+	
+	// reset energy
+	energy := &((*r.bodiesEnergy)[idx])
+	*energy = 0.0
 	
 	// Coord is initialized at the Root coord
 	var rootCoord quadtree.Coord
@@ -620,6 +637,7 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 	
 	body := (*r.bodies)[idx]
 	acc := &((*r.bodiesAccel)[idx])
+	energy := &((*r.bodiesEnergy)[idx])
 	
 	// compute the node box size
 	level := coord.Level()
@@ -637,10 +655,11 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 	// check if the COM of the node can be used
 	if (boxSize / distToNode) < BN_THETA {
 	
-		x, y := getRepulsionVector( &body, &(node.Body))
+		x, y, e := getRepulsionVector( &body, &(node.Body))
 			
 		acc.X += x
 		acc.Y += y
+		*energy += e
 
 		// fmt.Printf("computeAccelationWithNodeRecursive at node %#v x %9.3f y %9.3f\n", node.Coord(), x, y)
 
@@ -683,10 +702,11 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 					}	
 					if dist < minInterbodyDistance { minInterbodyDistance = dist }
 					
-					x, y := getRepulsionVector( &body, b)
+					x, y, e := getRepulsionVector( &body, b)
 			
 					acc.X += x
 					acc.Y += y
+					*energy += e
 					rank++
 					// fmt.Printf("computeAccelationWithNodeRecursive at leaf %#v rank %d x %9.3f y %9.3f\n", b.Coord(), rank, x, y)
 				} else {

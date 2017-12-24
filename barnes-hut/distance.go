@@ -115,7 +115,8 @@ func getDistanceBetweenBodiesWithBodies( A, B *quadtree.Body, x, y int) float64 
 // applied to body A
 // proportional to the inverse of the distance squared
 // return x, y of repulsion vector and distance between A & B
-func getRepulsionVector( A, B *quadtree.Body) (x, y float64) {
+// return energy as the repulsion energy 
+func getRepulsionVector( A, B *quadtree.Body) (x, y, energy float64) {
 
 	atomic.AddUint64( &nbComputationPerStep, 1)
 
@@ -126,12 +127,7 @@ func getRepulsionVector( A, B *quadtree.Body) (x, y float64) {
 	absDistance := math.Sqrt( distQuared + ETA )
 
 	distPow3 := (distQuared + ETA) * absDistance
-	
-	if false { 
-		distPow3 := math.Pow( distQuared, 1.5) 
-		distQuared /= distPow3
-	}
-	
+		
 	// repulsion is proportional to mass
 	massCombined := A.M * B.M
 	x *= massCombined
@@ -149,6 +145,6 @@ func getRepulsionVector( A, B *quadtree.Body) (x, y float64) {
 		x *= 1.0
 		y *= 1.0		
 	}
-	return x, y
+	return x, y, massCombined/absDistance
 }
 

@@ -68,7 +68,7 @@ func TesGetRepulsionVector(t *testing.T) {
 	cases[0].wantY = -2.4
 	
 	for _, c := range cases {
-		gotX, gotY := getRepulsionVector( & c.A, & c.B)
+		gotX, gotY, _ := getRepulsionVector( & c.A, & c.B)
 		if( (gotX != c.wantX) && (gotY != c.wantY)) {
 			t.Errorf("A %#v B %#v == %f %f, want %f %f", c.A, c.B, gotX, gotY, c.wantX, c.wantY )
 		}	
