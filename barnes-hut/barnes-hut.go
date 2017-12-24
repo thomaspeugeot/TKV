@@ -140,15 +140,6 @@ type Run struct {
 	state State
 	step int
 
-	// in order to solve the "front row rock concert packing issue #5"
-	// creation of two mirror mirror body set : vertical and horyzontal
-	// with their respective quadtree. This mirror repulsion is computed only
-	// when bodies are near the border
-	bodiesMirroredVertical * []quadtree.Body // bodies position in the quatree
-	bodiesMirroredHorizontal * []quadtree.Body // bodies position in the quatree
-	quadtreeMirroredVertical quadtree.Quadtree // the supporting vertical quadtree
-	quadtreeMirroredHorizontal quadtree.Quadtree // the supporting horizontal quadtree
-
 	giniFileLog * os.File
 	giniOverTime [][]float64 // evolution of the gini distribution over time 
 	xMin, xMax, yMin, yMax float64 // coordinates of the rendering windows
@@ -243,11 +234,6 @@ func (r * Run) Init( bodies * ([]quadtree.Body)) {
 	makeBodiesMemory( & r.bodiesOrig )
 	copy(  *r.bodiesOrig, *r.bodies)
 
-	// init mirror bodies
-	makeBodiesMemory( & r.bodiesMirroredVertical )
-	makeBodiesMemory( & r.bodiesMirroredHorizontal )
-	r.mirrorBodies()
-
 	acc := make([]Acc, len(*bodies))
 	vel := make([]Vel, len(*bodies))
 	r.bodiesAccel = &acc
@@ -255,9 +241,6 @@ func (r * Run) Init( bodies * ([]quadtree.Body)) {
 
 	// init quatrees
 	r.q.Init(bodies)
-
-	r.quadtreeMirroredHorizontal.Init( r.bodiesMirroredHorizontal)
-	r.quadtreeMirroredVertical.Init( r.bodiesMirroredVertical)
 
 	// init neighbour array
 	r.InitNeighbourDico( bodies)
@@ -411,10 +394,6 @@ func (r * Run) OneStepOptional( updatePosition bool) {
 	
 	// compute the quadtree from the bodies
 	r.q.UpdateNodesListsAndCOM()
-
-	// init for mirror bodies
-	r.quadtreeMirroredHorizontal.UpdateNodesListsAndCOM()
-	r.quadtreeMirroredVertical.UpdateNodesListsAndCOM()
 	
 	// compute repulsive forces & acceleration
 	r.ComputeRepulsiveForceConcurrent( ConcurrentRoutines)
@@ -440,7 +419,6 @@ func (r * Run) OneStepOptional( updatePosition bool) {
 		
 	// compute new position
 	if( updatePosition) { r.UpdatePosition() }
-	r.mirrorBodies()
 
 	// init neighbours original
 	if r.step == 0 { 
@@ -630,25 +608,6 @@ func (r * Run) computeAccelerationOnBodyBarnesHut(idx int) float64 {
 	
 	result := r.computeAccelationWithNodeRecursive( idx, rootCoord, & r.q)
 
-	// store computed accelertation
-	accTmp := *acc
-
-	// compute mirrored repulsion
-	body := &(*r.bodies)[idx]
-	distX, distY := getModuloDistanceFromBoder( body)
-	if( distX < MirrorCutoffDistance ) {
-		r.computeAccelationWithNodeRecursive( idx, rootCoord, & r.quadtreeMirroredHorizontal)
-		// Info.Printf("Computed X mirror repulsion %f", minDist)
-	}
-	if( distY < MirrorCutoffDistance ) {
-		r.computeAccelationWithNodeRecursive( idx, rootCoord, & r.quadtreeMirroredVertical)
-		// Info.Printf("Computed Y mirror repulsion %f", minDist)
-	}
-
-	// reset computed acceleration without mirrors
-	*acc = accTmp
-
-
 	return result
 }
 
@@ -713,20 +672,16 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 	
 					dist := getModuloDistanceBetweenBodies( &body, b)
 
-					// update the neighbour if this is the computation with
-					// the quadtree of actual bodies (not mirrored)
-					if q == & r.q {
-						r.bodiesNeighbours.Insert( idx, b, dist)
+					r.bodiesNeighbours.Insert( idx, b, dist)
 
-						if dist == 0.0 {
-							var t testing.T
-							q.CheckIntegrity( &t)
+					if dist == 0.0 {
+						var t testing.T
+						q.CheckIntegrity( &t)
 
-							Error.Printf("Problem at rank %d for body of rank %d on node %#v ", 
-							rank, rankOfBody, *node)
-						}	
-						if dist < minInterbodyDistance { minInterbodyDistance = dist }
-					}
+						Error.Printf("Problem at rank %d for body of rank %d on node %#v ", 
+						rank, rankOfBody, *node)
+					}	
+					if dist < minInterbodyDistance { minInterbodyDistance = dist }
 					
 					x, y := getRepulsionVector( &body, b, q)
 			
@@ -854,17 +809,3 @@ func (r * Run) BodyCountGini() quadtree.QuadtreeGini {
 }
 
 var CurrentCountry = "bods"
-
-func (r * Run) mirrorBodies() {
-	for idx, _ := range * r.bodies {
-		
-		body := &((*r.bodies)[idx])
-		bodyMirrorHorizontal := &((*r.bodiesMirroredHorizontal)[idx])
-		bodyMirrorVertical := &((*r.bodiesMirroredVertical)[idx])
-
-		bodyMirrorHorizontal.X = 1.0 - body.X
-		bodyMirrorHorizontal.Y = body.Y
-		bodyMirrorVertical.X = body.X
-		bodyMirrorVertical.Y = 1.0 - body.Y
-	}
-}
