@@ -101,6 +101,15 @@ func getVectorBetweenBodiesWithMirror( A, B *quadtree.Body, x, y int) (vX, xY fl
 	return xB, yB
 }
 
+// compute distance between A and B with x,y transformation
+func getDistanceBetweenBodiesWithBodies( A, B *quadtree.Body, x, y int) float64 {
+
+	xV, yV :=  getVectorBetweenBodiesWithMirror( A, B, x, y)
+	distSquared := (xV*xV + yV*yV)
+
+	return math.Sqrt( distSquared )
+}
+
 
 // compute repulsion force vector between body A and body B
 // applied to body A
