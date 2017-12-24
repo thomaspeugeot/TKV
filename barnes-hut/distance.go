@@ -80,11 +80,33 @@ func getModuloDistanceBetweenBodies( A, B *quadtree.Body) float64 {
 	return math.Sqrt( distSquared )
 }
 
+// compute mirror vector berween bodies A & B
+// 
+// x == -1, B's x position is mirrored relative to x=0
+// x == 0, B's x position is unchanged
+// x == 1, B's x position is mirrored relative to x=1
+//
+// idem for y for B's y position 
+func getVectorBetweenBodiesWithMirror( A, B *quadtree.Body, x, y int) (vX, xY float64) {
+
+	xB := B.X
+	yB := B.Y
+
+	if x == -1 { xB = 0.0 - xB }
+	if x == 1 { xB = 1.0 - xB }
+
+	if (y == -1) { yB = 0.0 - yB}
+	if (x == 1) { yB= 1.0 - yB}
+
+	return xB, yB
+}
+
+
 // compute repulsion force vector between body A and body B
 // applied to body A
 // proportional to the inverse of the distance squared
 // return x, y of repulsion vector and distance between A & B
-func getRepulsionVector( A, B *quadtree.Body, q *quadtree.Quadtree) (x, y float64) {
+func getRepulsionVector( A, B *quadtree.Body) (x, y float64) {
 
 	atomic.AddUint64( &nbComputationPerStep, 1)
 

@@ -40,7 +40,7 @@ var DtRequest = Dt // new value of Dt requested by the UI. The real Dt will be c
 var MaxDisplacement float64  = 0.001 // cannot make more that 1/1000 th of the unit square per second
 
 // the barnes hut criteria 
-var BN_THETA float64 = 0.5 // can use barnes if distance to COM is 5 times side of the node's box
+var BN_THETA float64 = 0.3 // can use barnes if distance to COM is 5 times side of the node's box
 var ThetaRequest = BN_THETA // new value of theta requested by the UI. The real BN_THETA will be changed at the end of the current step.
 
 // how much drag we put (1.0 is no drag)
@@ -56,7 +56,7 @@ var UseBarnesHut bool = true
 // cutoff for influence. According to Bartolo, 1/r2 is very strong on a plane (integration does not convergence on the plane)
 // therefore a cutoff distance for the computation of the force is wellcome
 // first try at 1/10 th
-var CutoffDistance float64 = 0.01
+var CutoffDistance float64 = 20.0
 
 var MirrorCutoffDistance float64 = 0.1
 
@@ -582,7 +582,7 @@ func (r * Run) computeAccelerationOnBody(origIndex int) float64 {
 				minInterbodyDistance = dist
 			}
 
-			x, y := getRepulsionVector( &body, &body2, &r.q)
+			x, y := getRepulsionVector( &body, &body2)
 			
 			acc.X += x
 			acc.Y += y
@@ -606,7 +606,7 @@ func (r * Run) computeAccelerationOnBodyBarnesHut(idx int) float64 {
 	// Coord is initialized at the Root coord
 	var rootCoord quadtree.Coord
 	
-	result := r.computeAccelationWithNodeRecursive( idx, rootCoord, & r.q)
+	result := r.computeAccelationWithNodeRecursive( idx, rootCoord)
 
 	return result
 }
@@ -614,7 +614,7 @@ func (r * Run) computeAccelerationOnBodyBarnesHut(idx int) float64 {
 // given a body at index idx, and a node at coordinate coord in the q quadtree, 
 // compute the repulsive force and update the accelation at index idx
 // return the minditance betwen the body and bodies in the quadtree node
-func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord, q *quadtree.Quadtree) float64 {
+func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord) float64 {
 	
 	minInterbodyDistance := 2.0
 	
@@ -626,7 +626,7 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 	boxSize := 1.0 / math.Pow( 2.0, float64(level)) // if level = 0, this is 1.0
 	
 	// fetch node in the quadtree
-	node := & (q.Nodes[coord])
+	node := & (r.q.Nodes[coord])
 	distToNode := getModuloDistanceBetweenBodies( &body, &(node.Body))
 	
 	// avoid node with zero mass
@@ -637,7 +637,7 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 	// check if the COM of the node can be used
 	if (boxSize / distToNode) < BN_THETA {
 	
-		x, y := getRepulsionVector( &body, &(node.Body), q)
+		x, y := getRepulsionVector( &body, &(node.Body))
 			
 		acc.X += x
 		acc.Y += y
@@ -650,16 +650,16 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 			// fmt.Printf("computeAccelationWithNodeRecursive go down at node %#v\n", node.Coord())
 			coordNW, coordNE, coordSW, coordSE := quadtree.NodesBelow( coord)
 			dist := 2.0
-			dist = r.computeAccelationWithNodeRecursive( idx, coordNW, q)
+			dist = r.computeAccelationWithNodeRecursive( idx, coordNW)
 			if dist < minInterbodyDistance { minInterbodyDistance = dist }
 			
-			dist = r.computeAccelationWithNodeRecursive( idx, coordNE, q)
+			dist = r.computeAccelationWithNodeRecursive( idx, coordNE)
 			if dist < minInterbodyDistance { minInterbodyDistance = dist }
 			
-			dist = r.computeAccelationWithNodeRecursive( idx, coordSW, q)
+			dist = r.computeAccelationWithNodeRecursive( idx, coordSW)
 			if dist < minInterbodyDistance { minInterbodyDistance = dist }
 			
-			dist = r.computeAccelationWithNodeRecursive( idx, coordSE, q)		
+			dist = r.computeAccelationWithNodeRecursive( idx, coordSE)		
 			if dist < minInterbodyDistance { minInterbodyDistance = dist }
 			
 		} else {
@@ -676,14 +676,14 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 
 					if dist == 0.0 {
 						var t testing.T
-						q.CheckIntegrity( &t)
+						r.q.CheckIntegrity( &t)
 
 						Error.Printf("Problem at rank %d for body of rank %d on node %#v ", 
 						rank, rankOfBody, *node)
 					}	
 					if dist < minInterbodyDistance { minInterbodyDistance = dist }
 					
-					x, y := getRepulsionVector( &body, b, q)
+					x, y := getRepulsionVector( &body, b)
 			
 					acc.X += x
 					acc.Y += y

@@ -1,4 +1,4 @@
-	package barnes_hut
+package barnes_hut
 
 import (
 	"os"
@@ -8,7 +8,7 @@ import (
 )
 
 // test gif output
-func TestOutputGif(t *testing.T) {
+func TesOutputGif(t *testing.T) {
 
 	bodies := make([]quadtree.Body, 2000)
 	SpreadOnCircle( & bodies)
@@ -24,7 +24,7 @@ func TestOutputGif(t *testing.T) {
 	// visual verification
 }
 
-func TestOneStep(t *testing.T) {
+func TesOneStep(t *testing.T) {
 	bodies := make([]quadtree.Body, 2000)
 	SpreadOnCircle( & bodies)
 	
