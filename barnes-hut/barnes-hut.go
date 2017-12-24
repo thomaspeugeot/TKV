@@ -40,7 +40,7 @@ var DtRequest = Dt // new value of Dt requested by the UI. The real Dt will be c
 var MaxDisplacement float64  = 0.001 // cannot make more that 1/1000 th of the unit square per second
 
 // the barnes hut criteria 
-var BN_THETA float64 = 0.3 // can use barnes if distance to COM is 5 times side of the node's box
+var BN_THETA float64 = 0.5 // can use barnes if distance to COM is 5 times side of the node's box
 var ThetaRequest = BN_THETA // new value of theta requested by the UI. The real BN_THETA will be changed at the end of the current step.
 
 // how much drag we put (1.0 is no drag)
