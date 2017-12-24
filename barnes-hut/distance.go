@@ -21,20 +21,6 @@ func getModuloDistance( alpha, beta float64) (dist float64) {
 	return dist
 }
 
-
-// get mirror vector between alpha and beta.
-//
-// alpha and beta are between 0.0 and 1.0
-// the mirror vector
-func getMirrorVector( alpha, beta float64) (dist float64) {
-
-	dist = beta-alpha
-	if( dist > 0.5 ) { dist -= 1.0 }
-	if( dist < -0.5 ) { dist += 1.0 }
-		
-	return dist
-}
-
 // get modulo distance from border
 //
 // alpha and beta are between 0.0 and 1.0

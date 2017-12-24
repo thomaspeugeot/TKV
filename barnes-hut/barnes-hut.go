@@ -788,20 +788,6 @@ func (r * Run) UpdatePosition() {
 		}
 
 	}
-	
-	// experimental . if the border has been met shrink all bodies into the square by a fraction
-	if r.borderHasBeenMet && false {
-		for idx, _ := range (*r.bodies) {
-		
-			body := &((*r.bodies)[idx])
-		
-			distanceToCenterX := body.X - 0.5
-			distanceToCenterY := body.Y - 0.5
-
-			body.X = 0.5 + distanceToCenterX*0.999
-			body.Y = 0.5 + distanceToCenterY*0.999
-		}
-	}
 }
 
 func (r * Run) BodyCountGini() quadtree.QuadtreeGini {
