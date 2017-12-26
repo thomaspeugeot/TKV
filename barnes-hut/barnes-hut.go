@@ -624,8 +624,15 @@ func (r * Run) computeAccelerationOnBodyBarnesHut(idx int) float64 {
 	
 	// Coord is initialized at the Root coord
 	var rootCoord quadtree.Coord
-	
-	result := r.computeAccelationWithNodeRecursive( idx, rootCoord, 0, 0)
+
+	result := 2.0
+	for i:=-1 ; i<=1; i++ {
+		for j:=-1 ; j<=1; j++ {
+
+			resultTmp := r.computeAccelationWithNodeRecursive( idx, rootCoord, i, j)
+			if resultTmp < result { result = resultTmp }
+		}
+	}
 
 	return result
 }
@@ -637,8 +644,9 @@ func (r * Run) computeAccelerationOnBodyBarnesHut(idx int) float64 {
 // return the minditance betwen the body and bodies in the quadtree node
 func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord, xM, yM int) float64 {
 	
-	// can be usefull to debug  --> time.Sleep(300 * time.Millisecond)
-	// Trace.Printf("computeAccelationWithNodeRecursive idx %d coord %#v", idx, coord)
+	// can be usefull to debug  --> 
+	// time.Sleep(300 * time.Millisecond)
+	// Info.Printf("computeAccelationWithNodeRecursive idx %d coord %#v", idx, coord)
 	minInterbodyDistance := 2.0
 	
 	body := (*r.bodies)[idx]
@@ -653,7 +661,7 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 	node := & (r.q.Nodes[coord])
 	distToNode := getDistanceBetweenBodiesWithMirror( &body, &(node.Body), xM, yM)
 	
-	// Trace.Printf("computeAccelationWithNodeRecursive distance to quadtree node %f", distToNode)
+	// Info.Printf("computeAccelationWithNodeRecursive distance to quadtree node %f", distToNode)
 
 	// avoid node with zero mass
 	if( node.M == 0) {
@@ -669,12 +677,12 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 		acc.Y += y
 		*energy += e
 
-		// Trace.Printf("computeAccelationWithNodeRecursive at node %#v x %9.3f y %9.3f\n", node.Coord(), x, y)
+		// Info.Printf("computeAccelationWithNodeRecursive at node %#v x %9.3f y %9.3f\n", node.Coord(), x, y)
 
 	} else {		
 		if( level < 8) {
 			// parse sub nodes
-			// Trace.Printf("computeAccelationWithNodeRecursive go down at node %#v\n", node.Coord())
+			// Info.Printf("computeAccelationWithNodeRecursive go down at node %#v\n", node.Coord())
 			coordNW, coordNE, coordSW, coordSE := quadtree.NodesBelow( coord)
 			dist := 2.0
 			dist = r.computeAccelationWithNodeRecursive( idx, coordNW, xM, yM)
@@ -697,6 +705,7 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 			for b := node.First() ; b != nil; b = b.Next() {
 				if( *b != body) {
 	
+					// Info.Printf("computeAccelationWithNodeRecursive at leaf %#v rank %d", b.Coord(), rank)
 					dist := getDistanceBetweenBodiesWithMirror( &body, b, xM, yM)
 
 					r.bodiesNeighbours.Insert( idx, b, dist)
@@ -705,18 +714,21 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 						var t testing.T
 						r.q.CheckIntegrity( &t)
 
+						Error.Printf("Problem body x %f y %f to x %f y %f", body.X, body.Y, b.X, b.Y)
 						Error.Printf("Problem at rank %d for body of rank %d on node %#v ", 
 						rank, rankOfBody, *node)
+						os.Exit(3)
 					}	
 					if dist < minInterbodyDistance { minInterbodyDistance = dist }
 					
 					x, y, e := getRepulsionVector( &body, b, xM, yM)
+					// Info.Printf("computeAccelationWithNodeRecursive at leaf %#v rank %d x %9.3f y %9.3f\n", b.Coord(), rank, x, y)
 			
 					acc.X += x
 					acc.Y += y
 					*energy += e
 					rank++
-					// Trace.Printf("computeAccelationWithNodeRecursive at leaf %#v rank %d x %9.3f y %9.3f\n", b.Coord(), rank, x, y)
+					rankOfBody++
 				} else {
 					rankOfBody = rank
 				}

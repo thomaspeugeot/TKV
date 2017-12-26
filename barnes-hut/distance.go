@@ -93,10 +93,10 @@ func getVectorBetweenBodiesWithMirror( A, B *quadtree.Body, x, y int) (vX, xY fl
 	yB := B.Y
 
 	if x == -1 { xB = 0.0 - xB }
-	if x == 1 { xB = 1.0 - xB }
+	if x == 1 { xB = 2.0 - xB }
 
-	if y == -1 { yB = 0.0 - yB}
-	if y == 1 { yB = 1.0 - yB}
+	if y == -1 { yB = 0.0 - yB }
+	if y == 1 { yB = 2.0 - yB }
 
 	return xB - A.X , yB - A.Y
 }
