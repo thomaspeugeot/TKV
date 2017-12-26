@@ -40,7 +40,7 @@ var DtRequest = Dt // new value of Dt requested by the UI. The real Dt will be c
 var MaxDisplacement float64  = 0.001 // cannot make more that 1/1000 th of the unit square per second
 
 // the barnes hut criteria 
-var BN_THETA float64 = 0.5 // can use barnes if distance to COM is 5 times side of the node's box
+var BN_THETA float64 = 0.5 // can use barnes if distance to COM more than BN_THETA * side of the node's box
 var ThetaRequest = BN_THETA // new value of theta requested by the UI. The real BN_THETA will be changed at the end of the current step.
 
 // how much drag we put (1.0 is no drag)
@@ -56,7 +56,7 @@ var UseBarnesHut bool = true
 // cutoff for influence. According to Bartolo, 1/r2 is very strong on a plane (integration does not convergence on the plane)
 // therefore a cutoff distance for the computation of the force is wellcome
 // first try at 1/10 th
-var CutoffDistance float64 = 20.0
+var CutoffDistance float64 = 1.0
 
 var MirrorCutoffDistance float64 = 0.1
 
@@ -178,7 +178,7 @@ func (r * Run) SetGridFieldNb( v int)  {
 	
 	renderingMutex.Lock()
 	r.gridFieldNb = v
-	Trace.Printf("r.gridFieldNb %d", r.gridFieldNb)
+	// Trace.Printf("r.gridFieldNb %d", r.gridFieldNb)
 	renderingMutex.Unlock()
 }
 
@@ -222,7 +222,7 @@ func NewRun() * Run {
 // init the run with an array of quadtree bodies
 func (r * Run) Init( bodies * ([]quadtree.Body)) {
 
-	Info.Printf("Init begin")
+	Trace.Printf("Init begin")
 	
 	r.bodies = bodies
 
@@ -256,7 +256,7 @@ func (r * Run) Init( bodies * ([]quadtree.Body)) {
 
 	DtAdjustMode = AUTO
 
-	Info.Printf("Init end")
+	Trace.Printf("Init end")
 }
 
 
@@ -402,7 +402,7 @@ func (r * Run) OneStepOptional( updatePosition bool) {
 	r.ComputeRepulsiveForceConcurrent( ConcurrentRoutines)
 	r.ComputeMaxRepulsiveForce()	
 
-	Trace.Printf("MaxRepulsiveForce %#v", r.maxRepulsiveForce)
+	// Trace.Printf("MaxRepulsiveForce %#v", r.maxRepulsiveForce)
 
 	// compute optimal Dt, where we want the move to be
 	// half of the minimum distance between bodies 
@@ -448,8 +448,10 @@ func (r * Run) OneStepOptional( updatePosition bool) {
 	Gflops = float64( nbComputationPerStep) /  StepDuration
 
 	//	fmt.Printf("step %d speedup %f low 10 %f high 5 %f high 10 %f MFlops %f Dur (s) %f MinDist %f Max Vel %f Optim Dt %f Dt %f ratio %f \n",
-	r.status = fmt.Sprintf("step %d speedup %f Dur %e E %e MinD %e MaxMinD %e MaxV %e Dt Opt %e Dt %e F/A %e stirring %f nils %f \n",
+	r.status = fmt.Sprintf("step %d nbComp %d dur/comp %f speedup %f Dur %e E %e MinD %e MaxMinD %e MaxV %e Dt Opt %e Dt %e F/A %e stirring %f nils %f \n",
 		r.step, 
+		nbComputationPerStep,
+		(StepDuration/1000)/float64(nbComputationPerStep),
 		float64(len(*r.bodies)*len(*r.bodies))/float64(nbComputationPerStep),
 		StepDuration/1000000000	,
 		totalEnergy,
@@ -538,7 +540,7 @@ func (r * Run) ComputeRepulsiveForceSubSetMinDist( startIndex, endIndex int, min
 // return the minimal distance between the bodies sub set
 func (r * Run) ComputeRepulsiveForceSubSet( startIndex, endIndex int) float64 {
 
-	Trace.Printf("ComputeRepulsiveForceSubSet %d %d", startIndex, endIndex)
+	// Trace.Printf("ComputeRepulsiveForceSubSet %d %d", startIndex, endIndex)
 	minInterbodyDistance := 2.0
 
 	// parse all bodies
@@ -584,7 +586,7 @@ func (r * Run) computeAccelerationOnBody(origIndex int) float64 {
 		if( idx2 != origIndex) {
 			body2 := (*r.bodies)[idx2]
 			
-			dist := getModuloDistanceBetweenBodies( &body, &body2)
+			dist := getDistanceBetweenBodiesWithMirror( &body, &body2, 0, 0)
 			
 			if dist == 0.0 {
 				log.Fatal("distance is 0.0 between ", body, " and ", body2)
@@ -594,12 +596,12 @@ func (r * Run) computeAccelerationOnBody(origIndex int) float64 {
 				minInterbodyDistance = dist
 			}
 
-			x, y, e := getRepulsionVector( &body, &body2)
+			x, y, e := getRepulsionVector( &body, &body2, 0, 0)
 			
 			acc.X += x
 			acc.Y += y
 			*energy += e
-			// fmt.Printf("computeAccelerationOnBody idx2 %3d x %9.3f y %9.3f \n", idx2, x, y)
+			// Trace.Printf("computeAccelerationOnBody idx2 %3d x %9.3f y %9.3f \n", idx2, x, y)
 		}
 	}
 	return minInterbodyDistance
@@ -623,16 +625,20 @@ func (r * Run) computeAccelerationOnBodyBarnesHut(idx int) float64 {
 	// Coord is initialized at the Root coord
 	var rootCoord quadtree.Coord
 	
-	result := r.computeAccelationWithNodeRecursive( idx, rootCoord)
+	result := r.computeAccelationWithNodeRecursive( idx, rootCoord, 0, 0)
 
 	return result
 }
 
 // given a body at index idx, and a node at coordinate coord in the q quadtree, 
 // compute the repulsive force and update the accelation at index idx
+// x and y and the mirror configuration (xM==yM==0 means no)
+//
 // return the minditance betwen the body and bodies in the quadtree node
-func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord) float64 {
+func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord, xM, yM int) float64 {
 	
+	// can be usefull to debug  --> time.Sleep(300 * time.Millisecond)
+	// Trace.Printf("computeAccelationWithNodeRecursive idx %d coord %#v", idx, coord)
 	minInterbodyDistance := 2.0
 	
 	body := (*r.bodies)[idx]
@@ -645,8 +651,10 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 	
 	// fetch node in the quadtree
 	node := & (r.q.Nodes[coord])
-	distToNode := getModuloDistanceBetweenBodies( &body, &(node.Body))
+	distToNode := getDistanceBetweenBodiesWithMirror( &body, &(node.Body), xM, yM)
 	
+	// Trace.Printf("computeAccelationWithNodeRecursive distance to quadtree node %f", distToNode)
+
 	// avoid node with zero mass
 	if( node.M == 0) {
 		return 2.0
@@ -655,30 +663,30 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 	// check if the COM of the node can be used
 	if (boxSize / distToNode) < BN_THETA {
 	
-		x, y, e := getRepulsionVector( &body, &(node.Body))
+		x, y, e := getRepulsionVector( &body, &(node.Body), xM, yM)
 			
 		acc.X += x
 		acc.Y += y
 		*energy += e
 
-		// fmt.Printf("computeAccelationWithNodeRecursive at node %#v x %9.3f y %9.3f\n", node.Coord(), x, y)
+		// Trace.Printf("computeAccelationWithNodeRecursive at node %#v x %9.3f y %9.3f\n", node.Coord(), x, y)
 
 	} else {		
 		if( level < 8) {
 			// parse sub nodes
-			// fmt.Printf("computeAccelationWithNodeRecursive go down at node %#v\n", node.Coord())
+			// Trace.Printf("computeAccelationWithNodeRecursive go down at node %#v\n", node.Coord())
 			coordNW, coordNE, coordSW, coordSE := quadtree.NodesBelow( coord)
 			dist := 2.0
-			dist = r.computeAccelationWithNodeRecursive( idx, coordNW)
+			dist = r.computeAccelationWithNodeRecursive( idx, coordNW, xM, yM)
 			if dist < minInterbodyDistance { minInterbodyDistance = dist }
 			
-			dist = r.computeAccelationWithNodeRecursive( idx, coordNE)
+			dist = r.computeAccelationWithNodeRecursive( idx, coordNE, xM, yM)
 			if dist < minInterbodyDistance { minInterbodyDistance = dist }
 			
-			dist = r.computeAccelationWithNodeRecursive( idx, coordSW)
+			dist = r.computeAccelationWithNodeRecursive( idx, coordSW, xM, yM)
 			if dist < minInterbodyDistance { minInterbodyDistance = dist }
 			
-			dist = r.computeAccelationWithNodeRecursive( idx, coordSE)		
+			dist = r.computeAccelationWithNodeRecursive( idx, coordSE, xM, yM)		
 			if dist < minInterbodyDistance { minInterbodyDistance = dist }
 			
 		} else {
@@ -689,7 +697,7 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 			for b := node.First() ; b != nil; b = b.Next() {
 				if( *b != body) {
 	
-					dist := getModuloDistanceBetweenBodies( &body, b)
+					dist := getDistanceBetweenBodiesWithMirror( &body, b, xM, yM)
 
 					r.bodiesNeighbours.Insert( idx, b, dist)
 
@@ -702,13 +710,13 @@ func (r * Run) computeAccelationWithNodeRecursive( idx int, coord quadtree.Coord
 					}	
 					if dist < minInterbodyDistance { minInterbodyDistance = dist }
 					
-					x, y, e := getRepulsionVector( &body, b)
+					x, y, e := getRepulsionVector( &body, b, xM, yM)
 			
 					acc.X += x
 					acc.Y += y
 					*energy += e
 					rank++
-					// fmt.Printf("computeAccelationWithNodeRecursive at leaf %#v rank %d x %9.3f y %9.3f\n", b.Coord(), rank, x, y)
+					// Trace.Printf("computeAccelationWithNodeRecursive at leaf %#v rank %d x %9.3f y %9.3f\n", b.Coord(), rank, x, y)
 				} else {
 					rankOfBody = rank
 				}

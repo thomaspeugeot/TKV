@@ -141,7 +141,7 @@ func (r * Run) RenderGif(out io.Writer, encode64 bool) {
 		body := (*r.bodies)[idx]
 		bodyOrig := (*r.bodiesOrig)[idx]
 	
-		if false { fmt.Printf("Encoding body %d %f %f\n", idx, body.X, body.Y) }
+		Trace.Printf("Encoding body %d %f %f\n", idx, body.X, body.Y)
 	
 		// take into account rendering window
 		// in gif, A Point is an (x, y) co-ordinate on the integer grid, with axes increasing right and down.

@@ -5,6 +5,8 @@ import (
 	"github.com/thomaspeugeot/tkv/quadtree"
 	"testing"
 	"math"
+	"time"
+	"syscall"
 )
 
 // test gif output
@@ -15,7 +17,8 @@ func TesOutputGif(t *testing.T) {
 	
 	var r Run
 	r.Init( & bodies)
-	
+	r.SetCountry("fra")
+
 	var output *os.File
 	output, _ = os.Create("essai.gif")
 	
@@ -24,12 +27,20 @@ func TesOutputGif(t *testing.T) {
 	// visual verification
 }
 
-func TesOneStep(t *testing.T) {
-	bodies := make([]quadtree.Body, 2000)
+func TestOneStep(t *testing.T) {
+	bodies := make([]quadtree.Body, 1000)
 	SpreadOnCircle( & bodies)
 	
-	var r Run
+	var r Run 
+
+	// create output directory and cwd to it
+	r.OutputDir = time.Now().Local().Format("2006_01_02_040506")
+	Info.Printf("Output dir %s", r.OutputDir)
+	syscall.Mkdir( r.OutputDir, 0777)
+
 	r.Init( & bodies)
+	r.SetCountry("fra")
+
 	// r.q.CheckIntegrity( t)
 	r.OneStep()
 	r.OneStep()
@@ -68,7 +79,7 @@ func TesGetRepulsionVector(t *testing.T) {
 	cases[0].wantY = -2.4
 	
 	for _, c := range cases {
-		gotX, gotY, _ := getRepulsionVector( & c.A, & c.B)
+		gotX, gotY, _ := getRepulsionVector( & c.A, & c.B, 0, 0)
 		if( (gotX != c.wantX) && (gotY != c.wantY)) {
 			t.Errorf("A %#v B %#v == %f %f, want %f %f", c.A, c.B, gotX, gotY, c.wantX, c.wantY )
 		}	

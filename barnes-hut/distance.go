@@ -95,19 +95,23 @@ func getVectorBetweenBodiesWithMirror( A, B *quadtree.Body, x, y int) (vX, xY fl
 	if x == -1 { xB = 0.0 - xB }
 	if x == 1 { xB = 1.0 - xB }
 
-	if (y == -1) { yB = 0.0 - yB}
-	if (x == 1) { yB= 1.0 - yB}
+	if y == -1 { yB = 0.0 - yB}
+	if y == 1 { yB = 1.0 - yB}
 
-	return xB, yB
+	return xB - A.X , yB - A.Y
 }
 
-// compute distance between A and B with x,y transformation
-func getDistanceBetweenBodiesWithBodies( A, B *quadtree.Body, x, y int) float64 {
+// compute distance between A and B with xM, yM transformation
+func getDistanceBetweenBodiesWithMirror( A, B *quadtree.Body, xM, yM int) float64 {
 
-	xV, yV :=  getVectorBetweenBodiesWithMirror( A, B, x, y)
+	xV, yV :=  getVectorBetweenBodiesWithMirror( A, B, xM, yM)
 	distSquared := (xV*xV + yV*yV)
 
-	return math.Sqrt( distSquared )
+	res := math.Sqrt( distSquared )
+
+	// Trace.Printf("A %f %f B %f %f d %f", A.X, A.Y, B.X, B.Y, res)
+
+	return res
 }
 
 
@@ -116,12 +120,13 @@ func getDistanceBetweenBodiesWithBodies( A, B *quadtree.Body, x, y int) float64 
 // proportional to the inverse of the distance squared
 // return x, y of repulsion vector and distance between A & B
 // return energy as the repulsion energy 
-func getRepulsionVector( A, B *quadtree.Body) (x, y, energy float64) {
+func getRepulsionVector( A, B *quadtree.Body, xM, yM int) (x, y, energy float64) {
 
 	atomic.AddUint64( &nbComputationPerStep, 1)
 
-	x = getModuloDistance( B.X, A.X)
-	y = getModuloDistance( B.Y, A.Y)
+	// Trace.Printf("getRepulsionVector A %f %f B %f %f", A.X, A.Y, B.X, B.Y)
+
+	x, y = getVectorBetweenBodiesWithMirror( A, B, xM, yM)
 
 	distQuared := (x*x + y*y)
 	absDistance := math.Sqrt( distQuared + ETA )
@@ -134,8 +139,8 @@ func getRepulsionVector( A, B *quadtree.Body) (x, y, energy float64) {
 	y *= massCombined
 
 	// repulsion is inversly proportional to the square of the distance (1/r2)
-	x = x/distPow3
-	y = y/distPow3
+	x = -x/distPow3
+	y = -y/distPow3
 	
 	if absDistance > CutoffDistance {
 		x = 0.0

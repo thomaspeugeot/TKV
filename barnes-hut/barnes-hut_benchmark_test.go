@@ -77,6 +77,28 @@ func BenchmarkGetModuleDistance(b * testing.B ) {
 	}
 }
 
+func BenchmarkGetVectorBetweenBodiesWithMirror(b * testing.B ) {
+	
+	bodies := make([]quadtree.Body, 2)
+	bodies[1].X = 0.5
+	bodies[1].Y = 0.5
+		
+	for i := 0; i<b.N;i++ { 
+		getVectorBetweenBodiesWithMirror( &(bodies[0]), &(bodies[1]), 0, 0)
+	}
+}
+
+func BenchmarkGetDistanceBetweenBodiesWithMirror(b * testing.B ) {
+	
+	bodies := make([]quadtree.Body, 2)
+	bodies[1].X = 0.5
+	bodies[1].Y = 0.5
+		
+	for i := 0; i<b.N;i++ { 
+		getDistanceBetweenBodiesWithMirror( &(bodies[0]), &(bodies[1]), 0, 0)
+	}
+}
+
 func BenchmarkGetRepulsionVector(b * testing.B ) {
 	
 	bodies := make([]quadtree.Body, 2)
@@ -84,7 +106,7 @@ func BenchmarkGetRepulsionVector(b * testing.B ) {
 	bodies[1].Y = 0.5
 		
 	for i := 0; i<b.N;i++ { 
-		getRepulsionVector( &(bodies[0]), &(bodies[1]))
+		getRepulsionVector( &(bodies[0]), &(bodies[1]), 0, 0)
 	}
 }
 
