@@ -131,7 +131,7 @@ func getRepulsionVector( A, B *quadtree.Body, xM, yM int) (x, y, energy float64)
 	distQuared := (x*x + y*y)
 	absDistance := math.Sqrt( distQuared + ETA )
 
-	distPow3 := (distQuared + ETA) * absDistance
+	distPow3 := distQuared * absDistance
 		
 	// repulsion is proportional to mass
 	massCombined := A.M * B.M
@@ -145,10 +145,6 @@ func getRepulsionVector( A, B *quadtree.Body, xM, yM int) (x, y, energy float64)
 	if absDistance > CutoffDistance {
 		x = 0.0
 		y = 0.0
-	}
-	if absDistance < maxMinInterBodyDistance {
-		x *= 1.0
-		y *= 1.0		
 	}
 	return x, y, massCombined/absDistance
 }
