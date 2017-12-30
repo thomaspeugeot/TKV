@@ -36,8 +36,11 @@ var Dt float64  = 2.3*1e-10 // difficult to fine tune
 var DtRequest = Dt // new value of Dt requested by the UI. The real Dt will be changed at the end of the current step.
 
 // velocity cannot be too high in order to stop bodies from overtaking
-// each others
+// each others. The variable defines when displacement has to be capped
 var MaxDisplacement float64  = 0.001 // cannot make more that 1/1000 th of the unit square per second
+
+// give the theorical max displacement, as a ratio between the min distance and the max speed
+var MaxRatioDisplacement float64 = 0.5
 
 // the barnes hut criteria 
 var BN_THETA float64 = 0.5 // can use barnes if distance to COM more than BN_THETA * side of the node's box
@@ -395,7 +398,7 @@ func (r * Run) OneStepOptional( updatePosition bool) {
 	// half of the minimum distance between bodies 
 	// with initial speed at 0, the speed will increase to Dt*Acc and
 	// the displacement will be Dx = Dt*Dt*Acc. Thefore Dt 
-	r.dtOptim = math.Sqrt( 0.5 * r.minInterBodyDistance / r.maxRepulsiveForce.Norm )
+	r.dtOptim = math.Sqrt( MaxRatioDisplacement * r.minInterBodyDistance / r.maxRepulsiveForce.Norm )
 
 	// update Dt according to request or according to computing optimal Dt
 	if DtAdjustMode == MANUAL {
