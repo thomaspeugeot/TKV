@@ -146,12 +146,12 @@ func (country * Country) ComputeBaryCenters() {
 	}
 }
 
-func (country * Country) VillageCoordinates( lat, lng float64) (x, y, distance, latClosest, lngClosest, xSpread, ySpread float64, closestIndex int) {
+// given lat, lng
+// return xClosest, yClosest, distance, latClosest, lngClosest of the closest body within the country (original position)
+func (country * Country) ClosestBodyInOriginalPosition( lat, lng float64) (xRelClosest, yRelClosest, distance, latClosest, lngClosest, xSpread, ySpread float64, closestIndex int) {
 
 	// compute relative coordinates within the square
 	xRel, yRel := country.LatLng2XY( lat, lng)
-	Info.Printf("VillageCoordinates lat %f,  lng %f", lat, lng)
-	Info.Printf("VillageCoordinates Rel x %f, Rel y %f", xRel, yRel)
 
 	// parse all bodies and get closest body
 	closestIndex = -1
@@ -166,25 +166,21 @@ func (country * Country) VillageCoordinates( lat, lng float64) (x, y, distance, 
 			minDistance = distance
 		}
 	}	
-	Info.Printf("VillageCoordinates closestIndex %d, minDistance %f", closestIndex, minDistance)
 
-	villageX := country.VilCoordinates[closestIndex][0]
-	villageY := country.VilCoordinates[closestIndex][1]
-	xRelClosest := (*country.bodiesOrig)[closestIndex].X
-	yRelClosest := (*country.bodiesOrig)[closestIndex].Y
+	xRelClosest = (*country.bodiesOrig)[closestIndex].X
+	yRelClosest = (*country.bodiesOrig)[closestIndex].Y
 
 	latOptimClosest, lngOptimClosest := country.XY2LatLng( xRelClosest, yRelClosest)
 	
 
-	Info.Printf( "VillageCoordinates %f %f relative to country %f %f", lat, lng, xRel, yRel)
-	Info.Printf( "VillageCoordinates rel closest %f %f lat lng closest %f %f", xRelClosest, yRelClosest, latOptimClosest, lngOptimClosest)
-	Info.Printf( "VillageCoordinates village %d %d", villageX, villageY)
+	Info.Printf( "ClosestBodyInOriginalPosition %f %f relative to country %f %f", lat, lng, xRel, yRel)
+	Info.Printf( "ClosestBodyInOriginalPosition rel closest %f %f lat lng closest %f %f", xRelClosest, yRelClosest, latOptimClosest, lngOptimClosest)
 
 	// compute x, y in spread bodies
 	xSpread = (*country.bodiesSpread)[closestIndex].X
 	ySpread = (*country.bodiesSpread)[closestIndex].Y
 
-	Info.Printf( "VillageCoordinates village %f %f index %d", xSpread, ySpread, closestIndex)
+	Info.Printf( "ClosestBodyInOriginalPosition village %f %f index %d", xSpread, ySpread, closestIndex)
 
 	return xRelClosest, yRelClosest, minDistance, latOptimClosest, lngOptimClosest, xSpread, ySpread, closestIndex
 }
@@ -255,7 +251,7 @@ func (country * Country) VillageBorder( lat, lng float64) PointList {
 	Info.Printf( "VillageBorder country %s input lat %f lng %f", country.Name, lat, lng)
 	
 	// from input lat, lng, get the xSpread, ySpread
-	_, _, _, _, _, xSpread, ySpread, _ := country.VillageCoordinates(lat, lng)
+	_, _, _, _, _, xSpread, ySpread, _ := country.ClosestBodyInOriginalPosition(lat, lng)
 	Info.Printf( "VillageBorder country %s input xSpread %f ySpread %f", country.Name, xSpread, ySpread)
 
 	// compute village min & max coord

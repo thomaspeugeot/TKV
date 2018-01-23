@@ -94,7 +94,7 @@ func main() {
 
 	mux.Handle("/", http.FileServer(http.Dir("../tkv-client/")) )
 	
-	mux.HandleFunc("/villageCoordinates", villageCoordinates)
+	mux.HandleFunc("/closestBodyInOriginalPosition", closestBodyInOriginalPosition)
 	mux.HandleFunc("/villageTargetBorder", villageTargetBorder)
 	mux.HandleFunc("/villageSourceBorder", villageSourceBorder)
 	mux.HandleFunc("/allSourcPointsCoordinates", allSourcPointsCoordinates)
@@ -117,9 +117,9 @@ type VillageCoordResponse struct {
 }
 
 // get village coordinates from lat/long
-func villageCoordinates(w http.ResponseWriter, req *http.Request) {
+func closestBodyInOriginalPosition(w http.ResponseWriter, req *http.Request) {
 	
-	server.Info.Printf("villageCoordinates begin")
+	server.Info.Printf("closestBodyInOriginalPosition begin")
 	
 	// parse lat long from client
 	decoder := json.NewDecoder( req.Body)
@@ -130,10 +130,10 @@ func villageCoordinates(w http.ResponseWriter, req *http.Request) {
 	} else {
 		lastReqest = ll
 	}
-	server.Info.Printf("villageCoordinates for lat %f, lng %f", ll.Lat, ll.Lng)
+	server.Info.Printf("closestBodyInOriginalPosition for lat %f, lng %f", ll.Lat, ll.Lng)
 
-	x, y, distance, latClosest, lngClosest, xSpread, ySpread, _ := t.VillageCoordinates( ll.Lat, ll.Lng)
-	server.Info.Printf("villageCoordinates is %f %f, distance %f", x, y, distance)
+	x, y, distance, latClosest, lngClosest, xSpread, ySpread, _ := t.ClosestBodyInOriginalPosition( ll.Lat, ll.Lng)
+	server.Info.Printf("closestBodyInOriginalPosition is %f %f, distance %f", x, y, distance)
 
 	var xy VillageCoordResponse
 	xy.X = x
@@ -149,7 +149,7 @@ func villageCoordinates(w http.ResponseWriter, req *http.Request) {
 	VillageCoordResponsejson, _ := json.MarshalIndent( xy, "", "	")
 	fmt.Fprintf(w, "%s", VillageCoordResponsejson)
 	
-	server.Info.Printf("villageCoordinates end")
+	server.Info.Printf("closestBodyInOriginalPosition end")
 }
 
 // return all points within source borders
@@ -196,7 +196,7 @@ func villageTargetBorder(w http.ResponseWriter, req *http.Request) {
 	}
 	server.Info.Printf("villageTargetBorder for lat %f, lng %f", ll.Lat, ll.Lng)
 	
-	x, y, distance, _, _, xSpread, ySpread, _ := t.VillageCoordinates( ll.Lat, ll.Lng)
+	x, y, distance, _, _, xSpread, ySpread, _ := t.ClosestBodyInOriginalPosition( ll.Lat, ll.Lng)
 	server.Info.Printf("villageTargetBorder is %f %f, distance %f", x, y, distance)
 
 	

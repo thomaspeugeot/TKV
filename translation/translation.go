@@ -27,10 +27,10 @@ func (t * Translation) SetRenderingWindow( xMin, xMax, yMin, yMax float64) {
 
 
 // 
-func (t * Translation) VillageCoordinates( lat, lng float64) (x, y, distance, latClosest, lngClosest, xSpread, ySpread float64, closestIndex int) {
+func (t * Translation) ClosestBodyInOriginalPosition( lat, lng float64) (x, y, distance, latClosest, lngClosest, xSpread, ySpread float64, closestIndex int) {
 
 	// convert from lat lng to x, y in the Country 
-	return t.sourceCountry.VillageCoordinates( lat, lng)
+	return t.sourceCountry.ClosestBodyInOriginalPosition( lat, lng)
 }
 
 // from a coordinate in source coutry, get closest body, compute
