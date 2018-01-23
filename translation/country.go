@@ -214,9 +214,9 @@ func (country * Country) XYSpreadToLatLngOrig( x, y float64) (lat, lng float64) 
 }
 
 // get the bodies of a village from x, y spread coordinates
-func (country * Country) XYSpreadToLatLngOrigVillage( x, y float64) PointList {
+func (country * Country) XYSpreadToTerritoryBorder( x, y float64) PointList {
 
-	Info.Printf( "XYSpreadToLatLngOrigVillage Country %s x %f y %f", country.Name, x, y)
+	Info.Printf( "XYSpreadToTerritoryBorder Country %s x %f y %f", country.Name, x, y)
 	
 	points := make(PointList, 0)
 
@@ -240,42 +240,23 @@ func (country * Country) XYSpreadToLatLngOrigVillage( x, y float64) PointList {
 		}
 	}	
 
-	Info.Printf( "XYSpreadToLatLngOrigVillage Country %s nb bodies in village %d", country.Name, len(points))
+	Info.Printf( "XYSpreadToTerritoryBorder Country %s nb bodies in village %d", country.Name, len(points))
 	return points
 }
 
 // given x, y of a point, return the border in the country
-func (country * Country) VillageBorder( lat, lng float64) PointList {
+func (country * Country) LatLngToTerritoryBorder( lat, lng float64) PointList {
 
 	Info.Printf( "")
-	Info.Printf( "VillageBorder country %s input lat %f lng %f", country.Name, lat, lng)
+	Info.Printf( "LatLngToTerritoryBorder country %s input lat %f lng %f", country.Name, lat, lng)
 	
 	// from input lat, lng, get the xSpread, ySpread
 	_, _, _, _, _, xSpread, ySpread, _ := country.ClosestBodyInOriginalPosition(lat, lng)
-	Info.Printf( "VillageBorder country %s input xSpread %f ySpread %f", country.Name, xSpread, ySpread)
+	Info.Printf( "LatLngToTerritoryBorder country %s input xSpread %f ySpread %f", country.Name, xSpread, ySpread)
 
-	// compute village min & max coord
-	xMinVillage := float64( int( xSpread*numberOfVillagePerAxe))/numberOfVillagePerAxe
-	xMaxVillage := float64( int( xSpread*numberOfVillagePerAxe + 1.0))/numberOfVillagePerAxe
-	yMinVillage := float64( int( ySpread*numberOfVillagePerAxe))/numberOfVillagePerAxe
-	yMaxVillage := float64( int( ySpread*numberOfVillagePerAxe + 1.0))/numberOfVillagePerAxe
-	
-	Info.Printf( "VillageBorder input village Min x %f Max x %f", xMinVillage, xMaxVillage)
-	
-	// parse all bodies and if bodies has x & y spead close to input spread, include them in point list
-	points := make(PointList, 0)
-	for index,b := range *country.bodiesSpread {
-		if (xMinVillage <= b.X) && (b.X < xMaxVillage) && (yMinVillage <= b.Y) && (b.Y < yMaxVillage) {
+	points := country.XYSpreadToTerritoryBorder( xSpread, ySpread)
 
-			xRelClosest := (*country.bodiesOrig)[index].X
-			yRelClosest := (*country.bodiesOrig)[index].Y
-			latOptimClosest, lngOptimClosest := country.XY2LatLng( xRelClosest, yRelClosest)
-			
-			points = append(points, MakePoint(latOptimClosest, lngOptimClosest))
-		}
-	}	
-
-	Info.Printf( "VillageBorder nb of border points %d", len(points))
+	Info.Printf( "LatLngToTerritoryBorder nb of border points %d", len(points))
 	Info.Printf( "")
 
 	return points

@@ -133,7 +133,7 @@ func translateLatLngInSourceCountryToLatLngInTargetCountry(w http.ResponseWriter
 	server.Info.Printf("translateLatLngInSourceCountryToLatLngInTargetCountry for lat %f, lng %f", ll.Lat, ll.Lng)
 
 	x, y, distance, latClosest, lngClosest, xSpread, ySpread, _ := t.ClosestBodyInOriginalPosition( ll.Lat, ll.Lng)
-	server.Info.Printf("translateLatLngInSourceCountryToLatLngInTargetCountry is %f %f, distance %f", x, y, distance)
+	server.Info.Printf("translateLatLngInSourceCountryToLatLngInTargetCountry x, y is %f %f, distance %f", x, y, distance)
 
 	var xy VillageCoordResponse
 	xy.X = x

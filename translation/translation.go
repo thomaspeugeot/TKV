@@ -50,7 +50,7 @@ func (t * Translation) TargetBorder( xSpread, ySpread float64) PointList {
 
 	Info.Printf("TargetBorder input xSpread %f ySpread %f", xSpread, ySpread)
 
-	points := t.targetCountry.XYSpreadToLatLngOrigVillage( xSpread, ySpread)
+	points := t.targetCountry.XYSpreadToTerritoryBorder( xSpread, ySpread)
 
 	Info.Printf("Target Border nb of points %d", len(points))
 
@@ -61,7 +61,7 @@ func (t * Translation) SourceBorder( lat, lng float64) PointList {
 
 	Info.Printf("Source Border for lat %f lng %f", lat, lng)
 
-	points := t.sourceCountry.VillageBorder( lat, lng)
+	points := t.sourceCountry.LatLngToTerritoryBorder( lat, lng)
 
 	Info.Printf("Source Border nb of points %d", len(points))
 
