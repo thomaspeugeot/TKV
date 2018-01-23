@@ -33,14 +33,14 @@ func (t * Translation) ClosestBodyInOriginalPosition( lat, lng float64) (x, y, d
 	return t.sourceCountry.ClosestBodyInOriginalPosition( lat, lng)
 }
 
-// from a coordinate in source coutry, get closest body, compute
-func (t * Translation) TargetVillage( xSpread, ySpread float64) (latTarget, lngTarget float64) {
+// from x, y corrdinates in spread, get closest body lat/lng in target country
+func (t * Translation) XYSpreadToLatLngInTargetCountry( xSpread, ySpread float64) (latTarget, lngTarget float64) {
 
-	Info.Printf("TargetVillage input xSpread %f ySpread %f", xSpread, ySpread)
+	Info.Printf("XYSpreadToLatLngInTargetCountry input xSpread %f ySpread %f", xSpread, ySpread)
 
 	latTarget, lngTarget = t.targetCountry.XYSpreadToLatLngOrig( xSpread, ySpread)
 
-	Info.Printf("TargetVillage output lat %f lng %f", latTarget, lngTarget)
+	Info.Printf("XYSpreadToLatLngInTargetCountry output lat %f lng %f", latTarget, lngTarget)
 
 	return latTarget, lngTarget
 }

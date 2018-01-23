@@ -94,7 +94,7 @@ func main() {
 
 	mux.Handle("/", http.FileServer(http.Dir("../tkv-client/")) )
 	
-	mux.HandleFunc("/closestBodyInOriginalPosition", closestBodyInOriginalPosition)
+	mux.HandleFunc("/translateLatLngInSourceCountryToLatLngInTargetCountry", translateLatLngInSourceCountryToLatLngInTargetCountry)
 	mux.HandleFunc("/villageTargetBorder", villageTargetBorder)
 	mux.HandleFunc("/villageSourceBorder", villageSourceBorder)
 	mux.HandleFunc("/allSourcPointsCoordinates", allSourcPointsCoordinates)
@@ -117,9 +117,9 @@ type VillageCoordResponse struct {
 }
 
 // get village coordinates from lat/long
-func closestBodyInOriginalPosition(w http.ResponseWriter, req *http.Request) {
+func translateLatLngInSourceCountryToLatLngInTargetCountry(w http.ResponseWriter, req *http.Request) {
 	
-	server.Info.Printf("closestBodyInOriginalPosition begin")
+	server.Info.Printf("translateLatLngInSourceCountryToLatLngInTargetCountry begin")
 	
 	// parse lat long from client
 	decoder := json.NewDecoder( req.Body)
@@ -130,10 +130,10 @@ func closestBodyInOriginalPosition(w http.ResponseWriter, req *http.Request) {
 	} else {
 		lastReqest = ll
 	}
-	server.Info.Printf("closestBodyInOriginalPosition for lat %f, lng %f", ll.Lat, ll.Lng)
+	server.Info.Printf("translateLatLngInSourceCountryToLatLngInTargetCountry for lat %f, lng %f", ll.Lat, ll.Lng)
 
 	x, y, distance, latClosest, lngClosest, xSpread, ySpread, _ := t.ClosestBodyInOriginalPosition( ll.Lat, ll.Lng)
-	server.Info.Printf("closestBodyInOriginalPosition is %f %f, distance %f", x, y, distance)
+	server.Info.Printf("translateLatLngInSourceCountryToLatLngInTargetCountry is %f %f, distance %f", x, y, distance)
 
 	var xy VillageCoordResponse
 	xy.X = x
@@ -142,14 +142,14 @@ func closestBodyInOriginalPosition(w http.ResponseWriter, req *http.Request) {
 	xy.LatClosest = latClosest
 	xy.LngClosest = lngClosest
 
-	latTarget, lngTarget := t.TargetVillage( xSpread, ySpread)
+	latTarget, lngTarget := t.XYSpreadToLatLngInTargetCountry( xSpread, ySpread)
 	xy.LatTarget = latTarget
 	xy.LngTarget = lngTarget
 
 	VillageCoordResponsejson, _ := json.MarshalIndent( xy, "", "	")
 	fmt.Fprintf(w, "%s", VillageCoordResponsejson)
 	
-	server.Info.Printf("closestBodyInOriginalPosition end")
+	server.Info.Printf("translateLatLngInSourceCountryToLatLngInTargetCountry end")
 }
 
 // return all points within source borders

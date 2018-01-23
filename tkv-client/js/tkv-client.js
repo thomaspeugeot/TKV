@@ -67,13 +67,13 @@ app.controller("EventsController", [ '$scope', '$http', function($scope, $http) 
 		var jsonLatLng = JSON.stringify( args.leafletEvent.latlng);
 		console.log( jsonLatLng);
 
-		console.log("post for closestBodyInOriginalPosition before");
+		console.log("post for translateLatLngInSourceCountryToLatLngInTargetCountry before");
 				
-		$http.post('http://localhost:8001/closestBodyInOriginalPosition', jsonLatLng ).then
+		$http.post('http://localhost:8001/translateLatLngInSourceCountryToLatLngInTargetCountry', jsonLatLng ).then
 		(
 			function(response) { // success handler
 				console.log(response.status);
-				console.log('village closestBodyInOriginalPosition answer', response.data.X, response.data.Y);
+				console.log('village translateLatLngInSourceCountryToLatLngInTargetCountry answer', response.data.X, response.data.Y);
 
 				message = "village "+response.data.X+" "+response.data.Y+" "+response.data.Distance+" "+response.data.LatClosest+" "+response.data.LngClosest;
 
@@ -165,7 +165,7 @@ app.controller("EventsController", [ '$scope', '$http', function($scope, $http) 
 			}
 		);
 		
-		console.log("post for closestBodyInOriginalPosition is over");
+		console.log("post for translateLatLngInSourceCountryToLatLngInTargetCountry is over");
 
 
 	}); // end of click
