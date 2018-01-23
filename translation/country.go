@@ -78,11 +78,11 @@ func (country * Country) Init() {
 	
 }
 
-// load configuration from filename into counry 
+// load configuration from filename into country 
 // check that it matches the 
 func (country * Country) LoadConfig( isOriginal bool) bool {
 
-	Info.Printf( "Load Config begin : Country is %s, step %d", country.Name, country.Step)
+	Info.Printf( "Load Config begin : Country is %s, step %d isOriginal %t", country.Name, country.Step, isOriginal)
 
 	// computing the file name from the step
 	step := 0
@@ -217,9 +217,10 @@ func (country * Country) XYSpreadToLatLngOrig( x, y float64) (lat, lng float64) 
 	return latOptimClosest, lngOptimClosest
 }
 
+// get the bodies of a village from x, y spread coordinates
 func (country * Country) XYSpreadToLatLngOrigVillage( x, y float64) PointList {
 
-	Info.Printf( "XYSpreadToLatLngOrig input x %f y %f", x, y)
+	Info.Printf( "XYSpreadToLatLngOrigVillage Country %s x %f y %f", country.Name, x, y)
 	
 	points := make(PointList, 0)
 
@@ -243,6 +244,7 @@ func (country * Country) XYSpreadToLatLngOrigVillage( x, y float64) PointList {
 		}
 	}	
 
+	Info.Printf( "XYSpreadToLatLngOrigVillage Country %s nb bodies in village %d", country.Name, len(points))
 	return points
 }
 

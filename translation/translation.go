@@ -10,8 +10,8 @@ type Translation struct {
 
 func (t * Translation) Init(sourceCountry, targetCountry Country) {
 
-	Info.Printf("Init : Source Country is %s with step %d", sourceCountry.Name, sourceCountry.Step)
-	Info.Printf("Init : Target Country is %s with step %d", sourceCountry.Name, sourceCountry.Step)
+	Info.Printf("Init : Source Country is %s with nbBodies %d at simulation step %d", sourceCountry.Name, sourceCountry.NbBodies, sourceCountry.Step)
+	Info.Printf("Init : Target Country is %s with nbBodies %d at simulation step %d", targetCountry.Name, targetCountry.NbBodies, targetCountry.Step)
 
 	t.sourceCountry = sourceCountry
 	t.sourceCountry.Init()
@@ -52,6 +52,8 @@ func (t * Translation) TargetBorder( xSpread, ySpread float64) PointList {
 
 	points := t.targetCountry.XYSpreadToLatLngOrigVillage( xSpread, ySpread)
 
+	Info.Printf("Target Border nb of points %d", len(points))
+
 	return points
 }
 
@@ -60,6 +62,8 @@ func (t * Translation) SourceBorder( lat, lng float64) PointList {
 	Info.Printf("Source Border for lat %f lng %f", lat, lng)
 
 	points := t.sourceCountry.VillageBorder( lat, lng)
+
+	Info.Printf("Source Border nb of points %d", len(points))
 
 	return points
 }

@@ -78,12 +78,12 @@ func main() {
 
 
 	server.Info.Printf("sourceCountry to parse %s", sourceCountry.Name)
-	server.Info.Printf("nbBodies to parse %d", sourceCountry.NbBodies)
-	server.Info.Printf("step to parse %d", sourceCountry.Step)
+	server.Info.Printf("sourceCountry nbBodies in file to parse %d", sourceCountry.NbBodies)
+	server.Info.Printf("sourceCountry at step %d", sourceCountry.Step)
 	
 	server.Info.Printf("targetCountry to parse %s", targetCountry.Name)
-	server.Info.Printf("nbBodies to parse %d", targetCountry.NbBodies)
-	server.Info.Printf("step to parse %d", targetCountry.Step)
+	server.Info.Printf("targetCountry nbBodies to parse %d", targetCountry.NbBodies)
+	server.Info.Printf("targetCountry at step to parse %d", targetCountry.Step)
 	
 	t.Init(sourceCountry, targetCountry)
 
