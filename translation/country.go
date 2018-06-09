@@ -226,7 +226,7 @@ func (country * Country) XYSpreadToTerritoryBorder( x, y float64) PointList {
 	yMinVillage := float64( int( y*numberOfVillagePerAxe))/numberOfVillagePerAxe
 	yMaxVillage := float64( int( y*numberOfVillagePerAxe + 1.0))/numberOfVillagePerAxe
 	
-	Info.Printf( "XYSpreadToLatLngOrig input village Min x %f Max x %f", xMinVillage, xMaxVillage)
+	Info.Printf( "XYSpreadToTerritoryBorder input village Min x %f Max x %f", xMinVillage, xMaxVillage)
 	
 	// parse all bodies and get closest body
 	for index,b := range *country.bodiesSpread {
@@ -237,6 +237,7 @@ func (country * Country) XYSpreadToTerritoryBorder( x, y float64) PointList {
 			latOptimClosest, lngOptimClosest := country.XY2LatLng( xRelClosest, yRelClosest)
 			
 			points = append(points, MakePoint(latOptimClosest, lngOptimClosest))
+			Info.Printf("XYSpreadToTerritoryBorder %f %f", latOptimClosest, lngOptimClosest)
 		}
 	}	
 
