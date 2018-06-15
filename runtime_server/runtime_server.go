@@ -30,13 +30,13 @@ func main() {
 
 	// flags  for source country
 	sourceCountryPtr := flag.String("sourceCountry","fra","iso 3166 sourceCountry code")
-	sourceCountryNbBodiesPtr := flag.String("sourceCountryNbBodiesPtr","154301","nb of bodies")
-	sourceCountryStepPtr := flag.String("sourceCountryStep","96962","simulation step for the spread bodies for source country")
+	sourceCountryNbBodiesPtr := flag.String("sourceCountryNbBodiesPtr","697529","nb of bodies")
+	sourceCountryStepPtr := flag.String("sourceCountryStep","4723","simulation step for the spread bodies for source country")
 
 	// flags  for target country
 	targetCountryPtr := flag.String("targetCountry","hti","iso 3166 targetCountry code")
-	targetCountryNbBodiesPtr := flag.String("targetCountryNbBodiesPtr","82990","nb of bodies for target country")
-	targetCountryStepPtr := flag.String("targetCountryStep","36719","simulation step for the spread bodies for target country")
+	targetCountryNbBodiesPtr := flag.String("targetCountryNbBodiesPtr","927787","nb of bodies for target country")
+	targetCountryStepPtr := flag.String("targetCountryStep","8564","simulation step for the spread bodies for target country")
 
 	flag.Parse()
 
