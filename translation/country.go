@@ -8,7 +8,6 @@ import (
 	"log"
 	"math"
 	"os"
-	"path/filepath"
 
 	"github.com/thomaspeugeot/tkv/barnes-hut"
 	"github.com/thomaspeugeot/tkv/grump"
@@ -80,9 +79,14 @@ func (country *Country) Init() {
 
 }
 
+var bodsFileReader io.ReadCloser
+var bodsFileReaderErr error
+
 // load configuration from filename into country
 // check that it matches the
 func (country *Country) LoadConfig(isOriginal bool) bool {
+
+	bodsFileReaderErr = nil
 
 	Info.Printf("Load Config begin : Country is %s, step %d isOriginal %t", country.Name, country.Step, isOriginal)
 
@@ -108,75 +112,45 @@ func (country *Country) LoadConfig(isOriginal bool) bool {
 			return false
 		}
 
-		Info.Printf("Loading zip file %s in tmp dir", zipFilename)
-		// unzip file in tmp directory and change filename to it
-
+		Info.Printf("Loading zip file %s", zipFilename)
 		reader, err := zip.OpenReader(zipFilename)
 		if err != nil {
 			log.Fatal(err)
 		}
 		defer reader.Close()
-
-		target := "tmp"
-		// create tmp dir
-		if err := os.MkdirAll(target, 0755); err != nil {
-			log.Fatal(err)
-			return false
-		}
+		Info.Printf("Loading zip file %s done", zipFilename)
 
 		for _, file := range reader.File {
-			path := filepath.Join(target, file.Name)
-			if file.FileInfo().IsDir() {
-				os.MkdirAll(path, file.Mode())
-				continue
-			}
 
-			fileReader, err := file.Open()
-			if err != nil {
-				log.Fatal(err)
+			bodsFileReader, bodsFileReaderErr = file.Open()
+			Info.Printf("Open bods file %s in zip", file.Name)
+			if bodsFileReaderErr != nil {
+				log.Fatal(bodsFileReaderErr)
 				return false
 			}
-			defer fileReader.Close()
+			defer bodsFileReader.Close()
 
-			targetFile, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, file.Mode())
-			if err != nil {
-				log.Fatal(err)
-				return false
-			}
-			defer targetFile.Close()
-
-			if _, err := io.Copy(targetFile, fileReader); err != nil {
-				log.Fatal(err)
-				return false
-			}
 		}
-		filename = target + "/" + filename
 	}
 
-	file, err := os.Open(filename)
-	if err != nil {
-		log.Fatal(err)
-		return false
-	}
-
-	jsonParser := json.NewDecoder(file)
+	jsonParser := json.NewDecoder(bodsFileReader)
 
 	bodies := (make([]quadtree.Body, 0))
 	if isOriginal {
 		country.bodiesOrig = &bodies
-		if err = jsonParser.Decode(country.bodiesOrig); err != nil {
+		if err := jsonParser.Decode(country.bodiesOrig); err != nil {
 			log.Fatal(fmt.Sprintf("parsing config file %s", err.Error()))
 		}
 		Info.Printf("nb item parsed in file for orig %d\n", len(*country.bodiesOrig))
 	} else {
 		country.bodiesSpread = &bodies
-		if err = jsonParser.Decode(country.bodiesSpread); err != nil {
+		if err := jsonParser.Decode(country.bodiesSpread); err != nil {
 			log.Fatal(fmt.Sprintf("parsing config file %s", err.Error()))
 		}
 		Info.Printf("nb item parsed in file for spread %d\n", len(*country.bodiesSpread))
 	}
 
-	file.Close()
+	bodsFileReader.Close()
 
 	Info.Printf("Load Config end : Country is %s, step %d", country.Name, country.Step)
 
