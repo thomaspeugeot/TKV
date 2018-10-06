@@ -1,5 +1,5 @@
-Ten Kilo Villages (or "10 0000")
-===============================
+10 0000
+=======
 
 Implementation of the "10 000" concept (see https://10ktblog.wordpress.com/a-propos/ for a description of the concept)
 
