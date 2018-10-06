@@ -1,28 +1,15 @@
 # TKV
-Ten Kilo Villages
+Ten Kilo Villages (or "10 0000")
+===============================
 
-todo:
+Implementation of the "10 000" concept (see https://10ktblog.wordpress.com/a-propos/ for a description of the concept)
 
-DEBUG OF DYNAMIC
-- allow for pin-pointing the mid point between the closest bodies
-- allow for understanding the dynamic of the min distance
+10 000 is a web server
 
-PRODUCTION FOR ALL COUNTRIES
+**Running the web server**
 
-INTEGRATION OF EN USER CLIENT
+cd runtime_server
+go run runtime_server.go -sourceCountry fra -sourceCountryNbBodiesPtr 697529 -sourceCountryStep 4723 -targetCountry hti -targetCountryNbBodiesPtr 927787 -targetCountryStep 8564
 
-1/ provide a web service getVillages() which takes an area an input (top left and bottom right coords) and returns
-the coordinates of the barycenters of the village in the area  
+a vscode configuration is availble to run and debug the server.
 
-- optional paramters (cutoff for the number of villages barycenters to get)
-
-- create a struct "villageLayer" which is iinitialized with the data of all villages 
-	
-	init function
-	- for a set of countries
-		- load initial ".bods"
-		- load final ".bods"
-	- from the final ".bods", compute the village barycenters
-
-	getVillages functions
-	- given the area, parse all villages and pick up the ones inside the area

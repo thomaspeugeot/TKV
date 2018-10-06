@@ -270,7 +270,7 @@ func (country *Country) XYSpreadToTerritoryBorder(x, y float64) PointList {
 			latOptimClosest, lngOptimClosest := country.XY2LatLng(xRelClosest, yRelClosest)
 
 			points = append(points, MakePoint(latOptimClosest, lngOptimClosest))
-			Info.Printf("XYSpreadToTerritoryBorder %f %f", latOptimClosest, lngOptimClosest)
+			Trace.Printf("XYSpreadToTerritoryBorder %f %f", latOptimClosest, lngOptimClosest)
 		}
 	}
 
