@@ -9,6 +9,13 @@ Implementation of the "10 000" concept (see https://10ktblog.wordpress.com/a-pro
 
 ```
 cd runtime_server
+./runtime_server -sourceCountry fra -sourceCountryNbBodiesPtr 697529 -sourceCountryStep 4723 -targetCountry hti -targetCountryNbBodiesPtr 927787 -targetCountryStep 8564
+```
+
+**Running the web server with go command tool**
+
+```
+cd runtime_server
 go run runtime_server.go -sourceCountry fra -sourceCountryNbBodiesPtr 697529 -sourceCountryStep 4723 -targetCountry hti -targetCountryNbBodiesPtr 927787 -targetCountryStep 8564
 ```
 
