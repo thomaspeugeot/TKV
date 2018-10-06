@@ -14,3 +14,7 @@ go run runtime_server.go -sourceCountry fra -sourceCountryNbBodiesPtr 697529 -so
 
 a vscode configuration is availble to run and debug the server.
 
+**Running the web client**
+
+launch your browser at http://localhost:8001/tkv-client.html
+
