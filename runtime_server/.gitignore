@@ -1,0 +1,59 @@
+# Compiled Object files, Static and Dynamic libs (Shared Objects)
+*.o
+*.a
+*.so
+
+# exclude go output files
+# * tells git to ignore everything.
+# !*/ then unignores anything that is a directory. This is crucial.
+# !*.* unignores all files with an extension.
+*
+!*/
+!*.*
+
+# csv files
+*.csv
+
+# png files
+*.png
+
+# max DS_Store files
+*.DS*
+
+# Folders
+_obj
+_test
+
+# Architecture specific extensions/prefixes
+*.[568vq]
+[568vq].out
+
+*.cgo1.go
+*.cgo2.c
+_cgo_defun.c
+_cgo_gotypes.go
+_cgo_export.*
+
+_testmain.go
+
+*.exe
+*.test
+*.prof
+
+# images
+*.gif
+
+#log
+*.log
+
+#bower component
+bower_components
+
+node_modules
+node_modules.old
+
+*.bods
+# *.zip, keep them for the runtime
+grump-reader/GlobalRuralUrbanMappingProjectVersion1GRUMPv1PopulationCountGrid.html
+grump-reader/GlobalRuralUrbanMappingProjectVersion1GRUMPv1PopulationCountGrid.xml
+grump-reader/GlobalRuralUrbanMappingProjectVersion1GRUMPv1PopulationCountGrid.html
