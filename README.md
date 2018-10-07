@@ -16,16 +16,15 @@ cd runtime_server
 
 **Running the web server with go command tool**
 
-
+Have go (golang.org) latest (>= v1.11) installed
+blank GOPATH & GOROOT env
 
 ```
-mkdir /tmp/mygoworkspace
-cd /tmp/mygoworkspace
-GOPATH=/tmp/mygoworkspace
+cd
 go get github.com/thomaspeugeot/tkv
 go get github.com/thomaspeugeot/pq
 go get github.com/ajstarks/svgo
-cd runtime_server
+cd go/src/github.com/thomaspeugeot/tkv/runtime_server
 go run runtime_server.go -sourceCountry fra -sourceCountryNbBodiesPtr 697529 -sourceCountryStep 4723 -targetCountry hti -targetCountryNbBodiesPtr 927787 -targetCountryStep 8564
 ```
 
