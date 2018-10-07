@@ -20,6 +20,7 @@ cd runtime_server
 
 ```
 mkdir /tmp/mygoworkspace
+cd /tmp/mygoworkspace
 GOPATH=/tmp/mygoworkspace
 go get github.com/thomaspeugeot/tkv
 go get github.com/thomaspeugeot/pq
