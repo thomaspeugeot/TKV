@@ -76,7 +76,7 @@ func main() {
 
 	handler.TranslateCurrent.Init(sourceCountry, targetCountry)
 
-	port := "localhost:8001"
+	port := "localhost:8002"
 
 	server.Info.Printf("begin listen on port %s", port)
 	mux := http.NewServeMux()

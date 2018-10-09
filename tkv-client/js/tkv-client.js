@@ -2,6 +2,8 @@
 
 var app = angular.module("demoapp", ['leaflet-directive']);
 
+var hostname = "http://localhost:8002/"
+
 app.controller("EventsController", [ '$scope', '$http', function($scope, $http) {
 
 	angular.extend($scope, {
@@ -69,7 +71,7 @@ app.controller("EventsController", [ '$scope', '$http', function($scope, $http) 
 
 		console.log("post for translateLatLngInSourceCountryToLatLngInTargetCountry before");
 				
-		$http.post('http://localhost:8001/translateLatLngInSourceCountryToLatLngInTargetCountry', jsonLatLng ).then
+		$http.post(hostname + 'translateLatLngInSourceCountryToLatLngInTargetCountry', jsonLatLng ).then
 		(
 			function(response) { // success handler
 				console.log(response.status);
@@ -108,7 +110,7 @@ app.controller("EventsController", [ '$scope', '$http', function($scope, $http) 
 					focus: false,
 				}
 
-				$http.post('http://localhost:8001/villageTargetBorder', jsonLatLng ).then
+				$http.post(hostname + 'villageTargetBorder', jsonLatLng ).then
 				(
 					function(response) { // success handler
 						console.log(response.status);
@@ -127,7 +129,7 @@ app.controller("EventsController", [ '$scope', '$http', function($scope, $http) 
 
 						console.log('target village villageCoordinates answer ', $scope.villageBorders.data.features[0].geometry.coordinates[0] )
 
-						$http.post('http://localhost:8001/villageSourceBorder', jsonLatLng ).then
+						$http.post(hostname + 'villageSourceBorder', jsonLatLng ).then
 						(
 							function(response) { // success handler
 								console.log(response.status);
