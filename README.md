@@ -33,6 +33,6 @@ a vscode configuration is availble to run and debug the server.
 **Running the web client**
 
 
-launch your browser at http://localhost:8001/tkv-client.html
+launch your browser at http://localhost:8002/tkv-client.html
 
 On the top panel, zoom to your place of interest (it is currently limited to france). Left click. You terrritory appears as well as the matching territory in Haiti.
