@@ -25,9 +25,9 @@ First step is to create your environment on the Google Compute Platform (GCP).
 
 From there, either you work fully in the cloud (with a cloud shell) or you work locally on your computer (we do the second).
 
-''
+```
 cd /Users/thomaspeugeot/goroot/src/go-app
-''
+```
 
 
 
