@@ -76,5 +76,36 @@ it works fine.
 cd $GOPATH/src/github.com/GoogleCloudPlatform/golang-samples/appengine/gophers/gophers-1
 
 ```
+## 2018, october the 11th
 
+Trying to reproduce gophers-1 for serving the 10000 web site (only the map).
 
+The definition of the app.yaml is cryptic. 
+```
+# All URLs are handled by the Go application script
+handlers:
+- url: /.*
+  script: _go_app
+```
+Why "/.*" to describe all files ? It is described in https://cloud.google.com/appengine/docs/standard/go/config/appref
+This is for the description of ONE service. There, we will need only ONE app.yaml file.
+The above definition defines one "Handler" instruction. It states that all requests should be served by the go application.
+I make the hypothesis that this will be enough for us. 
+```
+- url: /tkv-client.html
+  static_files: tkv-client.html
+  upload: tkv-client.html
+
+- url: /.*
+  script: _go_app
+
+```
+à essayer
+
+```
+cd goroot/src/github.com/thomaspeugeot/tkv/gae_tkv
+```
+
+http://localhost:8080/tkv-client.html
+
+semble renvoyer la page mais le javascript n'est pas exécuté. A investiguer.
