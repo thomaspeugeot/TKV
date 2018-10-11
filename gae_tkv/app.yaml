@@ -1,10 +1,20 @@
 runtime: go
 api_version: go1
 
+# all requests are served by the go runtime (no need for static files)
 handlers:
+- url: /tkv-client.html
+  static_files: tkv-client.html
+  upload: tkv-client.html
+
+- url: /css
+  static_dir: css
+  
+- url: /js
+  static_dir: js
+  
 - url: /.*
   script: _go_app
-
 
 skip_files:
 - ^(.*/)?#.*#$
