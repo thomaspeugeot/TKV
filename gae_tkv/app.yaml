@@ -7,6 +7,10 @@ handlers:
   static_files: tkv-client.html
   upload: tkv-client.html
 
+- url: /
+  static_files: tkv-client.html
+  upload: tkv-client.html
+
 - url: /css
   static_dir: css
   

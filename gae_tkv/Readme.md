@@ -108,4 +108,69 @@ cd goroot/src/github.com/thomaspeugeot/tkv/gae_tkv
 
 http://localhost:8080/tkv-client.html
 
-semble renvoyer la page mais le javascript n'est pas exécuté. A investiguer.
+does not work. At least, a configuration seems to work with dev_appserver.py
+handlers:
+```
+- url: /tkv-client.html
+  static_files: tkv-client.html
+  upload: tkv-client.html
+
+- url: /css
+  static_dir: css
+  
+- url: /js
+  static_dir: js
+```
+Let's try to see if works when the path is outside the root directory
+```
+handlers:
+- url: /tkv-client.html
+  static_files: tkv-client.html
+  upload: tkv-client.html
+
+- url: /css
+  static_dir: ../tkv-client/css
+  
+- url: /js
+  static_dir: ../tkv-client/js
+```
+it does work localy but does work with gcloud app deploy
+
+## 2018, october the 13th
+
+lets try if the path below root directory works with gcloud deploy. It does not. Let's check logs
+```
+gcloud --quiet app deploy
+gcloud app logs tail -s default
+```
+the
+```
+--quiet
+```
+option is cool for not having to avoid to interactive confirmation.
+
+It does not work anymore on the deployment configuration.
+There is a trace
+```
+2018-10-13 06:16:06 default[20181013t081528]  "GET /tkv-client.html HTTP/1.1" 200
+```
+meaning the tkv-client.html is correctly loaded but all the rest is not.
+or it does not GET the tkv-client.html at all
+```
+2018-10-13 06:18:28 default[20181013t081744]  "GET /js/leaflet.js HTTP/1.1" 404
+2018-10-13 06:18:28 default[20181013t081744]  "GET /css/angular-material.css HTTP/1.1" 404
+2018-10-13 06:18:28 default[20181013t081744]  "GET /js/angular.js HTTP/1.1" 404
+2018-10-13 06:18:28 default[20181013t081744]  "GET /js/tkv-client.js HTTP/1.1" 404
+2018-10-13 06:18:28 default[20181013t081744]  "GET /css/leaflet.css HTTP/1.1" 404
+2018-10-13 06:18:28 default[20181013t081744]  "GET /js/angular-leaflet-directive.js HTTP/1.1" 404
+2018-10-13 06:18:28 default[20181013t081744]  "GET /js/leaflet.js HTTP/1.1" 404
+2018-10-13 06:18:28 default[20181013t081744]  "GET /js/angular-leaflet-directive.js HTTP/1.1" 404
+2018-10-13 06:18:28 default[20181013t081744]  "GET /js/tkv-client.js HTTP/1.1" 404
+```
+It works localy but not on remote, Let's try gcloud --verbosity=info.
+
+no info.
+Let's try from the console with the thomas.peugeot@10kt.org account
+https://console.cloud.google.com/logs/viewer?project=tenktorg&authuser=1&organizationId=174259221484&resource=gae_app%2Fmodule_id%2Fdefault&minLogLevel=0&expandAll=false&timestamp=2018-10-13T06:36:14.521000000Z&customFacets=&limitCustomFacetWidth=true&dateRangeStart=2018-10-13T05:36:14.775Z&dateRangeEnd=2018-10-13T06:36:14.775Z&interval=PT1H&logName=projects%2Ftenktorg%2Flogs%2Fappengine.googleapis.com%252Frequest_log&scrollTimestamp=2018-10-13T06:28:03.555834000Z
+
+Now, we have confirmation that the directory path OUTSIDE the root directory does work locally but NOT with the deployment.
