@@ -289,5 +289,7 @@ that works
 
 PUTAIN CA MARCHE !!!!!
 
-Except it works from the firefox on my mac. Not from safari on the ipad or the iphone.
 
+![First working deployment](Screen Shot 2018-10-14 at 13.03.50.jpg)
+
+Except it works from the firefox on my mac. Not from safari on the ipad or the iphone.
