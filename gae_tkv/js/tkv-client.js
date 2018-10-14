@@ -2,7 +2,7 @@
 
 var app = angular.module("demoapp", ['leaflet-directive']);
 
-var hostname = "http://localhost:8080/"
+var hostname = "https://tenktorg.appspot.com/"
 
 app.controller("EventsController", [ '$scope', '$http', function($scope, $http) {
 

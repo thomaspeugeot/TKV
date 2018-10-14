@@ -183,7 +183,7 @@ to remove versions.
 **Let's try to work with the services**
 From now, we have only dealt with serving the html/css/js files. Let's try to have handlers perform services tasks.
 
-## 2018, october the 13th
+## 2018, october the 14th
 Today, we try to have the service working.
 First find, no need to have the http server running in main.go
 ```
@@ -228,4 +228,10 @@ github.com/thomaspeugeot/tkv/handler.TranslateLatLngInSourceCountryToLatLngInTar
 ...
 
 ``` 
-The crash is normal since the translation has not been inited. Let's do this init in the translation file through a singloton pattern. 
+The crash is normal since the translation has not been inited. Let's do this init in the translation file through a singloton pattern.
+IT WORKS .... on the local development server
+
+On the gcloud server https://tenktorg.appspot.com/translateLatLngInSourceCountryToLatLngInTargetCountry, we now have an issue, not a surprise since 
+- the client javascript asks for localhost to get service 
+- the memory footprint is above the standard free quota
+

@@ -1,6 +1,12 @@
 runtime: go
 api_version: go1
 
+# currently, the server memory footprint is above 512 MB, therefore, it cannot 
+# run on the default (F1) config. 
+# https://cloud.google.com/appengine/docs/standard/#instance_classes
+# It needs a F4_1G
+instance_class: F4_1G
+
 # all requests are served by the go runtime (no need for static files)
 handlers:
 - url: /tkv-client.html
@@ -19,6 +25,8 @@ handlers:
   
 - url: /.*
   script: _go_app
+
+
 
 skip_files:
 - ^(.*/)?#.*#$
