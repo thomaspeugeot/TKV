@@ -174,3 +174,58 @@ Let's try from the console with the thomas.peugeot@10kt.org account
 https://console.cloud.google.com/logs/viewer?project=tenktorg&authuser=1&organizationId=174259221484&resource=gae_app%2Fmodule_id%2Fdefault&minLogLevel=0&expandAll=false&timestamp=2018-10-13T06:36:14.521000000Z&customFacets=&limitCustomFacetWidth=true&dateRangeStart=2018-10-13T05:36:14.775Z&dateRangeEnd=2018-10-13T06:36:14.775Z&interval=PT1H&logName=projects%2Ftenktorg%2Flogs%2Fappengine.googleapis.com%252Frequest_log&scrollTimestamp=2018-10-13T06:28:03.555834000Z
 
 Now, we have confirmation that the directory path OUTSIDE the root directory does work locally but NOT with the deployment.
+
+```
+ERROR: (gcloud.app.deploy) INVALID_ARGUMENT: Your app may not have more than 15 versions. Please delete one of the existing versions before trying to create a new version.
+```
+https://console.cloud.google.com/appengine/versions?authuser=1&organizationId=174259221484&project=tenktorg&serviceId=default&versionssize=50
+to remove versions.
+**Let's try to work with the services**
+From now, we have only dealt with serving the html/css/js files. Let's try to have handlers perform services tasks.
+
+## 2018, october the 13th
+Today, we try to have the service working.
+First find, no need to have the http server running in main.go
+```
+func main() {
+	appengine.Main()
+}
+```
+is all you need to serve your file
+If you want to add a service, it seems quite simple.
+```
+func main() {
+	http.HandleFunc("/checkEnv", checkEnv)
+	appengine.Main()
+}
+func checkEnv(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "IsDevAppServer: %v", appengine.IsDevAppServer())
+}
+```
+If I want to do something more complex, 
+```
+func main() {
+	http.HandleFunc("/translateLatLngInSourceCountryToLatLngInTargetCountry",
+		handler.TranslateLatLngInSourceCountryToLatLngInTargetCountry)
+	http.HandleFunc("/checkEnv", checkEnv)
+	appengine.Main()
+}
+func checkEnv(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "IsDevAppServer: %v", appengine.IsDevAppServer())
+}
+```
+The server answer to the request http://localhost:8080/translateLatLngInSourceCountryToLatLngInTargetCountry
+is
+```
+...
+2018/10/14 09:23:37 http: panic serving 127.0.0.1:59274: runtime error: invalid memory address or nil pointer dereference
+...
+github.com/thomaspeugeot/tkv/translation.(*Country).ClosestBodyInOriginalPosition(0x171ae80, 0x0, 0x0, 0x11e05ee, 0xc420086280, 0x2, 0xc4200722a0, 0x54, 0x16d8e60, 0xc420192a20, ...)
+	/Users/thomaspeugeot/goroot/src/github.com/thomaspeugeot/tkv/translation/country.go:193 +0x3e
+github.com/thomaspeugeot/tkv/translation.(*Translation).ClosestBodyInOriginalPosition(0x171ae60, 0x0, 0x0, 0xc420040b28, 0x2, 0x2, 0x14b5fe0, 0xc420040a48, 0xc42008ea40, 0xc420056600, ...)
+	/Users/thomaspeugeot/goroot/src/github.com/thomaspeugeot/tkv/translation/translation.go:36 +0x4d
+github.com/thomaspeugeot/tkv/handler.TranslateLatLngInSourceCountryToLatLngInTargetCountry(0x16e1460, 0xc4201360e0, 0xc42011a400)
+...
+
+``` 
+The crash is normal since the translation has not been inited. Let's do this init in the translation file through a singloton pattern. 

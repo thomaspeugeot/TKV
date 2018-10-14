@@ -2,6 +2,32 @@
 // translation
 package translation
 
+// singloton pointing to the current translation
+// the singloton can be autocally initiated if it is nil
+var translateCurrent Translation
+
+// singloton pattern to init the current translation
+func GetTranslateCurrent() *Translation {
+
+	// check if the current translation is void.
+	if translateCurrent.GetSourceCountryName() != "fra" {
+		var sourceCountry Country
+		var targetCountry Country
+
+		sourceCountry.Name = "fra"
+		sourceCountry.NbBodies = 697529
+		sourceCountry.Step = 4723
+
+		targetCountry.Name = "hti"
+		targetCountry.NbBodies = 927787
+		targetCountry.Step = 8564
+
+		translateCurrent.Init(sourceCountry, targetCountry)
+	}
+
+	return &translateCurrent
+}
+
 type Translation struct {
 	xMin, xMax, yMin, yMax float64 // coordinates of the rendering window (used to compute liste of villages)
 	sourceCountry          Country
@@ -29,7 +55,7 @@ func (t *Translation) SetRenderingWindow(xMin, xMax, yMin, yMax float64) {
 	t.xMin, t.xMax, t.yMin, t.yMax = xMin, xMax, yMin, yMax
 }
 
-//
+// from lat, lng in source country, find the closest body in source country
 func (t *Translation) ClosestBodyInOriginalPosition(lat, lng float64) (x, y, distance, latClosest, lngClosest, xSpread, ySpread float64, closestIndex int) {
 
 	// convert from lat lng to x, y in the Country

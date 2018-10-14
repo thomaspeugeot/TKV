@@ -12,9 +12,6 @@ import (
 	"github.com/thomaspeugeot/tkv/translation"
 )
 
-// load the data
-var TranslateCurrent translation.Translation
-
 // for decoding the rendering window
 type test_struct struct {
 	X1, X2, Y1, Y2 float64
@@ -49,7 +46,7 @@ func TranslateLatLngInSourceCountryToLatLngInTargetCountry(w http.ResponseWriter
 	}
 	server.Info.Printf("translateLatLngInSourceCountryToLatLngInTargetCountry for lat %f, lng %f", ll.Lat, ll.Lng)
 
-	x, y, distance, latClosest, lngClosest, xSpread, ySpread, _ := TranslateCurrent.ClosestBodyInOriginalPosition(ll.Lat, ll.Lng)
+	x, y, distance, latClosest, lngClosest, xSpread, ySpread, _ := translation.GetTranslateCurrent().ClosestBodyInOriginalPosition(ll.Lat, ll.Lng)
 	server.Info.Printf("translateLatLngInSourceCountryToLatLngInTargetCountry x, y is %f %f, distance %f", x, y, distance)
 
 	var xy VillageCoordResponse
@@ -59,7 +56,7 @@ func TranslateLatLngInSourceCountryToLatLngInTargetCountry(w http.ResponseWriter
 	xy.LatClosest = latClosest
 	xy.LngClosest = lngClosest
 
-	latTarget, lngTarget := TranslateCurrent.XYSpreadToLatLngInTargetCountry(xSpread, ySpread)
+	latTarget, lngTarget := translation.GetTranslateCurrent().XYSpreadToLatLngInTargetCountry(xSpread, ySpread)
 	xy.LatTarget = latTarget
 	xy.LngTarget = lngTarget
 
@@ -85,7 +82,7 @@ func AllSourcPointsCoordinates(w http.ResponseWriter, req *http.Request) {
 	}
 	server.Info.Printf("allSourcPointsCoordinates for lat %f, lng %f", ll.Lat, ll.Lng)
 
-	points := TranslateCurrent.SourceBorder(ll.Lat, ll.Lng)
+	points := translation.GetTranslateCurrent().SourceBorder(ll.Lat, ll.Lng)
 
 	coord := make(GeoJSONBorderCoordinates, 1)
 	coord[0] = make([][]float64, len(points))
@@ -113,10 +110,10 @@ func VillageTargetBorder(w http.ResponseWriter, req *http.Request) {
 	}
 	server.Info.Printf("villageTargetBorder for lat %f, lng %f", ll.Lat, ll.Lng)
 
-	x, y, distance, _, _, xSpread, ySpread, _ := TranslateCurrent.ClosestBodyInOriginalPosition(ll.Lat, ll.Lng)
+	x, y, distance, _, _, xSpread, ySpread, _ := translation.GetTranslateCurrent().ClosestBodyInOriginalPosition(ll.Lat, ll.Lng)
 	server.Info.Printf("villageTargetBorder is %f %f, distance %f", x, y, distance)
 
-	points := TranslateCurrent.TargetBorder(xSpread, ySpread)
+	points := translation.GetTranslateCurrent().TargetBorder(xSpread, ySpread)
 
 	// availble convex hull code (in perfect precision but robust)
 	ps := make([]pq.Point2q, len(points))
@@ -156,7 +153,7 @@ func VillageSourceBorder(w http.ResponseWriter, req *http.Request) {
 	}
 	server.Info.Printf("villageSourceBorder for lat %f, lng %f", ll.Lat, ll.Lng)
 
-	points := TranslateCurrent.SourceBorder(ll.Lat, ll.Lng)
+	points := translation.GetTranslateCurrent().SourceBorder(ll.Lat, ll.Lng)
 
 	// availble convex hull code (in perfect precision but robust)
 	ps := make([]pq.Point2q, len(points))

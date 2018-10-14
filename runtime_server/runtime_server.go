@@ -74,7 +74,8 @@ func main() {
 	server.Info.Printf("targetCountry nbBodies to parse %d", targetCountry.NbBodies)
 	server.Info.Printf("targetCountry at step to parse %d", targetCountry.Step)
 
-	handler.TranslateCurrent.Init(sourceCountry, targetCountry)
+	t := translation.GetTranslateCurrent()
+	server.Info.Printf("ended init of country %s", t.GetSourceCountryName())
 
 	port := "localhost:8002"
 
