@@ -232,6 +232,62 @@ The crash is normal since the translation has not been inited. Let's do this ini
 IT WORKS .... on the local development server
 
 On the gcloud server https://tenktorg.appspot.com/translateLatLngInSourceCountryToLatLngInTargetCountry, we now have an issue, not a surprise since 
-- the client javascript asks for localhost to get service 
+# - the client javascript asks for localhost to get service 
 - the memory footprint is above the standard free quota
+
+The log on the application is pretty explicit.
+```
+2018-10-14 12:19:27.205 CEST
+Exceeded soft memory limit of 128 MB with 205 MB after servicing 0 requests total. Consider setting a larger instance class in app.yaml.
+2018-10-14 12:19:27.205 CEST
+This request caused a new process to be started for your application, and thus caused your application code to be loaded for the first time. This request may thus take longer and use more CPU than a typical request for your application.
+2018-10-14 12:19:27.205 CEST
+While handling this request, the process that handled this request was found to be using too much memory and was terminated. This is likely to cause a new process to be used for the next request to your application. If you see this message frequently, you may have a memory leak in your application or may be using an instance with insufficient memory. Consider setting a larger instance class in app.yaml.
+```
+**upgrading the google application engine class**
+
+apparently, the application consummes more than 128 MB (377), in top
+```
+9790  _go_app      0.0   00:19.89 11    0    35    219M   0B     377M   55433 55436 sleeping *0[1]          0.00000 0.00000    501  197249    319
+5
+```
+in the application monitor on osx, it is rather above 596 MB
+```
+ _go_app	0.0	20.29	11	0	59790	thomaspeugeot	219.5 MB	596.9 MB	0 bytes		0 bytes	0 bytes	64 bit	0 bytes	0 bytes	0	0		-	No	No	No	0 bytes	0 bytes	No	No		0 bytes	No	
+ ```
+ According to the go documentation, https://cloud.google.com/appengine/docs/standard/#instance_classes, 
+ we need to be in the F4_1G class
+ ```
+ Instance Class 	Memory Limit 	CPU Limit 	Supported Scaling Types
+F1 (default) 	128 MB 	600 MHz 	automatic
+F2 	256 MB 	1.2 GHz 	automatic
+F4 	512 MB 	2.4 GHz 	automatic
+F4_1G 	1024 MB 	2.4 GHz 	automatic
+....
+```
+This is set in the app.yaml file.
+
+Activation of the 300$ free trial.
+
+https://tenktorg.appspot.com/translateLatLngInSourceCountryToLatLngInTargetCountry
+is responding correctly. VERY GOOD NEWS.
+
+Modification of the hostname in tkv-client.js
+```
+var hostname = "https://tenktorg.appspot.com/"
+```
+!!! one needs to have the hostname be automaticaly computed --> window.location.hostname
+```
+		hostname = window.location.hostname
+		protocol = window.location.protocol
+		port = window.location.port
+		targetService = protocol + "//"+ hostname + ":" + port + "/"
+        ...
+		$http.post( targetService +'translateLatLngInSourceCountryToLatLngInTargetCountry', jsonLatLng )...
+```
+that works
+
+PUTAIN CA MARCHE !!!!!
+
+Except it works from the firefox on my mac. Not from safari on the ipad or the iphone.
 
