@@ -290,6 +290,6 @@ that works
 PUTAIN CA MARCHE !!!!!
 
 
-![First working deployment](Screen Shot 2018-10-14 at 13.03.50.jpg)
+![First working deployment](Screen Shot 2018-10-14 at 13.03.50.png)
 
 Except it works from the firefox on my mac. Not from safari on the ipad or the iphone.
