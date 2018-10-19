@@ -3,7 +3,7 @@
 
 This code is the implementation of the "10 000" concept (see https://10ktblog.wordpress.com/a-propos/ for a description of the concept)
 
-This reopository is for 3 programs
+This reopository programs related
 * the "extractor" program that turns an open source density file from a country into a country body file at initial configuration
 * the "simulation" programm that simulates the spreading of bodies (it takes a country body file and output a new one with updated positions)  
 * the "runtime" 10 000 web server for the end user who need to find his territory in france among the 10 000 territories and the sister territory in Haiti. This program take a 2 country body files (one at init and one at the end of the simulation)
@@ -34,6 +34,15 @@ go run sim_server.go -sourceCountry=hti -sourceCountryNbBodies=82990
 
 you can monitor sim_server progress running by opening the file  tkv-client/tkv-monitor.html in your favorite browser
 
+
+The "movie" program
+-------------------------
+
+This program generates a movie from the simulation steps
+```
+cd sim-movie
+go run sim-movie.go <some flags to be completed>
+```
 
 The 10000 runtime server
 -------------------------
