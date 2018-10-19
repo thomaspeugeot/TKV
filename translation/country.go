@@ -182,7 +182,12 @@ func (country *Country) ComputeBaryCenters() {
 
 // given lat, lng
 // return xClosest, yClosest, distance, latClosest, lngClosest of the closest body within the country (original position)
-func (country *Country) ClosestBodyInOriginalPosition(lat, lng float64) (xRelClosest, yRelClosest, distance, latClosest, lngClosest, xSpread, ySpread float64, closestIndex int) {
+func (country *Country) ClosestBodyInOriginalPosition(lat, lng float64) (
+	xRelClosest, yRelClosest,
+	distance,
+	latClosest, lngClosest,
+	xSpread, ySpread float64,
+	closestIndex int) {
 
 	// compute relative coordinates within the square
 	xRel, yRel := country.LatLng2XY(lat, lng)

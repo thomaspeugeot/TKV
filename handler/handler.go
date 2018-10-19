@@ -28,6 +28,7 @@ type VillageCoordResponse struct {
 	Distance               float64
 	LatClosest, LngClosest float64
 	LatTarget, LngTarget   float64
+	Xspread, Yspread       float64
 }
 
 // get village coordinates from lat/long
@@ -55,6 +56,8 @@ func TranslateLatLngInSourceCountryToLatLngInTargetCountry(w http.ResponseWriter
 	xy.Distance = distance
 	xy.LatClosest = latClosest
 	xy.LngClosest = lngClosest
+	xy.Xspread = xSpread
+	xy.Yspread = ySpread
 
 	latTarget, lngTarget := translation.GetTranslateCurrent().XYSpreadToLatLngInTargetCountry(xSpread, ySpread)
 	xy.LatTarget = latTarget

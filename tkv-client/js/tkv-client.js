@@ -77,9 +77,24 @@ app.controller("EventsController", [ '$scope', '$http', function($scope, $http) 
 				console.log(response.status);
 				console.log('village translateLatLngInSourceCountryToLatLngInTargetCountry answer', response.data.X, response.data.Y);
 
-				message = "village "+response.data.X+" "+response.data.Y+" "+response.data.Distance+" "+response.data.LatClosest+" "+response.data.LngClosest;
-
 				parseFloat(response.data.LatClosest);
+
+				lat = parseFloat(response.data.LatClosest);
+				lng = parseFloat(response.data.LngClosest);
+
+				latTarget = parseFloat(response.data.LatTarget);
+				lngTarget = parseFloat(response.data.LngTarget);
+
+				xSpead = parseFloat(response.data.Xspread);
+				ySpead = parseFloat(response.data.Yspread);
+
+				message = "Territory X="+ Math.floor(100*response.data.Xspread)+" Y="+Math.floor(100*response.data.Yspread);
+
+				$scope.targetMarkers['targetVillage'] = {
+					lat: latTarget,
+					lng: lngTarget,
+					focus: false,
+				}
 
 				$scope.markers['clickPos'] = {
 					lat: args.leafletEvent.latlng.lat,
@@ -90,26 +105,8 @@ app.controller("EventsController", [ '$scope', '$http', function($scope, $http) 
 					options: {
 						noHide: true
 					}
-				};	
-
-				lat = parseFloat(response.data.LatClosest);
-				lng = parseFloat(response.data.LngClosest);
-
-				latTarget = parseFloat(response.data.LatTarget);
-				lngTarget = parseFloat(response.data.LngTarget);
-
-				$scope.markers['closestVillage'] = {
-					lat: lat,
-					lng: lng,
-					focus: false,
-				}
-
-				$scope.targetMarkers['targetVillage'] = {
-					lat: latTarget,
-					lng: lngTarget,
-					focus: false,
-				}
-
+				};
+					
 				$http.post(hostname + 'villageTargetBorder', jsonLatLng ).then
 				(
 					function(response) { // success handler
