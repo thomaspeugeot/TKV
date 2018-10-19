@@ -1,9 +1,42 @@
 10 0000
 =======
 
-Implementation of the "10 000" concept (see https://10ktblog.wordpress.com/a-propos/ for a description of the concept)
+This code is the implementation of the "10 000" concept (see https://10ktblog.wordpress.com/a-propos/ for a description of the concept)
 
-10 000 is a web server
+This reopository is for 3 programs
+* the "extractor" program that turns an open source density file from a country into a country body file at initial configuration
+* the "simulation" programm that simulates the spreading of bodies (it takes a country body file and output a new one with updated positions)  
+* the "runtime" 10 000 web server for the end user who need to find his territory in france among the 10 000 territories and the sister territory in Haiti. This program take a 2 country body files (one at init and one at the end of the simulation)
+
+
+The extractor program
+-------------------------
+You can run with default parameters
+```
+cd grump-reader
+go run grump-reader.go -tkvdata="C:\Users\peugeot\tkv-data"
+```
+to see the execution flags
+```
+cd grump-reader
+go run grump-reader.go -help
+```
+
+depending on the input country the program exectutes in less that a minute
+
+The simulation server
+-------------------------
+
+```
+cd sim_server
+go run sim_server.go -sourceCountry=hti -sourceCountryNbBodies=82990
+```
+
+you can monitor sim_server progress running by opening the file  tkv-client/tkv-monitor.html in your favorite browser
+
+
+The 10000 runtime server
+-------------------------
 
 **Running the web server with go command tool**
 
@@ -27,3 +60,6 @@ a vscode configuration is availble to run and debug the server.
 launch your browser at http://localhost:8002/tkv-client.html
 
 On the top panel, zoom to your place of interest (it is currently limited to france). Left click. You terrritory appears as well as the matching territory in Haiti.
+
+Code organisation
+------------------
