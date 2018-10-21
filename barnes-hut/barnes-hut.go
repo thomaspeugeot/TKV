@@ -10,7 +10,8 @@ TKV implementation starts from a Barnes-Hut implementation of the gravitation si
 and make the following modification:
 
 In a gravitational simulation, bodies are attracted to each others by mean of the newtownian gravitation law.
-Here, repulsion is used instead of gravitational attraction and add friction (see #Run.UpdateVelocity)
+Here, repulsion is used instead of gravitational attraction.
+A drag is introduced to put simulation bodies to rest (see #Run.UpdateVelocity)
 
 In a cosmological simulation, bodies position are not limited. Here,
 bodies are kept within a [0;1]*[0;1] square by having "mirror" bodies that

@@ -1,3 +1,8 @@
+/*
+GRUMP is the acronym for "Global Rural-Urban Mapping Project"; this is a freely available data source
+of population density and this package contains function to serialize/deserialize data of a country
+into a body file (a coord file).
+*/
 package grump
 
 import (

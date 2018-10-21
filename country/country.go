@@ -1,5 +1,5 @@
 /*
-Contains country codes
+Contains country codes and lat/long coordinates of enclosing square as well as total population (from GRUMP).
 */
 package country
 
