@@ -1,4 +1,6 @@
-// runtime server to be deployed on the google application engine (gae)
+/*
+This directory contains the code for the runtime server that is deployed on the google application engine (gae). contains the html / javascript / css files of the web site.
+*/
 package main
 
 import (

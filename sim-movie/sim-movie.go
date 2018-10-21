@@ -1,3 +1,7 @@
+/*
+Contains the main package for the sim-movie programm. sim-movie creates a movie from snapshots
+from the the barnes hut simulation
+*/
 package main
 
 import "image"

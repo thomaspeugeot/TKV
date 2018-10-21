@@ -180,7 +180,7 @@ func (r *Run) LoadConfigOrig(filename string) bool {
 
 		jsonParser := json.NewDecoder(file)
 		if err = jsonParser.Decode(r.bodiesOrig); err != nil {
-			log.Fatal(fmt.Sprintf("parsing config file", err.Error()))
+			log.Fatal(fmt.Sprintf("parsing config file %s", err.Error()))
 		}
 
 		file.Close()

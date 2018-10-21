@@ -1,12 +1,13 @@
-// this package provides the function for retriving villages locations, borders as well as
-// translation
+/*
+Package translation provides functions for managing a translation between two countries.
+*/
 package translation
 
-// singloton pointing to the current translation
+// Singloton pointing to the current translation
 // the singloton can be autocally initiated if it is nil
 var translateCurrent Translation
 
-// singloton pattern to init the current translation
+// Singloton pattern to init the current translation
 func GetTranslateCurrent() *Translation {
 
 	// check if the current translation is void.
@@ -28,6 +29,7 @@ func GetTranslateCurrent() *Translation {
 	return &translateCurrent
 }
 
+// Definition of a translation between a source and a target country
 type Translation struct {
 	xMin, xMax, yMin, yMax float64 // coordinates of the rendering window (used to compute liste of villages)
 	sourceCountry          Country
@@ -38,6 +40,7 @@ func (t *Translation) GetSourceCountryName() string {
 	return t.sourceCountry.Name
 }
 
+// Init source & target countries of the translation
 func (t *Translation) Init(sourceCountry, targetCountry Country) {
 
 	Info.Printf("Init : Source Country is %s with nbBodies %d at simulation step %d", sourceCountry.Name, sourceCountry.NbBodies, sourceCountry.Step)

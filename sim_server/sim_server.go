@@ -1,3 +1,6 @@
+/*
+Contains the main package for the simulation server. Also contains all handlers for the simulation server.
+*/
 package main
 
 import (

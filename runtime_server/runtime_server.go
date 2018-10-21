@@ -1,3 +1,6 @@
+/*
+This directory contains the main package for running the 10000 web server on a computer
+*/
 package main
 
 import (
@@ -11,11 +14,7 @@ import (
 	"github.com/thomaspeugeot/tkv/translation"
 )
 
-//
-//
-// on pc
 // go run runtime_server.go -targetCountryStep=43439
-//
 func main() {
 
 	// flags  for source country

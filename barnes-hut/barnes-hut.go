@@ -1,14 +1,21 @@
-// package barnes-hut is a compact implementation of a modified barnes-hut algorithm
-//
-// goal is to spread evenly bodies on a 2D rectangle
-//
-// TKV implementation starts from a Barnes-Hut implementation of the gravitation simulation and make the following modification:
-//
-// - keep bodies within the canvas: bodies "bumps" on bodders (see updatePos)
-//
-// - for spreading, use repulsion instead of gravitational attraction and add friction (see updateVel)
-//
-// - use a ring topology instead of a linear topology (think of spreading bodies on a ring, see getDist), modification of metric
+/*
+Package barnes-hut is a modified barnes-hut simulation algorithm.
+
+A the start of the simulation, bodies are spread according to the
+density of the country of interest.
+At the end of the simulation, bodies are spread evenly on a 2D rectangle. At the end of the simulation,
+the body repartition is said to be hyperuniform (https://www.quantamagazine.org/hyperuniformity-found-in-birds-math-and-physics-20160712/)
+
+TKV implementation starts from a Barnes-Hut implementation of the gravitation simulation
+and make the following modification:
+
+In a gravitational simulation, bodies are attracted to each others by mean of the newtownian gravitation law.
+Here, repulsion is used instead of gravitational attraction and add friction (see #Run.UpdateVelocity)
+
+In a cosmological simulation, bodies position are not limited. Here,
+bodies are kept within a [0;1]*[0;1] square by having "mirror" bodies that
+forbids a body from crossing the border (see #Run.UpdatePosition)
+*/
 package barnes_hut
 
 import (
@@ -50,12 +57,13 @@ var MaxRatioDisplacement float64 = 0.5
 // then, compute force from the whole box instead computing for each node of the box.
 var BN_THETA float64 = 0.5
 
-// new value of theta requested by the UI. The real BN_THETA will be changed at the end of the current step.
+// New value of theta requested by the UI. The real BN_THETA will be changed at the end of the current step.
 var BN_THETA_Request = BN_THETA
 
 // how much drag we put (1.0 is no drag)
-// tis criteria is important because it favors bodies that moves freely against bodies that are stuck on a border
-var SpeedDragFactor float64 = 0.2 // 0.99 makes a very bumpy behavior for the Dt
+// tHis criteria is important because it favors bodies that moves freely against bodies that are stuck on a border
+// 0.99 makes a very bumpy behavior for the Dt
+var SpeedDragFactor float64 = 0.2
 
 // used to compute speed up
 var nbComputationPerStep uint64
@@ -63,12 +71,13 @@ var nbComputationPerStep uint64
 // if true, Barnes-Hut algo is used
 var UseBarnesHut bool = true
 
-// cutoff for influence. According to Bartolo, 1/r2 is very strong on a plane (integration does not convergence on the plane)
+// Cutoff for influence.
+// According to Bartolo, 1/r2 is very strong on a plane (integration does not convergence on the plane)
 // therefore a cutoff distance for the computation of the force is wellcome
 // first try at 1/10 th
 var CutoffDistance float64 = 1.0
 
-// at what step do the simulation stop
+// At what step do the simulation stop
 var MaxStep int = 10000
 
 //	Bodies's X,Y position coordinates are float64 between 0 & 1
@@ -94,6 +103,7 @@ type DtAdjustModeType string
 
 var DtAdjustMode DtAdjustModeType
 
+// Possible values for DtAdjustModeType
 const (
 	AUTO   = "AUTO"
 	MANUAL = "MANUAL"
@@ -102,6 +112,7 @@ const (
 // state of the simulation
 type State string
 
+// Possible values for simulation State
 const (
 	STOPPED = "STOPPED"
 	RUNNING = "RUNNING"
@@ -110,6 +121,7 @@ const (
 // decide wether, villages borders are drawn
 type RenderState string
 
+// Possible values for RenderState
 const (
 	WITHOUT_BORDERS = "WITHOUT_BORDERS"
 	WITH_BORDERS    = "WITH_BORDERS"
@@ -120,6 +132,7 @@ var ratioOfBorderVillages = 0.0 // ratio of villages that are eligible for marki
 // decide wether to display the original configuration or the running configruation
 type RenderChoice string
 
+// Possible  values for RenderChoice
 const (
 	ORIGINAL_CONFIGURATION = "ORIGINAL_CONFIGURATION"
 	RUNNING_CONFIGURATION  = "RUNNING_CONFIGURATION"
@@ -338,7 +351,7 @@ func (r *Run) ToggleRenderChoice() {
 }
 
 func (r *Run) ToggleFieldRendering() {
-	Info.Printf("ToggleFieldRendering new state %b", !r.fieldRendering)
+	Info.Printf("ToggleFieldRendering new state %v", !r.fieldRendering)
 	r.fieldRendering = !r.fieldRendering
 }
 
