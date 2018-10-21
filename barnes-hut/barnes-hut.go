@@ -45,9 +45,13 @@ var MaxDisplacement float64 = 0.001 // cannot make more that 1/1000 th of the un
 // give the theorical max displacement, as a ratio between the min distance and the max speed
 var MaxRatioDisplacement float64 = 0.5
 
-// the barnes hut criteria
-var BN_THETA float64 = 0.5  // can use barnes if distance to COM more than BN_THETA * side of the node's box
-var ThetaRequest = BN_THETA // new value of theta requested by the UI. The real BN_THETA will be changed at the end of the current step.
+// BN_THETA is the barnes hut criteria
+// If distance to Center Of Mass (COM) of the box is more than BN_THETA * side of the box
+// then, compute force from the whole box instead computing for each node of the box.
+var BN_THETA float64 = 0.5
+
+// new value of theta requested by the UI. The real BN_THETA will be changed at the end of the current step.
+var BN_THETA_Request = BN_THETA
 
 // how much drag we put (1.0 is no drag)
 // tis criteria is important because it favors bodies that moves freely against bodies that are stuck on a border
@@ -389,7 +393,7 @@ func (r *Run) OneStepOptional(updatePosition bool) {
 	nbComputationPerStep = 0
 	r.maxVelocity = 0.0
 
-	BN_THETA = ThetaRequest
+	BN_THETA = BN_THETA_Request
 
 	// compute the quadtree from the bodies
 	r.q.UpdateNodesListsAndCOM()

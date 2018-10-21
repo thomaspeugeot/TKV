@@ -213,7 +213,7 @@ func theta(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		log.Println("error decoding ", err)
 	} else {
-		barnes_hut.ThetaRequest = thetaRequest
+		barnes_hut.BN_THETA_Request = thetaRequest
 	}
 }
 
