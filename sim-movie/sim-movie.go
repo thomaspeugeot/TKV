@@ -4,6 +4,7 @@ from the the barnes hut simulation
 */
 package main
 
+import "flag"
 import "image"
 import "image/gif"
 import "os"
@@ -12,8 +13,12 @@ import "fmt"
 
 func main() {
 
+	dirPtr := flag.String("dir", "../sim_server", "directory where the snapshop are located and the movie will be generated")
+
+	flag.Parse()
+
 	// open the current working directory
-	cwd, error := os.Open("../sim_server")
+	cwd, error := os.Open(*dirPtr)
 
 	if error != nil {
 		panic("not able to open current working directory")
@@ -28,18 +33,27 @@ func main() {
 
 	// parse the list of names and pick the ones that match the
 	var files []string
+	var movieFileName string
 
 	for _, dirname := range names {
-		if strings.Contains(dirname, "hti") && strings.Contains(dirname, "gif") {
+		if strings.Contains(dirname, ".gif") && strings.Contains(dirname, "conf-") && len(dirname) > 15 {
+
+			// get 17 first caracters of the dirname
+			sliptedName := strings.Split(dirname, "-")
+			movieFileName = "movie-" + sliptedName[1] + "-" + sliptedName[2]
+
 			fmt.Printf("dirname %s\n", dirname)
 			files = append(files, dirname)
 		}
 	}
 
+	fmt.Printf("movie name %s\n", movieFileName)
+
 	// load static image and construct outGif
 	outGif := &gif.GIF{}
 	for _, name := range files {
-		f, _ := os.Open("../sim_server/" + name)
+		fileName := cwd.Name() + "/" + name
+		f, _ := os.Open(fileName)
 		inGif, _ := gif.Decode(f)
 		f.Close()
 
@@ -48,7 +62,8 @@ func main() {
 	}
 
 	// save to out.gif
-	f, _ := os.OpenFile("hti.gif", os.O_WRONLY|os.O_CREATE, 0600)
+	outputFilename := cwd.Name() + "/" + movieFileName + ".gif"
+	f, _ := os.OpenFile(outputFilename, os.O_WRONLY|os.O_CREATE, 0600)
 	defer f.Close()
 	gif.EncodeAll(f, outGif)
 }
