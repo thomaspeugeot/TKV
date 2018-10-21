@@ -26,8 +26,8 @@
             "program": "${workspaceFolder}/runtime_server/runtime_server.go",
             "env": {},
             "args": ["-sourceCountry","fra"," -sourceCountryNbBodiesPtr"," 697529"," -sourceCountryStep"," 4723"," -targetCountry"," hti"," -targetCountryNbBodiesPtr"," 927787"," -targetCountryStep"," 8564"],
-            "showLog": true,
-            "trace": "verbose",
+            // "showLog": true,
+            // "trace": "verbose",
             "cwd": "${workspaceFolder}/runtime_server"
         }
     ]

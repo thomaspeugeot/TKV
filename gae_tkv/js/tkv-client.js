@@ -104,7 +104,11 @@ app.controller("EventsController", [ '$scope', '$http', function($scope, $http) 
 				$scope.targetMarkers['targetVillage'] = {
 					lat: latTarget,
 					lng: lngTarget,
+					message: message, 
 					focus: false,
+					options: {
+						noHide: true
+					}
 				}
 
 				$scope.markers['clickPos'] = {
