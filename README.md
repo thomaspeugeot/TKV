@@ -1,7 +1,9 @@
 10 0000
 =======
 
-This code is the implementation of the "10 000" concept (see https://10ktblog.wordpress.com/a-propos/ for a description of the concept)
+This code is the implementation of the "10 000" concept (see https://10ktblog.wordpress.com/a-propos/ for a description of the concept). 
+
+You can check the end product at https://tenktorg.appspot.com/. Zoom in the top area (france). Click, get your territory and check the twin territory in Haïti. 
 
 This reopository programs related
 * the "extractor" program that turns an open source density file from a country into a country body file at initial configuration
