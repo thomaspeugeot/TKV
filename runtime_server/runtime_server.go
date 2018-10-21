@@ -82,7 +82,7 @@ func main() {
 	server.Info.Printf("begin listen on port %s", port)
 	mux := http.NewServeMux()
 
-	mux.Handle("/", http.FileServer(http.Dir("../tkv-client/")))
+	mux.Handle("/", http.FileServer(http.Dir("../gae_tkv/")))
 
 	mux.HandleFunc("/translateLatLngInSourceCountryToLatLngInTargetCountry",
 		handler.TranslateLatLngInSourceCountryToLatLngInTargetCountry)
