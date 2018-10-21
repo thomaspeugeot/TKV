@@ -35,8 +35,7 @@ go run sim_server.go -sourceCountry=hti -sourceCountryNbBodies=82990
 you can monitor sim_server progress running by opening the file  tkv-client/tkv-monitor.html in your favorite browser
 
 
-The "movie" program
--------------------------
+** The "movie" program **
 
 This program generates a movie from the simulation steps
 ```
