@@ -1,11 +1,13 @@
-// compact implementation of a modified barnes-hut algorithm
+// package barnes-hut is a compact implementation of a modified barnes-hut algorithm
 //
 // goal is to spread evenly bodies on a 2D rectangle
 //
 // TKV implementation starts from a Barnes-Hut implementation of the gravitation simulation and make the following modification:
 //
 // - keep bodies within the canvas: bodies "bumps" on bodders (see updatePos)
+//
 // - for spreading, use repulsion instead of gravitational attraction and add friction (see updateVel)
+//
 // - use a ring topology instead of a linear topology (think of spreading bodies on a ring, see getDist), modification of metric
 package barnes_hut
 
