@@ -10,7 +10,6 @@
 *
 !*/
 !*.*
-!runtime_server
 
 # csv files
 *.csv

@@ -1,4 +1,4 @@
-runtime: go
+runtime: go111
 api_version: go1
 
 # currently, the server memory footprint is above 512 MB, therefore, it cannot 
@@ -25,15 +25,3 @@ handlers:
   
 - url: /.*
   script: _go_app
-
-
-
-skip_files:
-- ^(.*/)?#.*#$
-- ^(.*/)?.*~$
-- ^(.*/)?.*\.py[co]$
-- ^(.*/)?.*/RCS/.*$
-- ^(.*/)?\..*$
-- ^(.*/)?.*\.bak$
-- ^(.*/)?.*\.bods$
-- tmp/
