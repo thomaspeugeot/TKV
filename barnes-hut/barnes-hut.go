@@ -17,7 +17,7 @@ In a cosmological simulation, bodies position are not limited. Here,
 bodies are kept within a [0;1]*[0;1] square by having "mirror" bodies that
 forbids a body from crossing the border (see #Run.UpdatePosition)
 */
-package barnes_hut
+package barneshut
 
 import (
 	"encoding/csv"
@@ -393,7 +393,7 @@ func (r *Run) OneStepOptional(updatePosition bool) {
 
 	recordStr := make([]string, 10)
 	// get gini distribution at level 8
-	density := r.ComputeDensityTencilePerVillage()
+	density := r.ComputeDensityTencilePerTerritory()
 	// for idx, record := range r.q.BodyCountGini[8][:] {
 	for idx, record := range density {
 		recordStr[idx] = fmt.Sprintf("%f", record)

@@ -17,7 +17,7 @@ import (
 )
 
 //!+main
-var r *barnes_hut.Run
+var r *barneshut.Run
 
 //
 // to start with haiti
@@ -56,21 +56,21 @@ func main() {
 		}
 	}
 	{
-		_, errScan := fmt.Sscanf(*cutoffPtr, "%f", &barnes_hut.CutoffDistance)
+		_, errScan := fmt.Sscanf(*cutoffPtr, "%f", &barneshut.CutoffDistance)
 		if errScan != nil {
 			log.Fatal(errScan)
 			return
 		}
 	}
-	server.Info.Printf("CutoffDistance %f", barnes_hut.CutoffDistance)
+	server.Info.Printf("CutoffDistance %f", barneshut.CutoffDistance)
 	{
-		_, errScan := fmt.Sscanf(*maxStepPtr, "%d", &barnes_hut.MaxStep)
+		_, errScan := fmt.Sscanf(*maxStepPtr, "%d", &barneshut.MaxStep)
 		if errScan != nil {
 			log.Fatal(errScan)
 			return
 		}
 	}
-	server.Info.Printf("Max step %d", barnes_hut.MaxStep)
+	server.Info.Printf("Max step %d", barneshut.MaxStep)
 	var port int = 8000
 	{
 		_, errScan := fmt.Sscanf(*portPtr, "%d", &port)
@@ -80,17 +80,17 @@ func main() {
 		}
 	}
 	server.Info.Printf("will listen on port %d", port)
-	r = barnes_hut.NewRun()
+	r = barneshut.NewRun()
 
 	// load configuration files.
-	filename := fmt.Sprintf(barnes_hut.CountryBodiesNamePattern, sourceCountry.Name, sourceCountry.NbBodies, sourceCountry.Step)
+	filename := fmt.Sprintf(barneshut.CountryBodiesNamePattern, sourceCountry.Name, sourceCountry.NbBodies, sourceCountry.Step)
 	server.Info.Printf("filename for init %s", filename)
 	r.LoadConfig(filename)
 
-	r.SetState(barnes_hut.RUNNING)
+	r.SetState(barneshut.RUNNING)
 
 	output, _ := os.Create(r.OutputDir + "/" + "essai200Kbody_6Ksteps.gif")
-	go r.OutputGif(output, barnes_hut.MaxStep)
+	go r.OutputGif(output, barneshut.MaxStep)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/status", status)
@@ -133,13 +133,13 @@ func status(w http.ResponseWriter, req *http.Request) {
 
 	fmt.Fprintf(w, "%s Dt Adjust %s\n%s",
 		r.State(),
-		barnes_hut.DtAdjustMode,
+		barneshut.DtAdjustMode,
 		r.Status())
 }
 
 func play(w http.ResponseWriter, req *http.Request) {
 
-	r.SetState(barnes_hut.RUNNING)
+	r.SetState(barneshut.RUNNING)
 	fmt.Fprintf(w, "Run status %s\n", r.State())
 }
 
@@ -149,12 +149,12 @@ func toggleManualAuto(w http.ResponseWriter, req *http.Request)     { r.ToggleMa
 
 func pause(w http.ResponseWriter, req *http.Request) {
 
-	r.SetState(barnes_hut.STOPPED)
+	r.SetState(barneshut.STOPPED)
 	fmt.Fprintf(w, "Run status %s\n", r.State())
 }
 
 func oneStep(w http.ResponseWriter, req *http.Request) {
-	if r.State() == barnes_hut.STOPPED {
+	if r.State() == barneshut.STOPPED {
 		r.OneStep()
 	}
 	fmt.Fprintf(w, "Run status %s\n", r.State())
@@ -203,7 +203,7 @@ func dt(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		log.Println("error decoding ", err)
 	} else {
-		barnes_hut.DtRequest = dtRequest
+		barneshut.DtRequest = dtRequest
 	}
 }
 
@@ -215,7 +215,7 @@ func theta(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		log.Println("error decoding ", err)
 	} else {
-		barnes_hut.BN_THETA_Request = thetaRequest
+		barneshut.BN_THETA_Request = thetaRequest
 	}
 }
 
@@ -227,7 +227,7 @@ func nbVillagesPerAxe(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		log.Println("error decoding ", err)
 	} else {
-		barnes_hut.SetNbVillagePerAxe(nbVillagesPerAxe)
+		barneshut.SetNbVillagePerAxe(nbVillagesPerAxe)
 	}
 }
 
@@ -239,7 +239,7 @@ func nbRoutines(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		log.Println("error decoding ", err)
 	} else {
-		barnes_hut.SetNbRoutines(nbRoutines)
+		barneshut.SetNbRoutines(nbRoutines)
 	}
 }
 
@@ -263,7 +263,7 @@ func updateRatioBorderBodies(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		log.Println("error decoding ", err)
 	} else {
-		barnes_hut.SetRatioBorderBodies(ratioBorderBodies)
+		barneshut.SetRatioBorderBodies(ratioBorderBodies)
 	}
 }
 

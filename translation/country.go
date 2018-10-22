@@ -98,7 +98,7 @@ func (country *Country) LoadConfig(isOriginal bool) bool {
 		step = country.Step
 	}
 
-	filename := fmt.Sprintf(barnes_hut.CountryBodiesNamePattern, country.Name, country.NbBodies, step)
+	filename := fmt.Sprintf(barneshut.CountryBodiesNamePattern, country.Name, country.NbBodies, step)
 	Info.Printf("LoadConfig (orig = true/final = false) %t file %s for country %s at step %d", isOriginal, filename, country.Name, step)
 
 	// check if file is missing.

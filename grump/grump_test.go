@@ -277,7 +277,7 @@ func BenchmarkReadGrumpNationalities(b * testing.B ) {
 	}
 
 	// capture config
-	var r barnes_hut.Run
+	var r barneshut.Run
 	r.Init( & bodies)
 	r.SetCountry("fra")
 	r.CaptureConfig()

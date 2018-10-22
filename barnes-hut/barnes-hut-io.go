@@ -1,4 +1,4 @@
-package barnes_hut
+package barneshut
 
 import (
 	"bytes"

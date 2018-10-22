@@ -223,7 +223,7 @@ func main() {
 	fmt.Println("cumulative pop ", cumulativePopTotal)
 	fmt.Println("nb of bodies ", bodiesNb)
 
-	var run barnes_hut.Run
+	var run barneshut.Run
 	run.Init(&bodies)
 	run.OutputDir = "."
 	run.SetCountry(country.Name)

@@ -1,4 +1,4 @@
-package barnes_hut
+package barneshut
 
 import (
 	"fmt"
@@ -33,13 +33,13 @@ func (r *Run) ComputeMaxRepulsiveForce() {
 // compute the density per village and return the density per village
 func (r *Run) ComputeDensityTencilePerTerritoryString() [10]string {
 	var densityString [10]string
-	density := r.ComputeDensityTencilePerVillage()
+	density := r.ComputeDensityTencilePerTerritory()
 	for tencile, _ := range density {
 		densityString[tencile] = fmt.Sprintf("%3.2f", density[tencile])
 	}
 	return densityString
 }
-func (r *Run) ComputeDensityTencilePerVillage() [10]float64 {
+func (r *Run) ComputeDensityTencilePerTerritory() [10]float64 {
 
 	// parse all bodies
 	// prepare the village
