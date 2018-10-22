@@ -92,7 +92,7 @@ func AllSourcPointsCoordinates(w http.ResponseWriter, req *http.Request) {
 
 	coord := make(GeoJSONBorderCoordinates, 1)
 	coord[0] = make([][]float64, len(points))
-	for idx, _ := range points {
+	for idx := range points {
 		coord[0][idx] = make([]float64, 2)
 		coord[0][idx][0] = points[idx].Y // Y is longitude
 		coord[0][idx][1] = points[idx].X // X is latitude
@@ -193,12 +193,12 @@ func PQtoGeoJSONBorderCoordinates(lower, upper []pq.Point2q) GeoJSONBorderCoordi
 
 	coord := make(GeoJSONBorderCoordinates, 1)
 	coord[0] = make([][]float64, len(lower)+len(upper))
-	for idx, _ := range lower {
+	for idx := range lower {
 		coord[0][idx] = make([]float64, 2)
 		coord[0][idx][0] = lower[idx].Y().Float64() // Y is longitude
 		coord[0][idx][1] = lower[idx].X().Float64() // X is latitude
 	}
-	for idx, _ := range upper {
+	for idx := range upper {
 		coord[0][len(lower)+idx] = make([]float64, 2)
 		coord[0][len(lower)+idx][0] = upper[idx].Y().Float64() // Y is longitude
 		coord[0][len(lower)+idx][1] = upper[idx].X().Float64() // X is latitude

@@ -449,7 +449,7 @@ func (r *Run) OneStepOptional(updatePosition bool) {
 	// compute total energy
 	totalEnergy := 0.0
 	// parse all bodies
-	for idx, _ := range *r.bodies {
+	for idx := range *r.bodies {
 		e := &((*r.bodiesEnergy)[idx])
 		totalEnergy += *e
 	}
@@ -571,7 +571,7 @@ func (r *Run) ComputeRepulsiveForceSubSet(startIndex, endIndex int) float64 {
 
 	// parse all bodies
 	bodiesSubSet := (*r.bodies)[startIndex:endIndex]
-	for idx, _ := range bodiesSubSet {
+	for idx := range bodiesSubSet {
 
 		// index in the original slice
 		origIndex := idx + startIndex
@@ -607,7 +607,7 @@ func (r *Run) computeAccelerationOnBody(origIndex int) float64 {
 
 	// parse all other bodies for repulsions
 	// accumulate repulsion on acceleration
-	for idx2, _ := range *r.bodies {
+	for idx2 := range *r.bodies {
 
 		if idx2 != origIndex {
 			body2 := (*r.bodies)[idx2]
@@ -782,7 +782,7 @@ func (r *Run) UpdateVelocity() {
 
 	var nbVelCapping int64
 	// parse all bodies
-	for idx, _ := range *r.bodies {
+	for idx := range *r.bodies {
 
 		// put some drag on initial speed
 		vel := r.getVel(idx)
@@ -818,7 +818,7 @@ func (r *Run) UpdatePosition() {
 	r.borderHasBeenMet = false
 
 	// parse all bodies
-	for idx, _ := range *r.bodies {
+	for idx := range *r.bodies {
 
 		body := &((*r.bodies)[idx])
 

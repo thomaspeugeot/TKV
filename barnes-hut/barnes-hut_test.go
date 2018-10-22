@@ -125,7 +125,7 @@ func TestComputeRepulsiveForcesConcurrent(t *testing.T) {
 	r2.ComputeRepulsiveForceConcurrent(13)
 
 	same := true
-	for idx, _ := range *r.bodies {
+	for idx := range *r.bodies {
 		if (*r.bodies)[idx].X != (*r2.bodies)[idx].X {
 			same = false
 		}

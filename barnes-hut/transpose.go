@@ -13,7 +13,7 @@ func printMatrix(m matrix) {
 
 func transpose(m matrix) matrix {
 	r := make(matrix, len(m[0]))
-	for x, _ := range r {
+	for x := range r {
 		r[x] = make(row, len(m))
 	}
 	for y, s := range m {
@@ -26,7 +26,7 @@ func transpose(m matrix) matrix {
 
 func transposeFloat64(m [][]float64) [][]float64 {
 	r := make([][]float64, len(m[0]))
-	for x, _ := range r {
+	for x := range r {
 		r[x] = make(row, len(m))
 	}
 	for y, s := range m {

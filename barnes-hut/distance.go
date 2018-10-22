@@ -54,7 +54,7 @@ func getModuloDistanceLocal(alpha, beta, left, rigth float64) (dist float64) {
 // function used to spread bodies randomly on
 // the unit square
 func SpreadOnCircle(bodies *[]quadtree.Body) {
-	for idx, _ := range *bodies {
+	for idx := range *bodies {
 
 		body := &((*bodies)[idx])
 

@@ -37,7 +37,7 @@ func NewRepulsionField(XMin, YMin, XMax, YMax float64, GridFieldTicks int, q *qu
 	f.cutoff = cutoff
 
 	f.values = make([][]float64, GridFieldTicks)
-	for i, _ := range f.values {
+	for i := range f.values {
 		f.values[i] = make([]float64, GridFieldTicks)
 	}
 	return &f
@@ -74,7 +74,7 @@ func (f *RepulsionField) ComputeField() {
 
 	// done := make( chan float64)
 	for i, vs := range f.values {
-		for j, _ := range vs {
+		for j := range vs {
 
 			x, y := f.XY(i, j)
 			var rootCoord quadtree.Coord

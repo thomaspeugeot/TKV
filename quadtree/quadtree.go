@@ -167,7 +167,7 @@ func (q *Quadtree) updateNodesList() {
 
 	Trace.Println("updateNodesList")
 
-	for idx, _ := range *q.bodies {
+	for idx := range *q.bodies {
 
 		b := &((*q.bodies)[idx])
 

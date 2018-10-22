@@ -16,7 +16,7 @@ func (r *Run) ComputeMaxRepulsiveForce() {
 	r.maxRepulsiveForce.Norm = 0.0
 
 	// parse bodies
-	for idx, _ := range *r.bodies {
+	for idx := range *r.bodies {
 		acc := &((*r.bodiesAccel)[idx])
 		norm := math.Sqrt(acc.X*acc.X + acc.Y*acc.Y)
 		if norm > r.maxRepulsiveForce.Norm {
@@ -34,7 +34,7 @@ func (r *Run) ComputeMaxRepulsiveForce() {
 func (r *Run) ComputeDensityTencilePerTerritoryString() [10]string {
 	var densityString [10]string
 	density := r.ComputeDensityTencilePerTerritory()
-	for tencile, _ := range density {
+	for tencile := range density {
 		densityString[tencile] = fmt.Sprintf("%3.2f", density[tencile])
 	}
 	return densityString
@@ -44,7 +44,7 @@ func (r *Run) ComputeDensityTencilePerTerritory() [10]float64 {
 	// parse all bodies
 	// prepare the village
 	villages := make([][]int, nbVillagePerAxe)
-	for x, _ := range villages {
+	for x := range villages {
 		villages[x] = make([]int, nbVillagePerAxe)
 	}
 
@@ -60,15 +60,15 @@ func (r *Run) ComputeDensityTencilePerTerritory() [10]float64 {
 	// var bodyCount []int
 	nbVillages := nbVillagePerAxe * nbVillagePerAxe
 	bodyCountPerVillage := make([]int, nbVillages)
-	for x, _ := range villages {
-		for y, _ := range villages[x] {
+	for x := range villages {
+		for y := range villages[x] {
 			bodyCountPerVillage[y+x*nbVillagePerAxe] = villages[x][y]
 		}
 	}
 	sort.Ints(bodyCountPerVillage)
 
 	var density [10]float64
-	for tencile, _ := range density {
+	for tencile := range density {
 		lowIndex := int(math.Floor(float64(nbVillages) * float64(tencile) / 10.0))
 		highIndex := int(math.Floor(float64(nbVillages) * float64(tencile+1) / 10.0))
 		// log.Output( 1, fmt.Sprintf( "tencile %d ", tencile))

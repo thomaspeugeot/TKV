@@ -135,7 +135,7 @@ func (r *Run) RenderGif(out io.Writer, encode64 bool) {
 	}
 
 	Trace.Printf("RenderGif with x min %f x max %f", r.xMin, r.xMax)
-	for idx, _ := range *r.bodies {
+	for idx := range *r.bodies {
 
 		body := (*r.bodies)[idx]
 		bodyOrig := (*r.bodiesOrig)[idx]
@@ -245,7 +245,7 @@ func (r *Run) RenderSVG(out io.Writer) {
 	s.Start(size, size)
 	s.Circle(250, 250, 125, "fill:none;stroke:black")
 
-	for idx, _ := range *r.bodies {
+	for idx := range *r.bodies {
 
 		body := (*r.bodies)[idx]
 		bodyOrig := (*r.bodiesOrig)[idx]

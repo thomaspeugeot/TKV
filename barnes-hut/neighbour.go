@@ -21,14 +21,14 @@ type NeighbourDico [][]Neighbour
 func (r *Run) InitNeighbourDico(bodies *([]quadtree.Body)) {
 	neighbours := make(NeighbourDico, len(*bodies))
 	r.bodiesNeighbours = &neighbours
-	for idx, _ := range *r.bodiesNeighbours {
+	for idx := range *r.bodiesNeighbours {
 		(*r.bodiesNeighbours)[idx] = make([]Neighbour, NbOfNeighboursPerBody)
 	}
 	r.bodiesNeighbours.Reset()
 
 	neighboursOrig := make(NeighbourDico, len(*bodies))
 	r.bodiesNeighboursOrig = &neighboursOrig
-	for idx, _ := range *r.bodiesNeighboursOrig {
+	for idx := range *r.bodiesNeighboursOrig {
 		(*r.bodiesNeighboursOrig)[idx] = make([]Neighbour, NbOfNeighboursPerBody)
 	}
 	r.bodiesNeighboursOrig.Reset()
@@ -37,8 +37,8 @@ func (r *Run) InitNeighbourDico(bodies *([]quadtree.Body)) {
 // reset neighbour dico
 func (dico *NeighbourDico) Reset() {
 
-	for idx, _ := range *dico {
-		for n, _ := range (*dico)[idx] {
+	for idx := range *dico {
+		for n := range (*dico)[idx] {
 			(*dico)[idx][n].n = nil
 			(*dico)[idx][n].Distance = 2.0
 		}
@@ -48,8 +48,8 @@ func (dico *NeighbourDico) Reset() {
 // reset neighbour dico
 func (dicoTarget *NeighbourDico) Copy(dicoSource *NeighbourDico) {
 
-	for idx, _ := range *dicoSource {
-		for n, _ := range (*dicoSource)[idx] {
+	for idx := range *dicoSource {
+		for n := range (*dicoSource)[idx] {
 			(*dicoTarget)[idx][n].n = (*dicoSource)[idx][n].n
 			(*dicoTarget)[idx][n].Distance = (*dicoSource)[idx][n].Distance
 		}
@@ -99,8 +99,8 @@ func (dico *NeighbourDico) Insert(index int, body *quadtree.Body, distance float
 // not twice the same neighbor
 func (dico *NeighbourDico) Check() {
 
-	for idx, _ := range *dico {
-		for n, _ := range (*dico)[idx] {
+	for idx := range *dico {
+		for n := range (*dico)[idx] {
 
 			body := (*dico)[idx][n].n
 			if body == nil {
@@ -108,7 +108,7 @@ func (dico *NeighbourDico) Check() {
 			}
 
 			// check to see if neighbor is present twice
-			for nOrig, _ := range (*dico)[idx] {
+			for nOrig := range (*dico)[idx] {
 				if (*dico)[idx][nOrig].n == body && nOrig != n {
 
 					Info.Printf("neighbour found twice at index %d rank %d and rank %d", idx, n, nOrig)
@@ -122,8 +122,8 @@ func (dico *NeighbourDico) Check() {
 func (dico *NeighbourDico) ComputeRatioOfNilNeighbours() float64 {
 
 	nbOfNil := 0
-	for idx, _ := range *dico {
-		for n, _ := range (*dico)[idx] {
+	for idx := range *dico {
+		for n := range (*dico)[idx] {
 
 			if (*dico)[idx][n].n == nil {
 				nbOfNil++
@@ -140,8 +140,8 @@ func (dico *NeighbourDico) ComputeStirring(dicoOrig *NeighbourDico) float64 {
 
 	numberOfNeighbors := 0 // number of neighbours in orig that are not nil
 	numberOfKeptNeighbors := 0
-	for idx, _ := range *dico {
-		for nOrig, _ := range (*dicoOrig)[idx] {
+	for idx := range *dico {
+		for nOrig := range (*dicoOrig)[idx] {
 
 			bodyOrig := (*dicoOrig)[idx][nOrig].n
 
@@ -149,7 +149,7 @@ func (dico *NeighbourDico) ComputeStirring(dicoOrig *NeighbourDico) float64 {
 				numberOfNeighbors++
 
 				// parse dico to check if the orig neighbour's body is present
-				for n, _ := range (*dico)[idx] {
+				for n := range (*dico)[idx] {
 					found := 0
 					if (*dico)[idx][n].n == bodyOrig {
 						numberOfKeptNeighbors++

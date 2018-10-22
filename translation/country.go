@@ -66,12 +66,12 @@ func (country *Country) Init() {
 
 	// init village array
 	country.villages = make([][]Village, nbVillagePerAxe)
-	for x, _ := range country.villages {
+	for x := range country.villages {
 		country.villages[x] = make([]Village, nbVillagePerAxe)
 	}
 
 	country.VilCoordinates = make([][]int, country.NbBodies)
-	for idx, _ := range country.VilCoordinates {
+	for idx := range country.VilCoordinates {
 		country.VilCoordinates[idx] = make([]int, 2)
 	}
 
