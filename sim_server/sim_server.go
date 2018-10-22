@@ -4,37 +4,37 @@ Contains the main package for the simulation server. Also contains all handlers 
 package main
 
 import (
+	"encoding/json"
+	"flag"
+	"fmt"
 	"github.com/thomaspeugeot/tkv/barnes-hut"
 	"github.com/thomaspeugeot/tkv/server"
 	"github.com/thomaspeugeot/tkv/translation"
-	"fmt"
 	"log"
+	"math"
 	"net/http"
 	"os"
-	"flag"
-	"math"
-	"encoding/json"
 )
 
 //!+main
-var r * barnes_hut.Run
+var r *barnes_hut.Run
 
 //
-// to start with haiti 
+// to start with haiti
 // go run sim_server.go -sourceCountry=hti -sourceCountryNbBodies=82990
-// 
+//
 func main() {
 
 	// flags  for source country
-	sourceCountryPtr := flag.String("sourceCountry","fra","iso 3166 sourceCountry code")
-	sourceCountryNbBodiesPtr := flag.String("sourceCountryNbBodies","34413","nb of bodies")
-	sourceCountryStepPtr := flag.String("sourceCountryStep","0","simulation step for the spread bodies for source country")
-	
-	cutoffPtr := flag.String("cutoff","2","cutoff code distance")
+	sourceCountryPtr := flag.String("sourceCountry", "fra", "iso 3166 sourceCountry code")
+	sourceCountryNbBodiesPtr := flag.String("sourceCountryNbBodies", "34413", "nb of bodies")
+	sourceCountryStepPtr := flag.String("sourceCountryStep", "0", "simulation step for the spread bodies for source country")
 
-	maxStepPtr := flag.String("maxStep","10000","at what step do the simulation stop")
+	cutoffPtr := flag.String("cutoff", "2", "cutoff code distance")
 
-	portPtr := flag.String("port","8000","listening port")
+	maxStepPtr := flag.String("maxStep", "10000", "at what step do the simulation stop")
+
+	portPtr := flag.String("port", "8000", "listening port")
 
 	flag.Parse()
 
@@ -42,56 +42,56 @@ func main() {
 	var sourceCountry translation.Country
 	sourceCountry.Name = *sourceCountryPtr
 	{
-		_, errScan := fmt.Sscanf(*sourceCountryNbBodiesPtr, "%d", & sourceCountry.NbBodies)
-		if( errScan != nil) {
+		_, errScan := fmt.Sscanf(*sourceCountryNbBodiesPtr, "%d", &sourceCountry.NbBodies)
+		if errScan != nil {
 			log.Fatal(errScan)
-			return			
+			return
 		}
 	}
 	{
-		_, errScan := fmt.Sscanf(*sourceCountryStepPtr, "%d", & sourceCountry.Step)
-		if( errScan != nil) {
+		_, errScan := fmt.Sscanf(*sourceCountryStepPtr, "%d", &sourceCountry.Step)
+		if errScan != nil {
 			log.Fatal(errScan)
-			return			
+			return
 		}
 	}
 	{
-		_, errScan := fmt.Sscanf(*cutoffPtr, "%f", & barnes_hut.CutoffDistance)
-		if( errScan != nil) {
+		_, errScan := fmt.Sscanf(*cutoffPtr, "%f", &barnes_hut.CutoffDistance)
+		if errScan != nil {
 			log.Fatal(errScan)
-			return			
+			return
 		}
 	}
 	server.Info.Printf("CutoffDistance %f", barnes_hut.CutoffDistance)
 	{
-		_, errScan := fmt.Sscanf(*maxStepPtr, "%d", & barnes_hut.MaxStep)
-		if( errScan != nil) {
+		_, errScan := fmt.Sscanf(*maxStepPtr, "%d", &barnes_hut.MaxStep)
+		if errScan != nil {
 			log.Fatal(errScan)
-			return			
+			return
 		}
 	}
 	server.Info.Printf("Max step %d", barnes_hut.MaxStep)
-	var port int =8000
+	var port int = 8000
 	{
-		_, errScan := fmt.Sscanf(*portPtr, "%d", & port)
-		if( errScan != nil) {
+		_, errScan := fmt.Sscanf(*portPtr, "%d", &port)
+		if errScan != nil {
 			log.Fatal(errScan)
-			return			
+			return
 		}
 	}
 	server.Info.Printf("will listen on port %d", port)
 	r = barnes_hut.NewRun()
 
 	// load configuration files.
-	filename := fmt.Sprintf( barnes_hut.CountryBodiesNamePattern, sourceCountry.Name, sourceCountry.NbBodies, sourceCountry.Step)
+	filename := fmt.Sprintf(barnes_hut.CountryBodiesNamePattern, sourceCountry.Name, sourceCountry.NbBodies, sourceCountry.Step)
 	server.Info.Printf("filename for init %s", filename)
-	r.LoadConfig( filename)	
+	r.LoadConfig(filename)
 
-	r.SetState( barnes_hut.RUNNING)
+	r.SetState(barnes_hut.RUNNING)
 
-	output, _ := os.Create( r.OutputDir + "/" + "essai200Kbody_6Ksteps.gif")
-	go r.OutputGif( output, barnes_hut.MaxStep)
-	
+	output, _ := os.Create(r.OutputDir + "/" + "essai200Kbody_6Ksteps.gif")
+	go r.OutputGif(output, barnes_hut.MaxStep)
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("/status", status)
 
@@ -121,39 +121,40 @@ func main() {
 	mux.HandleFunc("/toggleRenderChoice", toggleRenderChoice)
 	mux.HandleFunc("/toggleFieldRendering", toggleFieldRendering)
 
-	mux.Handle("/", http.FileServer(http.Dir("../tkv-client/")) )
+	mux.Handle("/", http.FileServer(http.Dir("../tkv-client/")))
 	adressToListen := fmt.Sprintf("localhost:%d", port)
 	server.Info.Printf("adressToListen %s", adressToListen)
-	log.Fatal(http.ListenAndServe( adressToListen, mux))
+	log.Fatal(http.ListenAndServe(adressToListen, mux))
 }
+
 //!-main
 
 func status(w http.ResponseWriter, req *http.Request) {
-	
-	fmt.Fprintf(w, "%s Dt Adjust %s\n%s", 
-				r.State(), 
-				barnes_hut.DtAdjustMode,
-				r.Status())
+
+	fmt.Fprintf(w, "%s Dt Adjust %s\n%s",
+		r.State(),
+		barnes_hut.DtAdjustMode,
+		r.Status())
 }
 
 func play(w http.ResponseWriter, req *http.Request) {
-		
-	r.SetState( barnes_hut.RUNNING)
+
+	r.SetState(barnes_hut.RUNNING)
 	fmt.Fprintf(w, "Run status %s\n", r.State())
 }
 
-func toggleRenderChoice(w http.ResponseWriter, req *http.Request) { r.ToggleRenderChoice() }
+func toggleRenderChoice(w http.ResponseWriter, req *http.Request)   { r.ToggleRenderChoice() }
 func toggleFieldRendering(w http.ResponseWriter, req *http.Request) { r.ToggleFieldRendering() }
-func toggleManualAuto(w http.ResponseWriter, req *http.Request) { r.ToggleManualAuto() }
+func toggleManualAuto(w http.ResponseWriter, req *http.Request)     { r.ToggleManualAuto() }
 
 func pause(w http.ResponseWriter, req *http.Request) {
-	
-	r.SetState( barnes_hut.STOPPED)
+
+	r.SetState(barnes_hut.STOPPED)
 	fmt.Fprintf(w, "Run status %s\n", r.State())
 }
 
 func oneStep(w http.ResponseWriter, req *http.Request) {
-	if (r.State() == barnes_hut.STOPPED) {
+	if r.State() == barnes_hut.STOPPED {
 		r.OneStep()
 	}
 	fmt.Fprintf(w, "Run status %s\n", r.State())
@@ -163,21 +164,20 @@ func captureConfig(w http.ResponseWriter, req *http.Request) {
 	r.CaptureConfig()
 }
 
-func render(w http.ResponseWriter, req *http.Request) { r.RenderGif( w, true) }
-func renderSVG(w http.ResponseWriter, req *http.Request) { r.RenderSVG( w) }
+func render(w http.ResponseWriter, req *http.Request)    { r.RenderGif(w, true) }
+func renderSVG(w http.ResponseWriter, req *http.Request) { r.RenderSVG(w) }
 
 func stats(w http.ResponseWriter, req *http.Request) {
-	
-	stats, _ := json.MarshalIndent( r.BodyCountGini(), "", "	")
+
+	stats, _ := json.MarshalIndent(r.BodyCountGini(), "", "	")
 	// stats, _ := json.MarshalIndent( r.GiniOverTimeTransposed(), "", "	")
 	// fmt.Println( string( stats))
 	fmt.Fprintf(w, "%s", stats)
 }
 
 func getDensityTenciles(w http.ResponseWriter, req *http.Request) {
-	
-	
-	tenciles, _ := json.MarshalIndent( r.ComputeDensityTencilePerVillageString(), "", "	")
+
+	tenciles, _ := json.MarshalIndent(r.ComputeDensityTencilePerTerritoryString(), "", "	")
 	fmt.Fprintf(w, "%s", tenciles)
 }
 
@@ -186,20 +186,20 @@ type test_struct struct {
 }
 
 func area(w http.ResponseWriter, req *http.Request) {
-	decoder := json.NewDecoder( req.Body)
+	decoder := json.NewDecoder(req.Body)
 	var t test_struct
-	err := decoder.Decode( &t)
+	err := decoder.Decode(&t)
 	if err != nil {
 		log.Println("error decoding ", err)
 	}
-	r.SetRenderingWindow( t.X1, t.X2, t.Y1, t.Y2)
+	r.SetRenderingWindow(t.X1, t.X2, t.Y1, t.Y2)
 }
 
 func dt(w http.ResponseWriter, req *http.Request) {
-	
-	decoder := json.NewDecoder( req.Body)
+
+	decoder := json.NewDecoder(req.Body)
 	var dtRequest float64
-	err := decoder.Decode( &dtRequest)
+	err := decoder.Decode(&dtRequest)
 	if err != nil {
 		log.Println("error decoding ", err)
 	} else {
@@ -207,12 +207,11 @@ func dt(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-
 func theta(w http.ResponseWriter, req *http.Request) {
 
-	decoder := json.NewDecoder( req.Body)
+	decoder := json.NewDecoder(req.Body)
 	var thetaRequest float64
-	err := decoder.Decode( &thetaRequest)
+	err := decoder.Decode(&thetaRequest)
 	if err != nil {
 		log.Println("error decoding ", err)
 	} else {
@@ -221,90 +220,89 @@ func theta(w http.ResponseWriter, req *http.Request) {
 }
 
 func nbVillagesPerAxe(w http.ResponseWriter, req *http.Request) {
-	
-	decoder := json.NewDecoder( req.Body)
+
+	decoder := json.NewDecoder(req.Body)
 	var nbVillagesPerAxe int
-	err := decoder.Decode( &nbVillagesPerAxe)
+	err := decoder.Decode(&nbVillagesPerAxe)
 	if err != nil {
 		log.Println("error decoding ", err)
 	} else {
-		barnes_hut.SetNbVillagePerAxe( nbVillagesPerAxe)
+		barnes_hut.SetNbVillagePerAxe(nbVillagesPerAxe)
 	}
 }
 
 func nbRoutines(w http.ResponseWriter, req *http.Request) {
-	
-	decoder := json.NewDecoder( req.Body)
+
+	decoder := json.NewDecoder(req.Body)
 	var nbRoutines int
-	err := decoder.Decode( &nbRoutines)
+	err := decoder.Decode(&nbRoutines)
 	if err != nil {
 		log.Println("error decoding ", err)
 	} else {
-		barnes_hut.SetNbRoutines( nbRoutines)
+		barnes_hut.SetNbRoutines(nbRoutines)
 	}
 }
 
 func fieldGridNb(w http.ResponseWriter, req *http.Request) {
-	
-	decoder := json.NewDecoder( req.Body)
+
+	decoder := json.NewDecoder(req.Body)
 	var gridNb float64
-	err := decoder.Decode( &gridNb)
+	err := decoder.Decode(&gridNb)
 	if err != nil {
 		log.Println("error decoding ", err)
 	} else {
-		r.SetGridFieldNb( int( math.Floor( gridNb)) )
+		r.SetGridFieldNb(int(math.Floor(gridNb)))
 	}
 }
 
 func updateRatioBorderBodies(w http.ResponseWriter, req *http.Request) {
 
-	decoder := json.NewDecoder( req.Body)
+	decoder := json.NewDecoder(req.Body)
 	var ratioBorderBodies float64
-	err := decoder.Decode( &ratioBorderBodies)
+	err := decoder.Decode(&ratioBorderBodies)
 	if err != nil {
 		log.Println("error decoding ", err)
 	} else {
-		barnes_hut.SetRatioBorderBodies( ratioBorderBodies)
+		barnes_hut.SetRatioBorderBodies(ratioBorderBodies)
 	}
 }
 
 // list the content of the available config files
 func dirConfig(w http.ResponseWriter, req *http.Request) {
-	
-	dircontent, _ := json.MarshalIndent( r.DirConfig(), "", "	")
+
+	dircontent, _ := json.MarshalIndent(r.DirConfig(), "", "	")
 	fmt.Fprintf(w, "%s", dircontent)
 }
 
 // send coordinates of minimal distance
 func minDistanceCoord(w http.ResponseWriter, req *http.Request) {
-	
-	minDistanceCoordResp, _ := json.MarshalIndent( r.GetMaxRepulsiveForce(), "", "	")
+
+	minDistanceCoordResp, _ := json.MarshalIndent(r.GetMaxRepulsiveForce(), "", "	")
 	fmt.Fprintf(w, "%s", minDistanceCoordResp)
 }
 
 // load config files
 func loadConfig(w http.ResponseWriter, req *http.Request) {
-	
+
 	// get the file
 	fileSlice := req.URL.Query()["file"]
 
 	server.Info.Println(fileSlice[0])
 	// get the file name
 
-	loadResult := r.LoadConfig( fileSlice[0])
-	server.Info.Println( "load result ", loadResult )
+	loadResult := r.LoadConfig(fileSlice[0])
+	server.Info.Println("load result ", loadResult)
 }
 
 // list config files in orig
 func loadConfigOrig(w http.ResponseWriter, req *http.Request) {
-	
+
 	// get the file
 	fileSlice := req.URL.Query()["file"]
 
 	server.Info.Println(fileSlice[0])
 	// get the file name
 
-	loadResult := r.LoadConfigOrig( fileSlice[0])
-	server.Info.Println( "load result ", loadResult )
+	loadResult := r.LoadConfigOrig(fileSlice[0])
+	server.Info.Println("load result ", loadResult)
 }
-
