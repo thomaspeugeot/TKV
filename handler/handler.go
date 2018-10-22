@@ -1,5 +1,5 @@
 /*
-The handler package contains all the function that are handled by the runtime server
+Package handler contains all the function that are handled by the runtime server
 */
 package handler
 

@@ -7,13 +7,14 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/thomaspeugeot/tkv/barnes-hut"
-	"github.com/thomaspeugeot/tkv/server"
-	"github.com/thomaspeugeot/tkv/translation"
 	"log"
 	"math"
 	"net/http"
 	"os"
+
+	"github.com/thomaspeugeot/tkv/barnes-hut"
+	"github.com/thomaspeugeot/tkv/server"
+	"github.com/thomaspeugeot/tkv/translation"
 )
 
 //!+main
@@ -71,7 +72,7 @@ func main() {
 		}
 	}
 	server.Info.Printf("Max step %d", barneshut.MaxStep)
-	var port int = 8000
+	var port := 8000
 	{
 		_, errScan := fmt.Sscanf(*portPtr, "%d", &port)
 		if errScan != nil {
@@ -181,13 +182,13 @@ func getDensityTenciles(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(w, "%s", tenciles)
 }
 
-type test_struct struct {
+type testStruct struct {
 	X1, X2, Y1, Y2 float64
 }
 
 func area(w http.ResponseWriter, req *http.Request) {
 	decoder := json.NewDecoder(req.Body)
-	var t test_struct
+	var t testStruct
 	err := decoder.Decode(&t)
 	if err != nil {
 		log.Println("error decoding ", err)

@@ -1,5 +1,5 @@
 /*
-Compact implementation of a static 2D quadtree.
+Package quadtree is a compact implementation of a static 2D quadtree.
 
 This implementation supports a Barnes Hut algorithm with more that one million bodies.
 It is a compact (and fun!) implementation because node coordinates are encoded into a 4 bytes stucture
