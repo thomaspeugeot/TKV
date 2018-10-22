@@ -5249,7 +5249,7 @@ var $AnimateProvider = ['$provide', function($provide) {
    * an animation. Upon bootstrap the classNameFilter value is not set at all and will
    * therefore enable $animate to attempt to perform an animation on any element that is triggered.
    * When setting the `classNameFilter` value, animations will only be performed on elements
-   * that successfully match the filter expression. This in turn can boost performance
+   * that successfuly match the filter expression. This in turn can boost performance
    * for low-powered devices as well as applications containing a lot of structural operations.
    * @param {RegExp=} expression The className expression which will be checked against all animations
    * @return {RegExp} The current CSS className expression value. If null then there is no expression value
@@ -6254,7 +6254,7 @@ function Browser(window, document, $log, $sniffer) {
    * Cancels a deferred task identified with `deferId`.
    *
    * @param {*} deferId Token returned by the `$browser.defer` function.
-   * @returns {boolean} Returns `true` if the task hasn't executed yet and was successfully
+   * @returns {boolean} Returns `true` if the task hasn't executed yet and was successfuly
    *                    canceled.
    */
   self.defer.cancel = function(deferId) {
@@ -12660,7 +12660,7 @@ function $IntervalProvider() {
       * Cancels a task associated with the `promise`.
       *
       * @param {Promise=} promise returned by the `$interval` function.
-      * @returns {boolean} Returns `true` if the task was successfully canceled.
+      * @returns {boolean} Returns `true` if the task was successfuly canceled.
       */
     interval.cancel = function(promise) {
       if (promise && promise.$$intervalId in intervals) {
@@ -18675,7 +18675,7 @@ function $SceDelegateProvider() {
  * The browser's
  * [Same Origin Policy](https://code.google.com/p/browsersec/wiki/Part2#Same-origin_policy_for_XMLHttpRequest)
  * and [Cross-Origin Resource Sharing (CORS)](http://www.w3.org/TR/cors/)
- * policy apply in addition to this and may further restrict whether the template is successfully
+ * policy apply in addition to this and may further restrict whether the template is successfuly
  * loaded.  This means that without the right CORS policy, loading templates from a different domain
  * won't work on all browsers.  Also, loading templates from `file://` URL does not work on some
  * browsers.
@@ -19637,7 +19637,7 @@ function $TimeoutProvider() {
       * resolved with a rejection.
       *
       * @param {Promise=} promise Promise returned by the `$timeout` function.
-      * @returns {boolean} Returns `true` if the task hasn't executed yet and was successfully
+      * @returns {boolean} Returns `true` if the task hasn't executed yet and was successfuly
       *   canceled.
       */
     timeout.cancel = function(promise) {
@@ -26449,7 +26449,7 @@ var ngIfDirective = ['$animate', '$compile', function($animate, $compile) {
  * In addition, the browser's
  * [Same Origin Policy](https://code.google.com/p/browsersec/wiki/Part2#Same-origin_policy_for_XMLHttpRequest)
  * and [Cross-Origin Resource Sharing (CORS)](http://www.w3.org/TR/cors/)
- * policy may further restrict whether the template is successfully loaded.
+ * policy may further restrict whether the template is successfuly loaded.
  * For example, `ngInclude` won't work for cross-domain requests on all browsers and for `file://`
  * access on some browsers.
  *
@@ -28493,7 +28493,7 @@ var ngOptionsMinErr = minErr('ngOptions');
  * $scope.selected = $scope.items[0].subItem;
  * ```
  *
- * In both examples, the **`track by`** expression is applied successfully to each `item` in the
+ * In both examples, the **`track by`** expression is applied successfuly to each `item` in the
  * `items` array. Because the selected option has been set programmatically in the controller, the
  * **`track by`** expression is also applied to the `ngModel` value. In the first example, the
  * `ngModel` value is `items[0]` and the **`track by`** expression evaluates to `items[0].id` with

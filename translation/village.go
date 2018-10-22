@@ -6,7 +6,7 @@ import (
 
 type Village struct {
 	quadtree.Body     // barycenter of the villages
-	NbBodies      int // nb of bodies in the village (maybe not usefull)
+	NbBodies      int // nb of bodies in the village (maybe not useful)
 }
 
 func (v *Village) reset() {

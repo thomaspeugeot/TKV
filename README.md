@@ -64,7 +64,7 @@ cd go/src/github.com/thomaspeugeot/tkv/runtime_server
 go run runtime_server.go -sourceCountry fra -sourceCountryNbBodiesPtr 697529 -sourceCountryStep 4723 -targetCountry hti -targetCountryNbBodiesPtr 927787 -targetCountryStep 8564
 ```
 
-a vscode configuration is availble to run and debug the server.
+a vscode configuration is available to run and debug the server.
 
 **Running the web client**
 

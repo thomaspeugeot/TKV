@@ -22,7 +22,7 @@ const (
 
 // serialize bodies's state vector into a file
 // convention is "step-xxxx.bod"
-// return true if operation was successfull
+// return true if operation was successful
 // works only if state is STOPPED
 func (r *Run) CaptureConfig() bool {
 	if r.state == STOPPED {

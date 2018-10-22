@@ -3,9 +3,6 @@ package grump
 import (
 	"bufio"
 	"fmt"
-	"github.com/thomaspeugeot/tkv/barnes-hut"
-	"github.com/thomaspeugeot/tkv/country"
-	"github.com/thomaspeugeot/tkv/quadtree"
 	"image"
 	"image/color"
 	"image/gif"
@@ -13,6 +10,10 @@ import (
 	"math"
 	"os"
 	"testing"
+
+	"github.com/thomaspeugeot/tkv/barnes-hut"
+	"github.com/thomaspeugeot/tkv/country"
+	"github.com/thomaspeugeot/tkv/quadtree"
 )
 
 var palette = []color.Color{
@@ -160,10 +161,10 @@ func BenchmarkReadGrumpNationalities(b *testing.B) {
 		fmt.Println(fmt.Sprintf("densities item %d : %s", nbWordsDensities, scannerD.Text()))
 	}
 
-	// Count the words, teh countries.
+	// Count the words, the countries.
 	countries := make(map[int]int)
 
-	// Count the words, teh countries.
+	// Count the words, the countries.
 	countriesDensities := make(map[int]int)
 
 	topLat := 85.0
@@ -261,7 +262,7 @@ func BenchmarkReadGrumpNationalities(b *testing.B) {
 
 			// for france, fill up bodies count
 			if value == 67 {
-				// compute relative position in the 1*1 sqaure
+				// compute relative position in the 1*1 square
 				border := country.CountryBorders[value]
 				relX := (columnLong - border.WestLng) / (border.EastLng - border.WestLng)
 				relY := (lineLat - border.BottomLat) / (border.TopLat - border.BottomLat)

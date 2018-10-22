@@ -669,10 +669,10 @@ func (r *Run) computeAccelerationOnBodyBarnesHut(idx int) float64 {
 // compute the repulsive force and update the accelation at index idx
 // x and y and the mirror configuration (xM==yM==0 means no)
 //
-// return the minditance betwen the body and bodies in the quadtree node
+// return the minditance between the body and bodies in the quadtree node
 func (r *Run) computeAccelationWithNodeRecursive(idx int, coord quadtree.Coord, xM, yM int) float64 {
 
-	// can be usefull to debug  -->
+	// can be useful to debug  -->
 	// time.Sleep(300 * time.Millisecond)
 	// Info.Printf("computeAccelationWithNodeRecursive idx %d coord %#v", idx, coord)
 	minInterbodyDistance := 2.0

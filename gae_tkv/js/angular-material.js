@@ -18079,7 +18079,7 @@ VirtualRepeatController.prototype.link_ =
 /** @private Attempts to set itemSize by measuring a repeated element in the dom */
 VirtualRepeatController.prototype.readItemSize_ = function() {
   if (this.itemSize) {
-    // itemSize was successfully read in a different asynchronous call.
+    // itemSize was successfuly read in a different asynchronous call.
     return;
   }
 
@@ -22507,7 +22507,7 @@ function MenuProvider($$interimElementProvider) {
      * Attempts to focus an element. Checks whether that element is the currently
      * focused element after attempting.
      * @param {HTMLElement} el - the element to attempt focus on
-     * @returns {bool} - whether the element was successfully focused
+     * @returns {bool} - whether the element was successfuly focused
      */
     function attemptFocus(el) {
       if (el && el.getAttribute('tabindex') != -1) {

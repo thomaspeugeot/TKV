@@ -5,15 +5,15 @@ import (
 )
 
 // relative to a body of interest, the storage for a neighbour with its distance
-// nota : this is used to measure the stiring of the bodies along the simulation
+// nota : this is used to measure the stirring of the bodies along the simulation
 type Neighbour struct {
 	n        *quadtree.Body // rank in the []quadtree.Body
 	Distance float64
 }
 
-// the measure of stiring is computed with a finite number of neighbours
-// no stiring is that the neighbours at the end of the run are the same neighbours
-// that at the begining
+// the measure of stirring is computed with a finite number of neighbours
+// no stirring is that the neighbours at the end of the run are the same neighbours
+// that at the beginning
 var NbOfNeighboursPerBody int = 10
 
 type NeighbourDico [][]Neighbour

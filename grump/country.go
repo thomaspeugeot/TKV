@@ -12,7 +12,7 @@ import (
 	"os"
 )
 
-// GrumpSpacing is side length in degrees of the input data unit sqaure
+// GrumpSpacing is side length in degrees of the input data unit square
 const GrumpSpacing float64 = 0.0083333333333
 
 // Country stores country meta data
