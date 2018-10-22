@@ -72,7 +72,7 @@ func main() {
 		}
 	}
 	server.Info.Printf("Max step %d", barneshut.MaxStep)
-	var port := 8000
+	port := 8000
 	{
 		_, errScan := fmt.Sscanf(*portPtr, "%d", &port)
 		if errScan != nil {
