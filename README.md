@@ -1,6 +1,8 @@
 10 0000
 =======
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/thomaspeugeot/tkv)](https://goreportcard.com/report/github.com/thomaspeugeot/tkv)
+
 This code is the implementation of the "10 000" concept (see https://10ktblog.wordpress.com/a-propos/ for a description of the concept). 
 
 You can check the end product at https://tenktorg.appspot.com/. Zoom in the top area (france). Click, get your territory and check the twin territory in Haïti. 
