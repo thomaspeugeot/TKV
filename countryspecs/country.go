@@ -1,7 +1,7 @@
 /*
-Contains country codes and lat/long coordinates of enclosing square as well as total population (from GRUMP).
+Package countryspecs country codes and lat/long coordinates of enclosing square as well as total population (from GRUMP).
 */
-package country
+package countryspecs
 
 // store country code
 type CountryCodeGrump struct {

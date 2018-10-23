@@ -1,4 +1,4 @@
-// Package grump is the main package for the "extractor program" that parses a country file in the GRUMP format and generates a config file of bodies
+// Package grumpreader is the main package for the "extractor program" that parses a country file in the GRUMP format and generates a config file of bodies
 //
 // For each cell of the country specifc file, this program generate bodies per cells according to
 // the population count in the cell

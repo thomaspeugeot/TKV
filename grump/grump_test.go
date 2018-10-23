@@ -12,7 +12,7 @@ import (
 	"testing"
 
 	"github.com/thomaspeugeot/tkv/barnes-hut"
-	"github.com/thomaspeugeot/tkv/country"
+	"github.com/thomaspeugeot/tkv/countryspecs"
 	"github.com/thomaspeugeot/tkv/quadtree"
 )
 
@@ -105,10 +105,10 @@ func BenchmarkReadGrumpNationalities(b *testing.B) {
 
 	// parse countries and make a match between index and known country
 	for index := 0; index <= 230; index++ {
-		countryCodeGrump := country.CountryCodes[index]
+		countryCodeGrump := countryspecs.CountryCodes[index]
 		countryName[countryCodeGrump.CodeGrump] = countryCodeGrump.Name
 
-		countryBorder := country.CountryBorders[index]
+		countryBorder := countryspecs.CountryBorders[index]
 		countryFinalBoundaries[countryBorder.Index] = &countryBoundary{countryBorder.TopLat,
 			countryBorder.BottomLat,
 			countryBorder.EastLng,
@@ -263,7 +263,7 @@ func BenchmarkReadGrumpNationalities(b *testing.B) {
 			// for france, fill up bodies count
 			if value == 67 {
 				// compute relative position in the 1*1 square
-				border := country.CountryBorders[value]
+				border := countryspecs.CountryBorders[value]
 				relX := (columnLong - border.WestLng) / (border.EastLng - border.WestLng)
 				relY := (lineLat - border.BottomLat) / (border.TopLat - border.BottomLat)
 

@@ -8,12 +8,13 @@ import (
 )
 
 var (
-	Trace   *log.Logger
-	Info    *log.Logger
-	Warning *log.Logger
-	Error   *log.Logger
+	Trace   *log.Logger // debug Level
+	Info    *log.Logger // debug Level
+	Warning *log.Logger // debug Level
+	Error   *log.Logger // debug Level
 )
 
+// Function Init inits trace
 func Init(
 	traceHandle io.Writer,
 	infoHandle io.Writer,
@@ -39,6 +40,5 @@ func Init(
 }
 
 func init() {
-	Init(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
 	Init(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
 }
