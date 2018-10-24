@@ -1,5 +1,6 @@
 /*
-This directory contains the code for the runtime server that is deployed on the google application engine (gae) as well as the html / javascript / css files of the web site.
+Package main of gao_tkv contains code for the runtime server that is deployed
+on the google application engine (gae) as well as the html / javascript / css files of the web site.
 */
 package main
 

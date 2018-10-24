@@ -1,5 +1,5 @@
 /*
-This directory contains the main package for running the 10000 web server on a computer
+Package main contains code for running the 10000 web server as a standalone server (no need for the cloud)
 */
 package main
 

@@ -1,5 +1,5 @@
 /*
-Definition of the loggers for all tkv servers
+Package server containts definition of the loggers for all tkv servers
 */
 package server
 
