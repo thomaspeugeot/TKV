@@ -1,5 +1,5 @@
 /*
-Package handler contains all the function that are handled by the runtime server
+Package handler contains all the function that are handled by the 10000 runtime server
 */
 package handler
 
@@ -16,7 +16,7 @@ import (
 )
 
 // for decoding the rendering window
-type test_struct struct {
+type testStruct struct {
 	X1, X2, Y1, Y2 float64
 }
 
@@ -32,10 +32,11 @@ type VillageCoordResponse struct {
 	LatClosest, LngClosest float64
 	LatTarget, LngTarget   float64
 	Xspread, Yspread       float64
+	SourceBorderPoints     GeoJSONBorderCoordinates
 }
 
 // get village coordinates from lat/long
-func TranslateLatLngInSourceCountryToLatLngInTargetCountry(w http.ResponseWriter, req *http.Request) {
+func GetTranslationResult(w http.ResponseWriter, req *http.Request) {
 
 	server.Info.Printf("translateLatLngInSourceCountryToLatLngInTargetCountry begin")
 
@@ -50,7 +51,8 @@ func TranslateLatLngInSourceCountryToLatLngInTargetCountry(w http.ResponseWriter
 	}
 	server.Info.Printf("translateLatLngInSourceCountryToLatLngInTargetCountry for lat %f, lng %f", ll.Lat, ll.Lng)
 
-	x, y, distance, latClosest, lngClosest, xSpread, ySpread, _ := translation.GetTranslateCurrent().ClosestBodyInOriginalPosition(ll.Lat, ll.Lng)
+	x, y, distance, latClosest, lngClosest, xSpread, ySpread, _ :=
+		translation.GetTranslateCurrent().ClosestBodyInOriginalPosition(ll.Lat, ll.Lng)
 	server.Info.Printf("translateLatLngInSourceCountryToLatLngInTargetCountry x, y is %f %f, distance %f", x, y, distance)
 
 	var xy VillageCoordResponse
@@ -66,6 +68,16 @@ func TranslateLatLngInSourceCountryToLatLngInTargetCountry(w http.ResponseWriter
 	xy.LatTarget = latTarget
 	xy.LngTarget = lngTarget
 
+	// add source border
+	sourceBorderPoints := translation.GetTranslateCurrent().SourceBorder(ll.Lat, ll.Lng)
+	xy.SourceBorderPoints = make(GeoJSONBorderCoordinates, 1)
+	xy.SourceBorderPoints[0] = make([][]float64, len(sourceBorderPoints))
+	for idx := range sourceBorderPoints {
+		xy.SourceBorderPoints[0][idx] = make([]float64, 2)
+		xy.SourceBorderPoints[0][idx][0] = sourceBorderPoints[idx].Y // Y is longitude
+		xy.SourceBorderPoints[0][idx][1] = sourceBorderPoints[idx].X // X is latitude
+	}
+
 	VillageCoordResponsejson, _ := json.MarshalIndent(xy, "", "	")
 	fmt.Fprintf(w, "%s", VillageCoordResponsejson)
 
@@ -74,7 +86,7 @@ func TranslateLatLngInSourceCountryToLatLngInTargetCountry(w http.ResponseWriter
 
 // return all points within source borders
 // get village coordinates from lat/long
-func AllSourcPointsCoordinates(w http.ResponseWriter, req *http.Request) {
+func AllSourceBorderPointsCoordinates(w http.ResponseWriter, req *http.Request) {
 
 	server.Info.Printf("allSourcPointsCoordinates begin")
 
@@ -185,6 +197,7 @@ func VillageSourceBorder(w http.ResponseWriter, req *http.Request) {
 	server.Info.Printf("villageSourceBorder end")
 }
 
+// Type GeoJSONBorderCoordinates is an array of an array of an array of int
 // convert pointList to array of array of array of float
 // this is necessary since the client only understand a border expressed as [][][]float
 type GeoJSONBorderCoordinates [][][]float64

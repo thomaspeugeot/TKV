@@ -111,7 +111,12 @@ app.controller("EventsController", [ '$scope', '$http', function($scope, $http) 
 					}
 				}
 
-				$scope.markers['clickPos'] = {
+				// reset source border markers
+				$scope.markers = []
+				$scope.markers = new Array()
+				$scope.markers.length = response.data.SourceBorderPoints[0].length +1
+				
+				$scope.markers[0] = {
 					lat: args.leafletEvent.latlng.lat,
 					lng: args.leafletEvent.latlng.lng,
 					message: message, 
@@ -122,13 +127,28 @@ app.controller("EventsController", [ '$scope', '$http', function($scope, $http) 
 					}
 				};	
 
+				for (var i = 0; i < $scope.sourceBorderMarkers.length; i++) {
+					lat = parseFloat( response.data.SourceBorderPoints[0][i][0]);
+					lng = parseFloat( response.data.SourceBorderPoints[0][i][1]);
+
+					$scope.markers[i] = {
+						lat: lat,
+						lng: lng,
+						focus: true,
+						draggable: false,
+						options: {
+							noHide: true
+						}
+					};	
+				}
+
 				$http.post(targetService + 'villageTargetBorder', jsonLatLng ).then
 				(
 					function(response) { // success handler
 						console.log(response.status);
 						console.log('target village villageCoordinates before ', $scope.villageBorders.data.features[0].geometry.coordinates[0] )
 						
-						// convert response data field to float
+						// reset source border points
 						$scope.villageBorders.data.features[0].geometry.coordinates = [ [ [] ] ];
 						$scope.villageBorders.data.features[0].geometry.coordinates[0] = new Array()
 						$scope.villageBorders.data.features[0].geometry.coordinates[0].length = response.data[0].length

@@ -84,10 +84,10 @@ func main() {
 	mux.Handle("/", http.FileServer(http.Dir("../gae_tkv/")))
 
 	mux.HandleFunc("/translateLatLngInSourceCountryToLatLngInTargetCountry",
-		handler.TranslateLatLngInSourceCountryToLatLngInTargetCountry)
+		handler.GetTranslationResult)
 	mux.HandleFunc("/villageTargetBorder", handler.VillageTargetBorder)
 	mux.HandleFunc("/villageSourceBorder", handler.VillageSourceBorder)
-	mux.HandleFunc("/allSourcPointsCoordinates", handler.AllSourcPointsCoordinates)
+	mux.HandleFunc("/allSourcPointsCoordinates", handler.AllSourceBorderPointsCoordinates)
 
 	log.Fatal(http.ListenAndServe(port, mux))
 	server.Info.Printf("end")
