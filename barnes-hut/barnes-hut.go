@@ -1,10 +1,13 @@
 /*
-Package barnes-hut is a modified barnes-hut simulation algorithm.
+Package barnes-hut is a modified barnes-hut simulation algorithm witg concurrent computation.
 
 A the start of the simulation, bodies are spread according to the
 density of the country of interest.
 At the end of the simulation, bodies are spread evenly on a 2D rectangle. At the end of the simulation,
 the body repartition is said to be hyperuniform (https://www.quantamagazine.org/hyperuniformity-found-in-birds-math-and-physics-20160712/)
+
+Barnes-Hut is an embarisgly parallel algorithm. This implementation is used the concurrent model of the go langage. 
+Nb of conurrent routine can be set up dynamicaly. 
 
 TKV implementation starts from a Barnes-Hut implementation of the gravitation simulation
 and make the following modification:
