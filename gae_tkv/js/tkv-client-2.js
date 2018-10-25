@@ -60,6 +60,15 @@ function reqListener( evt) {
 	L.marker([latTarget, lngTarget]).addTo(haiti)
 		.bindPopup( message).openPopup();
 
+
+	for (var i = 0; i < jsonResponse.SourceBorderPoints[0].length; i++) {
+
+		lng = parseFloat(jsonResponse.SourceBorderPoints[0][i][0]);
+		lat = parseFloat(jsonResponse.SourceBorderPoints[0][i][1]);
+
+		marker = new L.marker([lat,lng])
+			.addTo(france);
+	}
 };
 
 
