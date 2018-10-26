@@ -105,23 +105,22 @@ func main() {
 	}
 	colLngWidth := 0.0083333333333
 
-	// prepare the count matrix
-	countMatrix := make([]float64, country.NRows*country.NCols)
+	// prepare the input population matrix
+	inputPopulationMatrix := make([]float64, country.NRows*country.NCols)
 
 	popTotal := 0.0
-	// scan the file and store result in countMatrix
+	// scan the file and store result in inputPopulationMatrix
 	for row := 0; row < country.NRows; row++ {
 		lat := country.Row2Lat(row)
 		for col := 0; col < country.NCols; col++ {
 			scanner.Scan()
 			// lng := float64(country.XllCorner) + (float64(col)*colLngWidth)
 
-			var count float64
-			fmt.Sscanf(scanner.Text(), "%f", &count)
-			popTotal += count
+			var nbIndividualsInCell float64
+			fmt.Sscanf(scanner.Text(), "%f", &nbIndividualsInCell)
+			popTotal += nbIndividualsInCell
 
-			countMatrix[(country.NRows-row-1)*country.NCols+col] = count
-
+			inputPopulationMatrix[(country.NRows-row-1)*country.NCols+col] = nbIndividualsInCell
 		}
 		fmt.Printf("\rrow %5d lat %2.3f total %f", row, lat, popTotal)
 	}
@@ -175,6 +174,7 @@ func main() {
 	grump.Info.Printf("Preparing the ouput")
 	cumulativePopTotal := 0.0
 	bodiesNb := 0
+	nbCellsWithZeroBodies := 0
 	for row := 0; row < country.NRows; row++ {
 		lat := country.Row2Lat(row)
 		for col := 0; col < country.NCols; col++ {
@@ -184,36 +184,40 @@ func main() {
 			relX, relY := country.LatLng2XY(lat, lng)
 
 			// fetch count of the cell
-			count := countMatrix[row*country.NCols+col]
+			nbIndividualsInCell := inputPopulationMatrix[row*country.NCols+col]
 
-			// how many bodies ? it is maxBodies *( count / country.PCount)
-			bodiesInCell := int(math.Floor(float64(targetMaxBodies) * count / popTotal))
+			// how many bodies ? it is maxBodies *( nbIndividualsInCell / country.PCount)
+			nbBodiesInCell := int(math.Ceil(float64(targetMaxBodies) * nbIndividualsInCell / popTotal))
 
-			massPerBody := float64(count) / float64(bodiesInCell)
+			massPerBody := float64(nbIndividualsInCell) / float64(nbBodiesInCell)
 
-			if bodiesInCell > bodiesInCellMax {
-				bodiesInCellMax = bodiesInCell
+			if nbBodiesInCell > bodiesInCellMax {
+				bodiesInCellMax = nbBodiesInCell
+			}
+			
+			if nbBodiesInCell == 0 {
+				nbCellsWithZeroBodies++
 			}
 
-			if bodiesInCell > maxCirclePerCell {
-				grump.Error.Printf("bodiesInCell %d superior to maxCirclePerCell %d", bodiesInCell, maxCirclePerCell)
+			if nbBodiesInCell > maxCirclePerCell {
+				grump.Error.Printf("nbBodiesInCell %d superior to maxCirclePerCell %d", nbBodiesInCell, maxCirclePerCell)
 
-				bodiesInCell = maxCirclePerCell
-				massPerBody = float64(count) / float64(bodiesInCell)
+				nbBodiesInCell = maxCirclePerCell
+				massPerBody = float64(nbIndividualsInCell) / float64(nbBodiesInCell)
 			}
 
 			// initiate the bodies
-			for i := 0; i < bodiesInCell; i++ {
+			for i := 0; i < nbBodiesInCell; i++ {
 				var body quadtree.Body
-				// angle := float64(i) * 2.0 * math.Pi / float64(bodiesInCell)
-				body.X = relX + (1.0/float64(country.NCols))*(0.5+arrangements[bodiesInCell][i].x)
-				body.Y = relY + (1.0/float64(country.NRows))*(0.5+arrangements[bodiesInCell][i].y)
+				// angle := float64(i) * 2.0 * math.Pi / float64(nbBodiesInCell)
+				body.X = relX + (1.0/float64(country.NCols))*(0.5+arrangements[nbBodiesInCell][i].x)
+				body.Y = relY + (1.0/float64(country.NRows))*(0.5+arrangements[nbBodiesInCell][i].y)
 				body.M = massPerBody
 
 				bodies = append(bodies, body)
 			}
-			cumulativePopTotal += count
-			bodiesNb += bodiesInCell
+			cumulativePopTotal += nbIndividualsInCell
+			bodiesNb += nbBodiesInCell
 		}
 	}
 
@@ -221,7 +225,10 @@ func main() {
 	// quadtree.Init( &bodies)
 	fmt.Println("bodies in cell max ", bodiesInCellMax)
 	fmt.Println("cumulative pop ", cumulativePopTotal)
-	fmt.Println("nb of bodies ", bodiesNb)
+	fmt.Println("nb of bodies\t\t\t", bodiesNb)
+	fmt.Println("nb of cells \t\t\t", country.NRows*country.NCols)
+	fmt.Println("nb of cells with bodies\t\t", country.NRows*country.NCols - nbCellsWithZeroBodies)
+	fmt.Println("nb of cells without bodies\t", nbCellsWithZeroBodies)
 
 	var run barneshut.Run
 	run.Init(&bodies)
