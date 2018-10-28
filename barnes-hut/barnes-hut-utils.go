@@ -87,6 +87,9 @@ func (r *Run) CreateMovieFromGif() {
 
 }
 
+// RenderGif creates a gif image and serialize it into out
+// if encode64 is true, the serialization is encoded in base 64 (64 ASCII characters), 
+// enabling transmission over http	
 func (r *Run) RenderGif(out io.Writer, encode64 bool) {
 
 	renderingMutex.Lock()
@@ -97,7 +100,7 @@ func (r *Run) RenderGif(out io.Writer, encode64 bool) {
 	const (
 		size    = 600 // image canvas
 		delay   = 4   // delay between frames in 10ms units
-		nframes = 0
+		nframes = 0 // 0 means it is not an animated gif
 	)
 	anim := gif.GIF{LoopCount: nframes}
 	rect := image.Rect(0, 0, size+1, size+1)

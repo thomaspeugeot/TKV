@@ -88,7 +88,7 @@ func main() {
 	server.Info.Printf("filename for init %s", filename)
 	r.LoadConfig(filename)
 
-	r.SetState(barneshut.RUNNING)
+	r.SetState(barneshut.STOPPED)
 
 	output, _ := os.Create(r.OutputDir + "/" + "essai200Kbody_6Ksteps.gif")
 	go r.OutputGif(output, barneshut.MaxStep)
