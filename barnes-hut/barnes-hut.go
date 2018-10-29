@@ -210,7 +210,8 @@ func NewRun() *Run {
 	bodies := make([]quadtree.Body, 0)
 
 	// create output directory and cwd to it
-	r.OutputDir = time.Now().Local().Format("2006_01_02_040506")
+	// https://stackoverflow.com/questions/20234104/how-to-format-current-time-using-a-yyyymmddhhmmss-format
+	r.OutputDir = time.Now().Local().Format("2006_01_02_150405")
 	Info.Printf("Output dir %s", r.OutputDir)
 	os.Mkdir(r.OutputDir, 0777)
 
