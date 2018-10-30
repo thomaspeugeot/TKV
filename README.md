@@ -80,3 +80,5 @@ Code organisation
 godoc -v -http=:6060
 ```
 lauch browser at http://127.0.0.1:6060/pkg/github.com/thomaspeugeot/tkv/
+
+API documentation is available at https://godoc.org/github.com/thomaspeugeot/tkv
