@@ -11,7 +11,7 @@ package main
 import "flag"
 import "math"
 
-// import "math/rand"
+import "math/rand"
 import "fmt"
 import "os"
 import "log"
@@ -43,12 +43,21 @@ func main() {
 
 	// flag "country"
 	countryPtr := flag.String("country", "fra", "iso 3166 country code")
+
+	// flag "targetMaxBodies"
 	targetMaxBodiesPtr := flag.String("targetMaxBodies", "100000", "target nb of bodies")
+
+	// flag "sampleRatio"
+	sampleRatioPtr := flag.String("sampleRatio", "100", "Ratio (in %) of output bodies, default is 100%")
 
 	// get the directory containing tkv data through the flag "tkvdata"
 	dirTKVDataPtr := flag.String("tkvdata", "/Users/thomaspeugeot/the-mapping-data/", "directory containing input tkv data")
 
+	// use fibonacci packing, not the optimal packing
+	fiboPtr := flag.Bool("fibo", false, "if true, uses fibonacci packing")
+
 	var country grump.Country
+	var sampleRatio float64
 
 	flag.Parse()
 
@@ -73,6 +82,15 @@ func main() {
 	grumpFile, err = os.Open(filepath.Clean(grumpFilePath))
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	// get sample ratio
+	{
+		_, errScan := fmt.Sscanf(*sampleRatioPtr, "%f", &sampleRatio)
+		if errScan != nil {
+			log.Fatal(errScan)
+			return
+		}
 	}
 
 	// parse the grump
@@ -111,7 +129,7 @@ func main() {
 	popTotal := 0.0
 	// scan the file and store result in inputPopulationMatrix
 	for row := 0; row < country.NRows; row++ {
-		lat := country.Row2Lat(row)
+		// lat := country.Row2Lat(row)
 		for col := 0; col < country.NCols; col++ {
 			scanner.Scan()
 			// lng := float64(country.XllCorner) + (float64(col)*colLngWidth)
@@ -122,50 +140,76 @@ func main() {
 
 			inputPopulationMatrix[(country.NRows-row-1)*country.NCols+col] = nbIndividualsInCell
 		}
-		fmt.Printf("\rrow %5d lat %2.3f total %f", row, lat, popTotal)
+		// fmt.Printf("\rrow %5d lat %2.3f total %f", row, lat, popTotal)
 	}
 	fmt.Printf("\n")
 	grump.Info.Printf("reading grump file is over, closing")
 	grumpFile.Close()
 
 	// get the arrangement
-	arrangements := make(arrangementsStore, maxCirclePerCell+1)
-	for nbCircles := 1; nbCircles <= maxCirclePerCell; nbCircles++ {
+	var arrangements arrangementsStore
+	if !*fiboPtr {
+		arrangements = make(arrangementsStore, maxCirclePerCell+1)
+		for nbCircles := 1; nbCircles <= maxCirclePerCell; nbCircles++ {
 
-		fmt.Printf("\rgetting arrangement for %3d circles", nbCircles)
+			// fmt.Printf("\rgetting arrangement for %3d circles", nbCircles)
 
-		arrangements[nbCircles] = make([]circleCoord, nbCircles)
+			arrangements[nbCircles] = make([]circleCoord, nbCircles)
 
-		// open the reference file
-		circlePackingFilePath := fmt.Sprintf("%s/csq_coords/csq%d.txt", dirTKVData, nbCircles)
-		var circlePackingFile *os.File
-		var errCirclePackingFile error
-		circlePackingFile, errCirclePackingFile = os.Open(filepath.Clean(circlePackingFilePath))
-		if errCirclePackingFile != nil {
-			log.Fatal(err)
+			// open the reference file
+			circlePackingFilePath := fmt.Sprintf("%s/csq_coords/csq%d.txt", dirTKVData, nbCircles)
+			var circlePackingFile *os.File
+			var errCirclePackingFile error
+			circlePackingFile, errCirclePackingFile = os.Open(filepath.Clean(circlePackingFilePath))
+			if errCirclePackingFile != nil {
+				log.Fatal(err)
+			}
+
+			// prepare scanner
+			scannerCircle := bufio.NewScanner(circlePackingFile)
+			scannerCircle.Split(bufio.ScanWords)
+
+			// one line per circle
+			for circle := 0; circle < nbCircles; circle++ {
+
+				// scan the id of the circle
+				scannerCircle.Scan()
+
+				// scan X coordinate
+				scannerCircle.Scan()
+				fmt.Sscanf(scannerCircle.Text(), "%f", &(arrangements[nbCircles][circle].x))
+				// scan Y coordinate
+				scannerCircle.Scan()
+				fmt.Sscanf(scannerCircle.Text(), "%f", &(arrangements[nbCircles][circle].y))
+				// fmt.Printf("getting arrangement for %d circle %3d, coord %f %f\n", nbCircles, circle, arrangements[nbCircles][circle].x, arrangements[nbCircles][circle].y)
+			}
+			circlePackingFile.Close()
 		}
+		grump.Info.Printf("reading circle packing files is over")
+	} else {
+		maxCirclePerCell = 3000
+		arrangements = make(arrangementsStore, maxCirclePerCell+1)
+		goldentRatio := 1.0 + math.Sqrt(5.0)
+		for nbCircles := 1; nbCircles <= maxCirclePerCell; nbCircles++ {
 
-		// prepare scanner
-		scannerCircle := bufio.NewScanner(circlePackingFile)
-		scannerCircle.Split(bufio.ScanWords)
+			// coef is the spacing at the end and the beginning
+			// of each row
+			coef := math.Sqrt(float64(nbCircles)) / (math.Sqrt(float64(nbCircles)) + 1.0)
 
-		// one line per circle
-		for circle := 0; circle < nbCircles; circle++ {
+			arrangements[nbCircles] = make([]circleCoord, nbCircles)
+			for circle := 0; circle < nbCircles; circle++ {
+				x := (float64(circle) + 0.5) / float64(nbCircles)
+				_, y := math.Modf(((float64(circle) + 0.5) * goldentRatio))
 
-			// scan the id of the circle
-			scannerCircle.Scan()
+				// shrink by coef at the center
+				x = 0.5 + (x-0.5)*coef
+				y = 0.5 + (y-0.5)*coef
 
-			// scan X coordinate
-			scannerCircle.Scan()
-			fmt.Sscanf(scannerCircle.Text(), "%f", &(arrangements[nbCircles][circle].x))
-			// scan Y coordinate
-			scannerCircle.Scan()
-			fmt.Sscanf(scannerCircle.Text(), "%f", &(arrangements[nbCircles][circle].y))
-			// fmt.Printf("getting arrangement for %d circle %3d, coord %f %f\n", nbCircles, circle, arrangements[nbCircles][circle].x, arrangements[nbCircles][circle].y)
+				arrangements[nbCircles][circle].x = x
+				arrangements[nbCircles][circle].y = y
+			}
 		}
-		circlePackingFile.Close()
 	}
-	grump.Info.Printf("reading circle packing files is over")
 
 	// prepare the output density file
 	var bodies []quadtree.Body
@@ -187,14 +231,14 @@ func main() {
 			nbIndividualsInCell := inputPopulationMatrix[row*country.NCols+col]
 
 			// how many bodies ? it is maxBodies *( nbIndividualsInCell / country.PCount)
-			nbBodiesInCell := int(math.Ceil(float64(targetMaxBodies) * nbIndividualsInCell / popTotal))
+			nbBodiesInCell := int(math.Floor(float64(targetMaxBodies) * nbIndividualsInCell / popTotal))
 
 			massPerBody := float64(nbIndividualsInCell) / float64(nbBodiesInCell)
 
 			if nbBodiesInCell > bodiesInCellMax {
 				bodiesInCellMax = nbBodiesInCell
 			}
-			
+
 			if nbBodiesInCell == 0 {
 				nbCellsWithZeroBodies++
 			}
@@ -206,7 +250,8 @@ func main() {
 				massPerBody = float64(nbIndividualsInCell) / float64(nbBodiesInCell)
 			}
 
-			// initiate the bodies
+			// initiate the bodies in cell
+			nbBodiesInCellAfterSamplingRatio := 0
 			for i := 0; i < nbBodiesInCell; i++ {
 				var body quadtree.Body
 				// angle := float64(i) * 2.0 * math.Pi / float64(nbBodiesInCell)
@@ -214,10 +259,15 @@ func main() {
 				body.Y = relY + (1.0/float64(country.NRows))*(0.5+arrangements[nbBodiesInCell][i].y)
 				body.M = massPerBody
 
-				bodies = append(bodies, body)
+				//
+				sample := rand.Float64() * 100.0
+				if sample < sampleRatio {
+					bodies = append(bodies, body)
+					nbBodiesInCellAfterSamplingRatio++
+				}
 			}
 			cumulativePopTotal += nbIndividualsInCell
-			bodiesNb += nbBodiesInCell
+			bodiesNb += nbBodiesInCellAfterSamplingRatio
 		}
 	}
 
@@ -227,7 +277,7 @@ func main() {
 	fmt.Println("cumulative pop ", cumulativePopTotal)
 	fmt.Println("nb of bodies\t\t\t", bodiesNb)
 	fmt.Println("nb of cells \t\t\t", country.NRows*country.NCols)
-	fmt.Println("nb of cells with bodies\t\t", country.NRows*country.NCols - nbCellsWithZeroBodies)
+	fmt.Println("nb of cells with bodies\t\t", country.NRows*country.NCols-nbCellsWithZeroBodies)
 	fmt.Println("nb of cells without bodies\t", nbCellsWithZeroBodies)
 
 	var run barneshut.Run
