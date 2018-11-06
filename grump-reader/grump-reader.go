@@ -233,11 +233,12 @@ func main() {
 
 	for row := 0; row < country.NRows; row++ {
 		lat := country.Row2Lat(row)
+
+		// allocate for col
+		parselyPopulatedCellCoords[row] = make([]bool, country.NCols)
 		for col := 0; col < country.NCols; col++ {
 			lng := float64(country.XllCorner) + (float64(col) * colLngWidth)
 
-			// allocate for col
-			parselyPopulatedCellCoords[row] = make([]bool, country.NCols)
 
 			// compute relative coordinate of the cell
 			relX, relY := country.LatLng2XY(lat, lng)
@@ -257,8 +258,8 @@ func main() {
 				nbCellsWithPopButWithZeroBodies++
 				missedPopulationTotal += nbIndividualsInCell
 				parselyPopulatedCellCoords[row][col] = true
+				// grump.Info.Printf("Fist cell %d, %d", row, col)
 			}
-
 			if nbBodiesInCell > maxCirclePerCell {
 				grump.Error.Printf("nbBodiesInCell %d superior to maxCirclePerCell %d", nbBodiesInCell, maxCirclePerCell)
 
@@ -287,11 +288,10 @@ func main() {
 		}
 	}
 
-	// construct the graph of parsely populated cells
+	// construct the nodes of the graph of parsely populated cells
 	graph := goraph.NewGraph()
 	for row := 0; row < country.NRows; row++ {
 		for col := 0; col < country.NCols; col++ {
-
 			if parselyPopulatedCellCoords[row][col] == true {
 				nodeID := fmt.Sprintf("%d-%d", row, col)
 				n := goraph.NewNode(nodeID)
@@ -300,6 +300,28 @@ func main() {
 
 		}
 	}
+
+	// construct edges of the graph of parsely populated cells
+	// an edge is present if the next cell to the right or below is also
+	// parsely populated
+	for row := 0; row < country.NRows -1 ; row++ {
+		for col := 0; col < country.NCols -1; col++ {
+			if parselyPopulatedCellCoords[row][col] == true {
+
+				var from goraph.StringID
+				from = goraph.StringID(fmt.Sprintf("%d-%d", row, col))
+				// node to the right
+				if parselyPopulatedCellCoords[row][col+1]  == true {
+					var to goraph.StringID = goraph.StringID(fmt.Sprintf("%d-%d", row, col+1))
+					graph.AddEdge( from, to, 1.0) 
+					graph.AddEdge( to, from, 1.0) 
+				}			
+			}
+		}
+	}
+	fmt.Printf("Graph size\t\t%10d\n", graph.GetNodeCount())
+	setOfSets := goraph.Tarjan( graph)
+	fmt.Printf("Graph number of connected graph ?\t\t%d\n", len(setOfSets))
 
 	// var quadtree quadtree.Quadtree
 	// quadtree.Init( &bodies)
