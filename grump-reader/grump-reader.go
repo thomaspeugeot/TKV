@@ -98,7 +98,7 @@ func main() {
 			return
 		}
 	}
-
+	
 	// parse the grump
 	var word int
 	scanner := bufio.NewScanner(grumpFile)
@@ -152,7 +152,12 @@ func main() {
 	fmt.Printf("\n")
 	grump.Info.Printf("reading grump file is over, closing")
 	grumpFile.Close()
+	fmt.Printf("pop total\t\t\t%10.0f\n", popTotal)
+	cutoff := popTotal/float64(targetMaxBodies)
+	fmt.Printf("pop cutoff per cell\t%10.0f\n", cutoff)
 
+	
+	
 	// get the arrangement
 	var arrangements arrangementsStore
 	if !*fiboPtr {
@@ -224,7 +229,6 @@ func main() {
 
 	grump.Info.Printf("Preparing the ouput")
 	cumulativePopTotal := 0.0
-	bodiesNb := 0
 	nbCellsWithZeroBodies := 0
 	nbCellsWithPopButWithZeroBodies := 0
 	missedPopulationTotal := 0.0
@@ -285,7 +289,6 @@ func main() {
 				}
 			}
 			cumulativePopTotal += nbIndividualsInCell
-			bodiesNb += nbBodiesInCellAfterSamplingRatio
 		}
 	}
 
@@ -334,12 +337,51 @@ func main() {
 
 	// parse the connected set
 	popInParselyPopulatedCells := 0.0
+	
+	// population that is not accounted for in the graph
+	notAccountedForPop := 0.0
 	for setId := 0; setId < len(setOfSets); setId++ {
+		popInGraph := 0.0
 		for nodeRank :=0 ; nodeRank < len( setOfSets[setId]); nodeRank++ {
 			nodeID := setOfSets[setId][nodeRank]
 			var row, col int
 			fmt.Sscanf(nodeID.String(), "%d-%d", &row, &col)
 			popInParselyPopulatedCells += inputPopulationMatrix[row][col]
+			popInGraph += inputPopulationMatrix[row][col]
+			
+			if(  inputPopulationMatrix[row][col] > cutoff ) {
+				grump.Error.Printf("Too much pop ! %f row %d col %d", inputPopulationMatrix[row][col], row, col)
+			}
+			
+			// generates a body if popInGraph above cutoff
+			if popInGraph > cutoff {
+				popInGraph -= cutoff
+				
+				// get lat/lng
+				lat := country.Row2Lat(row)
+				lng := float64(country.XllCorner) + (float64(col) * colLngWidth)
+				grump.Trace.Printf("%f %f", lat, lng)
+								
+				// compute relative coordinate of the cell
+				relX, relY := country.LatLng2XY(lat, lng)
+			
+				var body quadtree.Body
+				// angle := float64(i) * 2.0 * math.Pi / float64(nbBodiesInCell)
+				body.X = relX + (1.0/float64(country.NCols))*0.5
+				body.Y = relY + (1.0/float64(country.NRows))*0.5
+				body.M = cutoff
+
+				// sample bodies
+				sample := rand.Float64() * 100.0
+				if sample < sampleRatio {
+					bodies = append(bodies, body)
+				}
+			}
+			
+			// get remainder
+			if nodeRank == (len( setOfSets[setId]) -1) {
+				notAccountedForPop += popInGraph
+			}
 		}
 	}
 	fmt.Printf("Total pop in graph cells\t%10.0f\n", popInParselyPopulatedCells)
@@ -350,12 +392,13 @@ func main() {
 	// fmt.Println(" ", )
 	fmt.Printf("bodies in cell max\t\t%10d\n", bodiesInCellMax)
 	fmt.Printf("cumulative pop\t\t\t%10.0f\n", cumulativePopTotal)
-	fmt.Printf("nb of bodies\t\t\t%10d\n", bodiesNb)
+	fmt.Printf("nb of bodies\t\t\t%10d\n", len(bodies))
 	fmt.Printf("nb of cells \t\t\t%10d\n", country.NRows*country.NCols)
 	fmt.Printf("nb of cells with bodies\t\t%10d\n", country.NRows*country.NCols-nbCellsWithZeroBodies)
 	fmt.Printf("nb of cells without bodies\t%10d\n", nbCellsWithZeroBodies)
 	fmt.Printf("nb of cells with pop w/o bodies\t%10d\n", nbCellsWithPopButWithZeroBodies)
-	fmt.Printf("missed pop of cells w/o bodies\t%10.0f\n", missedPopulationTotal)
+	fmt.Printf("graph pop of cells\t\t\t%10.0f\n", missedPopulationTotal)
+	fmt.Printf("missed pop of cells w/o bodies\t%10.0f\n", notAccountedForPop)
 
 	var run barneshut.Run
 	run.Init(&bodies)
