@@ -54,6 +54,7 @@ var DtRequest = Dt           // new value of Dt requested by the UI. The real Dt
 var MaxDisplacement float64 = 0.001 // cannot make more that 1/1000 th of the unit square per second
 
 // give the theorical max displacement, as a ratio between the min distance and the max speed
+// note: 2.0 gives too much stirring
 var MaxRatioDisplacement float64 = 0.5
 
 // BN_THETA is the barnes hut criteria

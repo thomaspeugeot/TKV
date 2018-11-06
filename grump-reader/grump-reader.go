@@ -20,10 +20,19 @@ import "path/filepath"
 import "github.com/thomaspeugeot/tkv/barnes-hut"
 import "github.com/thomaspeugeot/tkv/quadtree"
 import "github.com/thomaspeugeot/tkv/grump"
+import "github.com/gyuho/goraph"
 
 // coordinates of arrangement of circle packing in a square
 type circleCoord struct {
 	x, y float64
+}
+
+// storage of circle arrangement per number of circle in the square
+type arrangementsStore [][]circleCoord
+
+// coordinates of cell
+type cellCoord struct {
+	x, y int
 }
 
 // var targetMaxBodies = 400000
@@ -32,9 +41,6 @@ type circleCoord struct {
 var targetMaxBodies = 100000
 
 var maxCirclePerCell = 750
-
-// storage of circle arrangement per number of circle in the square
-type arrangementsStore [][]circleCoord
 
 // on the PC
 // go run grump-reader.go -tkvdata="C:\Users\peugeot\tkv-data"
@@ -54,7 +60,7 @@ func main() {
 	dirTKVDataPtr := flag.String("tkvdata", "/Users/thomaspeugeot/the-mapping-data/", "directory containing input tkv data")
 
 	// use fibonacci packing, not the optimal packing
-	fiboPtr := flag.Bool("fibo", false, "if true, uses fibonacci packing")
+	fiboPtr := flag.Bool("fibo", true, "if true, uses fibonacci packing")
 
 	var country grump.Country
 	var sampleRatio float64
@@ -219,10 +225,19 @@ func main() {
 	cumulativePopTotal := 0.0
 	bodiesNb := 0
 	nbCellsWithZeroBodies := 0
+	nbCellsWithPopButWithZeroBodies := 0
+	missedPopulationTotal := 0.0
+
+	// 2D array to store wether the cell has no bodies but some pop
+	parselyPopulatedCellCoords := make([][]bool, country.NRows)
+
 	for row := 0; row < country.NRows; row++ {
 		lat := country.Row2Lat(row)
 		for col := 0; col < country.NCols; col++ {
 			lng := float64(country.XllCorner) + (float64(col) * colLngWidth)
+
+			// allocate for col
+			parselyPopulatedCellCoords[row] = make([]bool, country.NCols)
 
 			// compute relative coordinate of the cell
 			relX, relY := country.LatLng2XY(lat, lng)
@@ -235,12 +250,13 @@ func main() {
 
 			massPerBody := float64(nbIndividualsInCell) / float64(nbBodiesInCell)
 
-			if nbBodiesInCell > bodiesInCellMax {
-				bodiesInCellMax = nbBodiesInCell
-			}
-
 			if nbBodiesInCell == 0 {
 				nbCellsWithZeroBodies++
+			}
+			if nbBodiesInCell == 0 && nbIndividualsInCell > 0 {
+				nbCellsWithPopButWithZeroBodies++
+				missedPopulationTotal += nbIndividualsInCell
+				parselyPopulatedCellCoords[row][col] = true
 			}
 
 			if nbBodiesInCell > maxCirclePerCell {
@@ -259,7 +275,7 @@ func main() {
 				body.Y = relY + (1.0/float64(country.NRows))*(0.5+arrangements[nbBodiesInCell][i].y)
 				body.M = massPerBody
 
-				//
+				// sample bodies
 				sample := rand.Float64() * 100.0
 				if sample < sampleRatio {
 					bodies = append(bodies, body)
@@ -271,14 +287,31 @@ func main() {
 		}
 	}
 
+	// construct the graph of parsely populated cells
+	graph := goraph.NewGraph()
+	for row := 0; row < country.NRows; row++ {
+		for col := 0; col < country.NCols; col++ {
+
+			if parselyPopulatedCellCoords[row][col] == true {
+				nodeID := fmt.Sprintf("%d-%d", row, col)
+				n := goraph.NewNode(nodeID)
+				graph.AddNode(n)
+			}
+
+		}
+	}
+
 	// var quadtree quadtree.Quadtree
 	// quadtree.Init( &bodies)
-	fmt.Println("bodies in cell max ", bodiesInCellMax)
-	fmt.Println("cumulative pop ", cumulativePopTotal)
-	fmt.Println("nb of bodies\t\t\t", bodiesNb)
-	fmt.Println("nb of cells \t\t\t", country.NRows*country.NCols)
-	fmt.Println("nb of cells with bodies\t\t", country.NRows*country.NCols-nbCellsWithZeroBodies)
-	fmt.Println("nb of cells without bodies\t", nbCellsWithZeroBodies)
+	// fmt.Println(" ", )
+	fmt.Printf("bodies in cell max\t\t%10d\n", bodiesInCellMax)
+	fmt.Printf("cumulative pop\t\t\t%10.0f\n", cumulativePopTotal)
+	fmt.Printf("nb of bodies\t\t\t%10d\n", bodiesNb)
+	fmt.Printf("nb of cells \t\t\t%10d\n", country.NRows*country.NCols)
+	fmt.Printf("nb of cells with bodies\t\t%10d\n", country.NRows*country.NCols-nbCellsWithZeroBodies)
+	fmt.Printf("nb of cells without bodies\t%10d\n", nbCellsWithZeroBodies)
+	fmt.Printf("nb of cells with pop w/o bodies%10d\n", nbCellsWithPopButWithZeroBodies)
+	fmt.Printf("missed pop of cells w/o bodies\t%10.0f\n", missedPopulationTotal)
 
 	var run barneshut.Run
 	run.Init(&bodies)
