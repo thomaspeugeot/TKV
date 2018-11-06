@@ -130,12 +130,13 @@ func main() {
 	colLngWidth := 0.0083333333333
 
 	// prepare the input population matrix
-	inputPopulationMatrix := make([]float64, country.NRows*country.NCols)
+	inputPopulationMatrix := make([][]float64, country.NRows)
 
 	popTotal := 0.0
 	// scan the file and store result in inputPopulationMatrix
 	for row := 0; row < country.NRows; row++ {
-		// lat := country.Row2Lat(row)
+		lat := country.Row2Lat(row)
+		inputPopulationMatrix[(country.NRows-row-1)] = make( []float64, country.NCols)
 		for col := 0; col < country.NCols; col++ {
 			scanner.Scan()
 			// lng := float64(country.XllCorner) + (float64(col)*colLngWidth)
@@ -144,9 +145,9 @@ func main() {
 			fmt.Sscanf(scanner.Text(), "%f", &nbIndividualsInCell)
 			popTotal += nbIndividualsInCell
 
-			inputPopulationMatrix[(country.NRows-row-1)*country.NCols+col] = nbIndividualsInCell
+			inputPopulationMatrix[(country.NRows-row-1)][col] = nbIndividualsInCell
 		}
-		// fmt.Printf("\rrow %5d lat %2.3f total %f", row, lat, popTotal)
+		fmt.Printf("\rrow %5d lat %2.3f total %f", row, lat, popTotal)		
 	}
 	fmt.Printf("\n")
 	grump.Info.Printf("reading grump file is over, closing")
@@ -244,7 +245,7 @@ func main() {
 			relX, relY := country.LatLng2XY(lat, lng)
 
 			// fetch count of the cell
-			nbIndividualsInCell := inputPopulationMatrix[row*country.NCols+col]
+			nbIndividualsInCell := inputPopulationMatrix[row][col]
 
 			// how many bodies ? it is maxBodies *( nbIndividualsInCell / country.PCount)
 			nbBodiesInCell := int(math.Floor(float64(targetMaxBodies) * nbIndividualsInCell / popTotal))
@@ -310,19 +311,40 @@ func main() {
 
 				var from goraph.StringID
 				from = goraph.StringID(fmt.Sprintf("%d-%d", row, col))
+
 				// node to the right
 				if parselyPopulatedCellCoords[row][col+1]  == true {
 					var to goraph.StringID = goraph.StringID(fmt.Sprintf("%d-%d", row, col+1))
 					graph.AddEdge( from, to, 1.0) 
 					graph.AddEdge( to, from, 1.0) 
 				}			
+
+				// node below
+				if parselyPopulatedCellCoords[row+1][col]  == true {
+					var to goraph.StringID = goraph.StringID(fmt.Sprintf("%d-%d", row+1, col))
+					graph.AddEdge( from, to, 1.0) 
+					graph.AddEdge( to, from, 1.0) 
+				}			
 			}
 		}
 	}
-	fmt.Printf("Graph size\t\t%10d\n", graph.GetNodeCount())
+	fmt.Printf("Graph nb of nodes\t\t%10d\n", graph.GetNodeCount())
 	setOfSets := goraph.Tarjan( graph)
-	fmt.Printf("Graph number of connected graph ?\t\t%d\n", len(setOfSets))
+	fmt.Printf("Graph number of connected graph\t%10d\n", len(setOfSets))
 
+	// parse the connected set
+	popInParselyPopulatedCells := 0.0
+	for setId := 0; setId < len(setOfSets); setId++ {
+		for nodeRank :=0 ; nodeRank < len( setOfSets[setId]); nodeRank++ {
+			nodeID := setOfSets[setId][nodeRank]
+			var row, col int
+			fmt.Sscanf(nodeID.String(), "%d-%d", &row, &col)
+			popInParselyPopulatedCells += inputPopulationMatrix[row][col]
+		}
+	}
+	fmt.Printf("Total pop in graph cells\t%10.0f\n", popInParselyPopulatedCells)
+
+	
 	// var quadtree quadtree.Quadtree
 	// quadtree.Init( &bodies)
 	// fmt.Println(" ", )
@@ -332,7 +354,7 @@ func main() {
 	fmt.Printf("nb of cells \t\t\t%10d\n", country.NRows*country.NCols)
 	fmt.Printf("nb of cells with bodies\t\t%10d\n", country.NRows*country.NCols-nbCellsWithZeroBodies)
 	fmt.Printf("nb of cells without bodies\t%10d\n", nbCellsWithZeroBodies)
-	fmt.Printf("nb of cells with pop w/o bodies%10d\n", nbCellsWithPopButWithZeroBodies)
+	fmt.Printf("nb of cells with pop w/o bodies\t%10d\n", nbCellsWithPopButWithZeroBodies)
 	fmt.Printf("missed pop of cells w/o bodies\t%10.0f\n", missedPopulationTotal)
 
 	var run barneshut.Run
