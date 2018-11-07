@@ -6,7 +6,7 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 
 		// adjust values of x min compared to x max
 		$scope.$watch( 'vm.area', function() {	
-				vm.updateArea();
+				// vm.updateArea();
 			}, true // http://stackoverflow.com/questions/19455501/watch-an-object
 		);	
 
@@ -310,7 +310,7 @@ angular.module('MyApp',['ngMaterial', 'ngMessages'])
 	  		);
 		};
 
-		pollRender();
+		// pollRender();
 
 	  	var pollStatus = function() {
 
