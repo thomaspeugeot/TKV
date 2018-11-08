@@ -16,8 +16,8 @@ func GetTranslateCurrent() *Translation {
 		var targetCountry Country
 
 		sourceCountry.Name = "fra"
-		sourceCountry.NbBodies = 697529
-		sourceCountry.Step = 4723
+		sourceCountry.NbBodies = 934136
+		sourceCountry.Step = 8725
 
 		targetCountry.Name = "hti"
 		targetCountry.NbBodies = 927787

@@ -55,7 +55,7 @@
             "host": "127.0.0.1",
             "program": "${workspaceFolder}/runtime_server/runtime_server.go",
             "env": {},
-            "args": ["-sourceCountry","fra"," -sourceCountryNbBodiesPtr"," 697529"," -sourceCountryStep"," 4723"," -targetCountry"," hti"," -targetCountryNbBodiesPtr"," 927787"," -targetCountryStep"," 8564"],
+            "args": [],
             // "showLog": true,
             // "trace": "verbose",
             "cwd": "${workspaceFolder}/runtime_server"
