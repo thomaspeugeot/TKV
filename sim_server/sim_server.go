@@ -10,7 +10,6 @@ import (
 	"log"
 	"math"
 	"net/http"
-	"os"
 
 	"github.com/thomaspeugeot/tkv/barnes-hut"
 	"github.com/thomaspeugeot/tkv/server"
@@ -33,10 +32,12 @@ func main() {
 
 	cutoffPtr := flag.String("cutoff", "2", "cutoff code distance")
 
-	maxStepPtr := flag.String("maxStep", "10000", "at what step do the simulation stop")
+	shutdownCriteriaPtr := flag.String("shutdownCriteria", "0.00001", "If energy decreases ratio is below this threshold during a simulation step, simulation shutdowns")
 
 	portPtr := flag.String("port", "8000", "listening port")
 
+	startPtr := flag.Bool("start", false, "if true, start simulation run immediatly") 
+	
 	flag.Parse()
 
 	// init sourceCountry from flags
@@ -64,14 +65,15 @@ func main() {
 		}
 	}
 	server.Info.Printf("CutoffDistance %f", barneshut.CutoffDistance)
+
 	{
-		_, errScan := fmt.Sscanf(*maxStepPtr, "%d", &barneshut.MaxStep)
+		_, errScan := fmt.Sscanf(*shutdownCriteriaPtr, "%f", &barneshut.ShutdownCriteria)
 		if errScan != nil {
 			log.Fatal(errScan)
 			return
 		}
 	}
-	server.Info.Printf("Max step %d", barneshut.MaxStep)
+	server.Info.Printf("Studown Criteria %f", barneshut.ShutdownCriteria)
 	port := 8000
 	{
 		_, errScan := fmt.Sscanf(*portPtr, "%d", &port)
@@ -88,10 +90,13 @@ func main() {
 	server.Info.Printf("filename for init %s", filename)
 	r.LoadConfig(filename)
 
-	r.SetState(barneshut.STOPPED)
-
-	output, _ := os.Create(r.OutputDir + "/" + "essai200Kbody_6Ksteps.gif")
-	go r.OutputGif(output, barneshut.MaxStep)
+	if !*startPtr	{
+		r.SetState(barneshut.STOPPED)
+	} else {
+		r.SetState(barneshut.RUNNING)
+	}
+	
+	go r.RunSimulation()
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/status", status)

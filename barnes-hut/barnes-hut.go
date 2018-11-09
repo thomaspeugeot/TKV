@@ -83,9 +83,9 @@ var UseBarnesHut bool = true
 var CutoffDistance float64 = 1.0
 
 // At what step do the simulation stop
-var MaxStep int = 10000
+var ShutdownCriteria float64 = 0.00001
 
-//	Bodies's X,Y position coordinates are float64 between 0 & 1
+// Bodies's X,Y position coordinates are float64 between 0 & 1
 type Pos struct {
 	X float64
 	Y float64
@@ -179,7 +179,9 @@ type Run struct {
 	maxRepulsiveForce       MaxRepulsiveForce // computed at each step (to compute optimal DT value)
 	maxVelocity             float64           // max velocity
 	dtOptim                 float64           // optimal dt
-	ratioOfBodiesWithCapVel float64           // ratio of bodies where the speed has been capped
+	ratioOfBodiesWithCapVel float64			// ratio of bodies where the speed has been capped
+	energy					float64			// total repulsive energy
+	energyDecreaseRatio		float64			// energy decrease ratio. Is used as a shutdown criteria
 
 	status string // status of the run
 
@@ -191,6 +193,27 @@ type Run struct {
 
 // (in order to solve issue "over accumulation of bodies at border slows dow spreading #5")
 var maxMinInterBodyDistance float64 // this variable store the max of the previous value
+
+// RunSimulation is the main entry to the simulation
+// It call for one step of simulation until the 
+// energy decrease ratio is met
+func (r *Run) RunSimulation() {
+
+	Info.Printf("Energy decrease %f, ShutdownCriteria %f crit %t", r.energyDecreaseRatio, ShutdownCriteria, (r.energyDecreaseRatio > ShutdownCriteria))
+	for (r.energyDecreaseRatio > ShutdownCriteria) {
+		// if state is STOPPED, pause
+		for r.state == STOPPED {
+			time.Sleep(100 * time.Millisecond)
+		}
+		r.OneStep()
+	}
+	
+	r.state = STOPPED
+	r.CaptureConfig()
+	// r.CreateMovieFromGif()
+	os.Exit(0)
+}
+
 
 func (r *Run) SetCountry(country string) {
 	r.country = country
@@ -274,6 +297,9 @@ func (r *Run) Init(bodies *([]quadtree.Body)) {
 	r.renderChoice = RUNNING_CONFIGURATION // we draw borders
 	r.fieldRendering = false
 
+	r.energy = math.MaxFloat64 // very high
+	r.energyDecreaseRatio = 1.0
+	
 	DtAdjustMode = AUTO
 
 	Trace.Printf("Init end")
@@ -452,12 +478,14 @@ func (r *Run) OneStepOptional(updatePosition bool) {
 	}
 
 	// compute total energy
-	totalEnergy := 0.0
 	// parse all bodies
+	lastEnergy := r.energy
+	r.energy = 0.0
 	for idx := range *r.bodies {
 		e := &((*r.bodiesEnergy)[idx])
-		totalEnergy += *e
+		r.energy += *e
 	}
+	r.energyDecreaseRatio = (lastEnergy - r.energy) / lastEnergy
 
 	// compute stirring
 	stirring := r.bodiesNeighbours.ComputeStirring(r.bodiesNeighboursOrig)
@@ -470,14 +498,12 @@ func (r *Run) OneStepOptional(updatePosition bool) {
 	StepDuration = float64((t1.Sub(t0)).Nanoseconds())
 	Gflops = float64(nbComputationPerStep) / StepDuration
 
-	//	fmt.Printf("step %d speedup %f low 10 %f high 5 %f high 10 %f MFlops %f Dur (s) %f MinDist %f Max Vel %f Optim Dt %f Dt %f ratio %f \n",
-	r.status = fmt.Sprintf("step %d nbComp %d dur/comp %f speedup %f Dur %e E %e MinD %e MaxMinD %e MaxV %e Dt Opt %e Dt %e F/A %e stirring %f nils %f \n",
+	r.status = fmt.Sprintf("%s step %5d speedup %5.2f Dur %4.2f E %e MinD %e MaxMinD %e MaxV %e Dt Opt %e Dt %e F/A %e stirring %f nils %f e decr ratio %1.10f\n",
+		time.Now().Local().Format("2006 01 02 15 04 05"),
 		r.step,
-		nbComputationPerStep,
-		(StepDuration/1000)/float64(nbComputationPerStep),
-		float64(len(*r.bodies)*len(*r.bodies))/float64(nbComputationPerStep),
-		StepDuration/1000000000,
-		totalEnergy,
+		float64(len(*r.bodies)*len(*r.bodies))/float64(nbComputationPerStep), //speedup
+		StepDuration/1000000000, // duration in seconds
+		r.energy, // energy
 		r.minInterBodyDistance,
 		maxMinInterBodyDistance,
 		r.maxVelocity,
@@ -485,11 +511,11 @@ func (r *Run) OneStepOptional(updatePosition bool) {
 		Dt,
 		r.ratioOfBodiesWithCapVel,
 		stirring,
-		ratioOfNil)
+		ratioOfNil,
+		r.energyDecreaseRatio)
 
 	fmt.Fprintf(r.StatusFileLog, r.Status())
-	Info.Printf(r.Status())
-
+	fmt.Printf(r.Status())	
 }
 
 var Gflops float64

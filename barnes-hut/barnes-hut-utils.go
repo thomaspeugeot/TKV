@@ -298,21 +298,3 @@ func (r *Run) RenderSVG(out io.Writer) {
 	s.End()
 	log.Output(1, fmt.Sprintf("end of render SVG"))
 }
-
-// output position of bodies of the Run into a GIF representation
-func (r *Run) OutputGif(out io.Writer, nbStep int) {
-
-	for r.step < nbStep {
-
-		// if state is STOPPED, pause
-		for r.state == STOPPED {
-			time.Sleep(100 * time.Millisecond)
-		}
-
-		r.OneStep()
-	}
-	r.state = STOPPED
-	r.CaptureConfig()
-	r.CreateMovieFromGif()
-	os.Exit(0)
-}
