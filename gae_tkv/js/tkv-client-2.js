@@ -15,6 +15,15 @@ var targetService
 
 var oReq 
 
+var littleIcon = L.icon({
+iconUrl: '9pixels.png',
+
+	iconSize:     [3, 3], // size of the icon
+	iconAnchor:   [22, 94], // point of the icon which will correspond to marker's location
+});
+
+
+
 function onFranceMapClick(e) {
 
 	hostname = window.location.hostname
@@ -27,7 +36,7 @@ function onFranceMapClick(e) {
 	console.log( jsonLatLng);
 
 	oReq = new XMLHttpRequest();
-	oReq.responseType = 'json';
+	// oReq.responseType = 'json';
 	oReq.addEventListener("load", reqListener);
 	oReq.open("POST", targetService +'translateLatLngInSourceCountryToLatLngInTargetCountry');
 	oReq.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
@@ -36,7 +45,7 @@ function onFranceMapClick(e) {
 
 function reqListener( evt) {
 	
-	var jsonResponse = this.response
+	var jsonResponse = JSON.parse( this.response)
 	
 	console.log('village translateLatLngInSourceCountryToLatLngInTargetCountry answer', 
 		jsonResponse.X, jsonResponse.Y);
@@ -66,7 +75,7 @@ function reqListener( evt) {
 		lng = parseFloat(jsonResponse.SourceBorderPoints[0][i][0]);
 		lat = parseFloat(jsonResponse.SourceBorderPoints[0][i][1]);
 
-		marker = new L.marker([lat,lng])
+		marker = new L.marker([lat,lng], {icon: littleIcon})
 			.addTo(france);
 	}
 };
