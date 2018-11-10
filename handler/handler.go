@@ -33,6 +33,7 @@ type VillageCoordResponse struct {
 	LatTarget, LngTarget   float64
 	Xspread, Yspread       float64
 	SourceBorderPoints     GeoJSONBorderCoordinates
+	TargetBorderPoints     GeoJSONBorderCoordinates
 }
 
 // get village coordinates from lat/long
@@ -76,6 +77,16 @@ func GetTranslationResult(w http.ResponseWriter, req *http.Request) {
 		xy.SourceBorderPoints[0][idx] = make([]float64, 2)
 		xy.SourceBorderPoints[0][idx][0] = sourceBorderPoints[idx].Y // Y is longitude
 		xy.SourceBorderPoints[0][idx][1] = sourceBorderPoints[idx].X // X is latitude
+	}
+
+	// add target border
+	targetBorderPoints := translation.GetTranslateCurrent().TargetBorder(xSpread, ySpread)
+	xy.TargetBorderPoints = make(GeoJSONBorderCoordinates, 1)
+	xy.TargetBorderPoints[0] = make([][]float64, len(targetBorderPoints))
+	for idx := range targetBorderPoints {
+		xy.TargetBorderPoints[0][idx] = make([]float64, 2)
+		xy.TargetBorderPoints[0][idx][0] = targetBorderPoints[idx].Y // Y is longitude
+		xy.TargetBorderPoints[0][idx][1] = targetBorderPoints[idx].X // X is latitude
 	}
 
 	VillageCoordResponsejson, _ := json.MarshalIndent(xy, "", "	")

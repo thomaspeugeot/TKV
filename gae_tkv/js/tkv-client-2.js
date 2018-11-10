@@ -2,7 +2,9 @@ var france = L.map('france').setView([47, 0], 5);
 
 L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
 	maxZoom: 18,
-	attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+	attribution: 
+		'A propos 10 000 territories; <a href="https://10ktblog.wordpress.com/a-propos/">10 000</a> contributors, ' +
+		'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
 		'<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
 		'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
 	id: 'mapbox.streets'
@@ -16,10 +18,9 @@ var targetService
 var oReq 
 
 var littleIcon = L.icon({
-iconUrl: '9pixels.png',
-
+	iconUrl: '9pixels.png',
 	iconSize:     [3, 3], // size of the icon
-	iconAnchor:   [22, 94], // point of the icon which will correspond to marker's location
+	iconAnchor:   [0, 0], // point of the icon which will correspond to marker's location
 });
 
 
@@ -69,7 +70,6 @@ function reqListener( evt) {
 	L.marker([latTarget, lngTarget]).addTo(haiti)
 		.bindPopup( message).openPopup();
 
-
 	for (var i = 0; i < jsonResponse.SourceBorderPoints[0].length; i++) {
 
 		lng = parseFloat(jsonResponse.SourceBorderPoints[0][i][0]);
@@ -78,6 +78,17 @@ function reqListener( evt) {
 		marker = new L.marker([lat,lng], {icon: littleIcon})
 			.addTo(france);
 	}
+
+	for (var i = 0; i < jsonResponse.TargetBorderPoints[0].length; i++) {
+
+		lng = parseFloat(jsonResponse.TargetBorderPoints[0][i][0]);
+		lat = parseFloat(jsonResponse.TargetBorderPoints[0][i][1]);
+
+		marker = new L.marker([lat,lng], {icon: littleIcon})
+			.addTo(haiti);
+	}
+
+	haiti.setView( [latTarget, lngTarget], france.getZoom());
 };
 
 
@@ -87,7 +98,9 @@ var haiti = L.map('haiti').setView([18, -72], 5);
 
 L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
 	maxZoom: 18,
-	attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+	attribution: 
+		'A propos 10 000 territories; <a href="https://10ktblog.wordpress.com/a-propos/">10 000</a> contributors, ' +
+		'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
 		'<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
 		'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
 	id: 'mapbox.streets'
