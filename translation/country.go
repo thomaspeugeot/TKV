@@ -19,12 +19,10 @@ type Country struct {
 
 	NbBodies int // nb of bodies according to the filename
 
-	bodiesOrig     *[]quadtree.Body // original bodies position in the quatree
-	bodiesSpread   *[]quadtree.Body // bodies position in the quatree after the spread simulation
+	bodiesOrig     *[]quadtree.BodyXY // original bodies position in the quatree
+	bodiesSpread   *[]quadtree.BodyXY   // bodies position in the quatree after the spread simulation
 	VilCoordinates [][]int
 	Step           int // step when the simulation stopped
-
-	villages [][]Village
 }
 
 type Point struct {
@@ -63,12 +61,6 @@ func (country *Country) Init() {
 
 	country.LoadConfig(true)  // load config at the end  of the simulation
 	country.LoadConfig(false) // load config at the start of the simulation
-
-	// init village array
-	country.villages = make([][]Village, nbVillagePerAxe)
-	for x := range country.villages {
-		country.villages[x] = make([]Village, nbVillagePerAxe)
-	}
 
 	country.VilCoordinates = make([][]int, country.NbBodies)
 	for idx := range country.VilCoordinates {
@@ -135,7 +127,7 @@ func (country *Country) LoadConfig(isOriginal bool) bool {
 
 	jsonParser := json.NewDecoder(bodsFileReader)
 
-	bodies := (make([]quadtree.Body, 0))
+	bodies := (make([]quadtree.BodyXY, 0))
 	if isOriginal {
 		country.bodiesOrig = &bodies
 		if err := jsonParser.Decode(country.bodiesOrig); err != nil {
@@ -170,10 +162,6 @@ func (country *Country) ComputeBaryCenters() {
 		villageY := int(math.Floor(float64(nbVillagePerAxe) * b.Y))
 
 		Trace.Printf("Adding body index %d to village %d %d", index, villageX, villageY)
-
-		// add body (original) to the barycenter of the village
-		bOrig := (*country.bodiesOrig)[index]
-		country.villages[villageX][villageY].addBody(bOrig)
 
 		country.VilCoordinates[index][0] = villageX
 		country.VilCoordinates[index][1] = villageY

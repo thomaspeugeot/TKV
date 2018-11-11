@@ -1,7 +1,6 @@
 package translation
 
 import (
-	"fmt"
 	"math"
 	"testing"
 )
@@ -71,14 +70,6 @@ func TestBallBodiesCount(t *testing.T) {
 	fra.Init()
 
 	var totalBodies int
-
-	for _, vRow := range fra.villages {
-		for _, v := range vRow {
-			totalBodies += v.NbBodies
-			fmt.Printf("%d;", v.NbBodies)
-		}
-		fmt.Println()
-	}
 
 	if totalBodies != fra.NbBodies {
 		t.Errorf("total bodies %d not matching nb bodies of country %d", totalBodies, fra.NbBodies)

@@ -5,10 +5,14 @@ import (
 	"math/rand"
 )
 
-// a body is a position & a mass
-type Body struct {
+type BodyXY struct {
 	X float64
 	Y float64
+}
+
+// a body is a position & a mass
+type Body struct {
+	BodyXY
 	M float64
 
 	// coordinate in the quadtree

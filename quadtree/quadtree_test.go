@@ -201,39 +201,13 @@ func TestComputeGini(t *testing.T) {
 
 }
 
-func TestUpdateNodeCOM(t *testing.T) {
-
-	var q Quadtree
-	var bodies []Body
-	InitBodiesUniform(&bodies, 10000)
-	q.Init(&bodies)
-
-	var c Coord
-	c.SetLevel(8)
-	c.setXHexaLevel8(0x010)
-	c.setYHexaLevel8(0x001)
-
-	n := q.Nodes[c]
-	b1 := Body{X: 0.5, Y: 0.0, M: 1.0, coord: 0, prev: n.first, next: nil}
-	n.first = &b1
-	b2 := Body{-0.5, 0.0, 1.0, 0x00, &b1, nil}
-	b1.next = &b2
-
-	want := Body{X: 0.0, Y: 0.0, M: 2.0, prev: nil, next: n.Body.next}
-
-	n.updateCOM()
-	if n.Body != want {
-		t.Errorf("update\nnode(%#v)\nwant %#v", n.Body, want)
-	}
-}
-
 func TestGetCoord8(t *testing.T) {
 	cases := []struct {
 		in   Body
 		want Coord
 	}{
-		{Body{0.0, 0.0, 0.0, 0x0, nil, nil}, 0x00080000},
-		{Body{0.0, 255.999, 255.999, 0x0, nil, nil}, 0x0008FFFF},
+		{Body{BodyXY{0.0, 0.0}, 0.0, 0x0, nil, nil}, 0x00080000},
+		{Body{BodyXY{0.0, 255.999}, 255.999, 0x0, nil, nil}, 0x0008FFFF},
 	}
 	for _, c := range cases {
 		got := c.in.getCoord8()
