@@ -1,4 +1,10 @@
-var france = L.map('france').setView([47, 0], 5);
+var fra = L.map('fra').setView([47, 0], 5);
+var hti = L.map('hti').setView([18, -72], 5);
+
+var mapOfMaps = new Map();
+
+mapOfMaps.set( "fra", fra);
+mapOfMaps.set( "hti", hti);
 
 L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
 	maxZoom: 18,
@@ -8,7 +14,7 @@ L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=p
 		'<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
 		'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
 	id: 'mapbox.streets'
-}).addTo(france);
+}).addTo(fra);
 
 var hostname
 var protocol
@@ -23,25 +29,24 @@ var littleIcon = L.icon({
 	iconAnchor:   [0, 0], // point of the icon which will correspond to marker's location
 });
 
-
-
-function onFranceMapClick(e) {
+function onMapClick(e) {
 
 	hostname = window.location.hostname
 	protocol = window.location.protocol
 	port = window.location.port
 	targetService = protocol + "//"+ hostname + ":" + port + "/"
 
+	messageToServer = { lat: e.latlng.lat , lng: e.latlng.lng, country: this._container.id}
 
-	var jsonLatLng = JSON.stringify( e.latlng);
-	console.log( jsonLatLng);
+	var messageToServerString = JSON.stringify( messageToServer );
+	console.log( messageToServerString);	
 
 	oReq = new XMLHttpRequest();
 	// oReq.responseType = 'json';
 	oReq.addEventListener("load", reqListener);
 	oReq.open("POST", targetService +'translateLatLngInSourceCountryToLatLngInTargetCountry');
 	oReq.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-	oReq.send( jsonLatLng);				
+	oReq.send( messageToServerString);				
 };
 
 function reqListener( evt) {
@@ -57,17 +62,16 @@ function reqListener( evt) {
 	latTarget = parseFloat(jsonResponse.LatTarget);
 	lngTarget = parseFloat(jsonResponse.LngTarget);
 
-	xSpead = parseFloat(jsonResponse.Xspread);
-	ySpead = parseFloat(jsonResponse.Yspread);
-
 	message = "Territory X="+ 
-		Math.floor(100*jsonResponse.Xspread)+" Y="+
-		Math.floor(100*jsonResponse.Yspread);
-			
-	L.marker([lat, lng]).addTo(france)
+		Math.floor(100*jsonResponse.X)+" Y="+
+		Math.floor(100*jsonResponse.Y);
+	
+
+		
+	L.marker([lat, lng]).addTo( mapOfMaps.get( jsonResponse.Source))
 		.bindPopup( message).openPopup();
 		
-	L.marker([latTarget, lngTarget]).addTo(haiti)
+	L.marker([latTarget, lngTarget]).addTo( mapOfMaps.get( jsonResponse.Target))
 		.bindPopup( message).openPopup();
 
 	for (var i = 0; i < jsonResponse.SourceBorderPoints[0].length; i++) {
@@ -76,7 +80,7 @@ function reqListener( evt) {
 		lat = parseFloat(jsonResponse.SourceBorderPoints[0][i][1]);
 
 		marker = new L.marker([lat,lng], {icon: littleIcon})
-			.addTo(france);
+			.addTo( mapOfMaps.get( jsonResponse.Source));
 	}
 
 	for (var i = 0; i < jsonResponse.TargetBorderPoints[0].length; i++) {
@@ -85,16 +89,18 @@ function reqListener( evt) {
 		lat = parseFloat(jsonResponse.TargetBorderPoints[0][i][1]);
 
 		marker = new L.marker([lat,lng], {icon: littleIcon})
-			.addTo(haiti);
+			.addTo( mapOfMaps.get( jsonResponse.Target));
 	}
 
-	haiti.setView( [latTarget, lngTarget], france.getZoom());
+	// reset zoom & location on target map 
+	mapOfMaps.get( jsonResponse.Target).setView( [latTarget, lngTarget], 
+		mapOfMaps.get( jsonResponse.Source).getZoom());
 };
 
 
-france.on('click', onFranceMapClick);
+fra.on('click', onMapClick);
 
-var haiti = L.map('haiti').setView([18, -72], 5);
+hti.on('click', onMapClick);
 
 L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
 	maxZoom: 18,
@@ -104,4 +110,4 @@ L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=p
 		'<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
 		'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
 	id: 'mapbox.streets'
-}).addTo(haiti);
+}).addTo(hti);

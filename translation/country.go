@@ -180,10 +180,8 @@ func (country *Country) ComputeBaryCenters() {
 	}
 }
 
-// given lat, lng
-// return xClosest, yClosest, distance, latClosest, lngClosest of the closest body within the country (original position)
+// given lat, lng, get coords after simulation
 func (country *Country) ClosestBodyInOriginalPosition(lat, lng float64) (
-	xRelClosest, yRelClosest,
 	distance,
 	latClosest, lngClosest,
 	xSpread, ySpread float64,
@@ -206,8 +204,8 @@ func (country *Country) ClosestBodyInOriginalPosition(lat, lng float64) (
 		}
 	}
 
-	xRelClosest = (*country.bodiesOrig)[closestIndex].X
-	yRelClosest = (*country.bodiesOrig)[closestIndex].Y
+	xRelClosest := (*country.bodiesOrig)[closestIndex].X
+	yRelClosest := (*country.bodiesOrig)[closestIndex].Y
 
 	latOptimClosest, lngOptimClosest := country.XY2LatLng(xRelClosest, yRelClosest)
 
@@ -220,10 +218,10 @@ func (country *Country) ClosestBodyInOriginalPosition(lat, lng float64) (
 
 	Info.Printf("ClosestBodyInOriginalPosition village %f %f index %d", xSpread, ySpread, closestIndex)
 
-	return xRelClosest, yRelClosest, minDistance, latOptimClosest, lngOptimClosest, xSpread, ySpread, closestIndex
+	return minDistance, latOptimClosest, lngOptimClosest, xSpread, ySpread, closestIndex
 }
 
-func (country *Country) XYSpreadToLatLngOrig(x, y float64) (lat, lng float64) {
+func (country *Country) XYToLatLng(x, y float64) (lat, lng float64) {
 
 	Info.Printf("XYSpreadToLatLngOrig input x %f y %f", x, y)
 
@@ -290,7 +288,7 @@ func (country *Country) LatLngToTerritoryBorder(lat, lng float64) PointList {
 	Info.Printf("LatLngToTerritoryBorder country %s input lat %f lng %f", country.Name, lat, lng)
 
 	// from input lat, lng, get the xSpread, ySpread
-	_, _, _, _, _, xSpread, ySpread, _ := country.ClosestBodyInOriginalPosition(lat, lng)
+	_, _, _, xSpread, ySpread, _ := country.ClosestBodyInOriginalPosition(lat, lng)
 	Info.Printf("LatLngToTerritoryBorder country %s input xSpread %f ySpread %f", country.Name, xSpread, ySpread)
 
 	points := country.XYSpreadToTerritoryBorder(xSpread, ySpread)

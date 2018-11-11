@@ -20,18 +20,19 @@ type testStruct struct {
 	X1, X2, Y1, Y2 float64
 }
 
-type LatLng struct {
+type LatLngCountry struct {
 	Lat, Lng float64
+	Country  string
 }
 
-var lastReqest LatLng // store last request.
+var lastReqest LatLngCountry // store last request.
 
 type VillageCoordResponse struct {
-	X, Y                   float64
+	Source, Target         string
 	Distance               float64
 	LatClosest, LngClosest float64
 	LatTarget, LngTarget   float64
-	Xspread, Yspread       float64
+	X, Y                   float64
 	SourceBorderPoints     GeoJSONBorderCoordinates
 	TargetBorderPoints     GeoJSONBorderCoordinates
 }
@@ -39,60 +40,61 @@ type VillageCoordResponse struct {
 // get village coordinates from lat/long
 func GetTranslationResult(w http.ResponseWriter, req *http.Request) {
 
-	server.Info.Printf("translateLatLngInSourceCountryToLatLngInTargetCountry begin")
-
 	// parse lat long from client
 	decoder := json.NewDecoder(req.Body)
-	var ll LatLng
-	err := decoder.Decode(&ll)
+	var llc LatLngCountry
+	err := decoder.Decode(&llc)
 	if err != nil {
 		log.Println("error decoding ", err)
 	} else {
-		lastReqest = ll
+		lastReqest = llc
 	}
-	server.Info.Printf("translateLatLngInSourceCountryToLatLngInTargetCountry for lat %f, lng %f", ll.Lat, ll.Lng)
 
-	x, y, distance, latClosest, lngClosest, xSpread, ySpread, _ :=
-		translation.GetTranslateCurrent().ClosestBodyInOriginalPosition(ll.Lat, ll.Lng)
-	server.Info.Printf("translateLatLngInSourceCountryToLatLngInTargetCountry x, y is %f %f, distance %f", x, y, distance)
+	// check wether country is the source country
+	// if not, switch source & target
+	sourceCountry := translation.GetTranslateCurrent().GetSourceCountryName()
+	if llc.Country != sourceCountry {
+		translation.GetTranslateCurrent().Swap()
+	}
 
-	var xy VillageCoordResponse
-	xy.X = x
-	xy.Y = y
-	xy.Distance = distance
-	xy.LatClosest = latClosest
-	xy.LngClosest = lngClosest
-	xy.Xspread = xSpread
-	xy.Yspread = ySpread
+	distance, latClosest, lngClosest, xSpread, ySpread, _ :=
+		translation.GetTranslateCurrent().BodyCoordsInSourceCountry(llc.Lat, llc.Lng)
 
-	latTarget, lngTarget := translation.GetTranslateCurrent().XYSpreadToLatLngInTargetCountry(xSpread, ySpread)
-	xy.LatTarget = latTarget
-	xy.LngTarget = lngTarget
+	var response VillageCoordResponse
+	response.Source = translation.GetTranslateCurrent().GetSourceCountryName()
+	response.Target = translation.GetTranslateCurrent().GetTargetCountryName()
+	response.Distance = distance
+	response.LatClosest = latClosest
+	response.LngClosest = lngClosest
+	response.X = xSpread
+	response.Y = ySpread
+
+	latTarget, lngTarget := translation.GetTranslateCurrent().LatLngToXYInTargetCountry(xSpread, ySpread)
+	response.LatTarget = latTarget
+	response.LngTarget = lngTarget
 
 	// add source border
-	sourceBorderPoints := translation.GetTranslateCurrent().SourceBorder(ll.Lat, ll.Lng)
-	xy.SourceBorderPoints = make(GeoJSONBorderCoordinates, 1)
-	xy.SourceBorderPoints[0] = make([][]float64, len(sourceBorderPoints))
+	sourceBorderPoints := translation.GetTranslateCurrent().SourceBorder(llc.Lat, llc.Lng)
+	response.SourceBorderPoints = make(GeoJSONBorderCoordinates, 1)
+	response.SourceBorderPoints[0] = make([][]float64, len(sourceBorderPoints))
 	for idx := range sourceBorderPoints {
-		xy.SourceBorderPoints[0][idx] = make([]float64, 2)
-		xy.SourceBorderPoints[0][idx][0] = sourceBorderPoints[idx].Y // Y is longitude
-		xy.SourceBorderPoints[0][idx][1] = sourceBorderPoints[idx].X // X is latitude
+		response.SourceBorderPoints[0][idx] = make([]float64, 2)
+		response.SourceBorderPoints[0][idx][0] = sourceBorderPoints[idx].Y // Y is longitude
+		response.SourceBorderPoints[0][idx][1] = sourceBorderPoints[idx].X // X is latitude
 	}
 
 	// add target border
 	targetBorderPoints := translation.GetTranslateCurrent().TargetBorder(xSpread, ySpread)
-	xy.TargetBorderPoints = make(GeoJSONBorderCoordinates, 1)
-	xy.TargetBorderPoints[0] = make([][]float64, len(targetBorderPoints))
+	response.TargetBorderPoints = make(GeoJSONBorderCoordinates, 1)
+	response.TargetBorderPoints[0] = make([][]float64, len(targetBorderPoints))
 	for idx := range targetBorderPoints {
-		xy.TargetBorderPoints[0][idx] = make([]float64, 2)
-		xy.TargetBorderPoints[0][idx][0] = targetBorderPoints[idx].Y // Y is longitude
-		xy.TargetBorderPoints[0][idx][1] = targetBorderPoints[idx].X // X is latitude
+		response.TargetBorderPoints[0][idx] = make([]float64, 2)
+		response.TargetBorderPoints[0][idx][0] = targetBorderPoints[idx].Y // Y is longitude
+		response.TargetBorderPoints[0][idx][1] = targetBorderPoints[idx].X // X is latitude
 	}
 
-	VillageCoordResponsejson, _ := json.MarshalIndent(xy, "", "	")
+	VillageCoordResponsejson, _ := json.MarshalIndent(response, "", "	")
 	fmt.Fprintf(w, "%s", VillageCoordResponsejson)
-
-	server.Info.Printf("translateLatLngInSourceCountryToLatLngInTargetCountry end")
 }
 
 // return all points within source borders
@@ -103,7 +105,7 @@ func AllSourceBorderPointsCoordinates(w http.ResponseWriter, req *http.Request) 
 
 	// parse lat long from client
 	decoder := json.NewDecoder(req.Body)
-	var ll LatLng
+	var ll LatLngCountry
 	err := decoder.Decode(&ll)
 	if err != nil {
 		log.Println("error decoding ", err)
@@ -132,15 +134,14 @@ func VillageTargetBorder(w http.ResponseWriter, req *http.Request) {
 
 	// parse lat long from client
 	decoder := json.NewDecoder(req.Body)
-	var ll LatLng
+	var ll LatLngCountry
 	err := decoder.Decode(&ll)
 	if err != nil {
 		log.Println("error decoding ", err)
 	}
 	server.Info.Printf("villageTargetBorder for lat %f, lng %f", ll.Lat, ll.Lng)
 
-	x, y, distance, _, _, xSpread, ySpread, _ := translation.GetTranslateCurrent().ClosestBodyInOriginalPosition(ll.Lat, ll.Lng)
-	server.Info.Printf("villageTargetBorder is %f %f, distance %f", x, y, distance)
+	_, _, _, xSpread, ySpread, _ := translation.GetTranslateCurrent().BodyCoordsInSourceCountry(ll.Lat, ll.Lng)
 
 	points := translation.GetTranslateCurrent().TargetBorder(xSpread, ySpread)
 
@@ -175,7 +176,7 @@ func VillageSourceBorder(w http.ResponseWriter, req *http.Request) {
 
 	// parse lat long from client
 	decoder := json.NewDecoder(req.Body)
-	var ll LatLng
+	var ll LatLngCountry
 	err := decoder.Decode(&ll)
 	if err != nil {
 		log.Println("error decoding ", err)
