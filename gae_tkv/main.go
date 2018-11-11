@@ -17,9 +17,6 @@ func main() {
 
 	http.HandleFunc("/translateLatLngInSourceCountryToLatLngInTargetCountry",
 		handler.GetTranslationResult)
-	http.HandleFunc("/villageTargetBorder", handler.VillageTargetBorder)
-	http.HandleFunc("/villageSourceBorder", handler.VillageSourceBorder)
-	http.HandleFunc("/allSourcPointsCoordinates", handler.AllSourceBorderPointsCoordinates)
 	http.HandleFunc("/checkEnv", checkEnv)
 
 	// that is all that is needed to serve the file at the root level

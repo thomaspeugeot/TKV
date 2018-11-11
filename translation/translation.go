@@ -91,7 +91,7 @@ func (t *Translation) LatLngToXYInTargetCountry(x, y float64) (latTarget, lngTar
 // from a coordinate in source coutry, get border
 func (t *Translation) TargetBorder(x, y float64) PointList {
 
-	return t.targetCountry.XYSpreadToTerritoryBorder(x, y)
+	return t.targetCountry.XYtoTerritoryBodies(x, y)
 }
 
 func (t *Translation) SourceBorder(lat, lng float64) PointList {

@@ -8,10 +8,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/thomaspeugeot/pq"
-	"github.com/thomaspeugeot/tkv/server"
 	"github.com/thomaspeugeot/tkv/translation"
 )
 
@@ -95,118 +93,6 @@ func GetTranslationResult(w http.ResponseWriter, req *http.Request) {
 
 	VillageCoordResponsejson, _ := json.MarshalIndent(response, "", "	")
 	fmt.Fprintf(w, "%s", VillageCoordResponsejson)
-}
-
-// return all points within source borders
-// get village coordinates from lat/long
-func AllSourceBorderPointsCoordinates(w http.ResponseWriter, req *http.Request) {
-
-	server.Info.Printf("allSourcPointsCoordinates begin")
-
-	// parse lat long from client
-	decoder := json.NewDecoder(req.Body)
-	var ll LatLngCountry
-	err := decoder.Decode(&ll)
-	if err != nil {
-		log.Println("error decoding ", err)
-		ll = lastReqest
-	}
-	server.Info.Printf("allSourcPointsCoordinates for lat %f, lng %f", ll.Lat, ll.Lng)
-
-	points := translation.GetTranslateCurrent().SourceBorder(ll.Lat, ll.Lng)
-
-	coord := make(GeoJSONBorderCoordinates, 1)
-	coord[0] = make([][]float64, len(points))
-	for idx := range points {
-		coord[0][idx] = make([]float64, 2)
-		coord[0][idx][0] = points[idx].Y // Y is longitude
-		coord[0][idx][1] = points[idx].X // X is latitude
-	}
-
-	allSourcPointsCoordinatesResponsejson, _ := json.MarshalIndent(coord, "", "	")
-	fmt.Fprintf(w, "%s", allSourcPointsCoordinatesResponsejson)
-
-	server.Info.Printf("allSourcPointsCoordinates end")
-}
-
-// get target village border from lat/long
-func VillageTargetBorder(w http.ResponseWriter, req *http.Request) {
-
-	// parse lat long from client
-	decoder := json.NewDecoder(req.Body)
-	var ll LatLngCountry
-	err := decoder.Decode(&ll)
-	if err != nil {
-		log.Println("error decoding ", err)
-	}
-	server.Info.Printf("villageTargetBorder for lat %f, lng %f", ll.Lat, ll.Lng)
-
-	_, _, _, xSpread, ySpread, _ := translation.GetTranslateCurrent().BodyCoordsInSourceCountry(ll.Lat, ll.Lng)
-
-	points := translation.GetTranslateCurrent().TargetBorder(xSpread, ySpread)
-
-	// available convex hull code (in perfect precision but robust)
-	ps := make([]pq.Point2q, len(points))
-	for i := 0; i < len(points); i++ {
-		//
-		xf, yf := points[i].X, points[i].Y
-		//
-		xq, yq := pq.FtoQ(xf), pq.FtoQ(yf)
-		ps[i] = pq.XYtoP(xq, yq)
-	}
-
-	T := time.Now()
-	lower, upper := pq.ParConvHull2q(4, ps)
-	TT := time.Since(T)
-	server.Info.Printf("villageTargetBorder time to compute convex hull %s", TT.String())
-
-	server.Info.Printf("Lower# %d", len(lower))
-	server.Info.Printf("Upper# %d", len(upper))
-
-	PQtoGeoJSONBorderCoordinates(lower, upper)
-
-	VillageBorderResponsejson, _ := json.MarshalIndent(PQtoGeoJSONBorderCoordinates(lower, upper), "", "	")
-	fmt.Fprintf(w, "%s", VillageBorderResponsejson)
-}
-
-// get target village border from lat/long
-func VillageSourceBorder(w http.ResponseWriter, req *http.Request) {
-
-	server.Info.Printf("villageSourceBorder begin")
-
-	// parse lat long from client
-	decoder := json.NewDecoder(req.Body)
-	var ll LatLngCountry
-	err := decoder.Decode(&ll)
-	if err != nil {
-		log.Println("error decoding ", err)
-	}
-	server.Info.Printf("villageSourceBorder for lat %f, lng %f", ll.Lat, ll.Lng)
-
-	points := translation.GetTranslateCurrent().SourceBorder(ll.Lat, ll.Lng)
-
-	// available convex hull code (in perfect precision but robust)
-	ps := make([]pq.Point2q, len(points))
-	for i := 0; i < len(points); i++ {
-		//
-		xf, yf := points[i].X, points[i].Y
-		//
-		xq, yq := pq.FtoQ(xf), pq.FtoQ(yf)
-		ps[i] = pq.XYtoP(xq, yq)
-	}
-
-	T := time.Now()
-	lower, upper := pq.ParConvHull2q(4, ps)
-	TT := time.Since(T)
-	server.Info.Printf("villageTargetBorder time to compute convex hull %s", TT.String())
-
-	server.Info.Printf("Lower# %d", len(lower))
-	server.Info.Printf("Upper# %d", len(upper))
-
-	VillageBorderResponsejson, _ := json.MarshalIndent(PQtoGeoJSONBorderCoordinates(lower, upper), "", "	")
-	fmt.Fprintf(w, "%s", VillageBorderResponsejson)
-
-	server.Info.Printf("villageSourceBorder end")
 }
 
 // Type GeoJSONBorderCoordinates is an array of an array of an array of int
