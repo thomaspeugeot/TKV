@@ -25,7 +25,7 @@ var oReq
 
 var littleIcon = L.icon({
 	iconUrl: '9pixels.png',
-	iconSize:     [3, 3], // size of the icon
+	iconSize:     [5, 5], // size of the icon
 	iconAnchor:   [0, 0], // point of the icon which will correspond to marker's location
 });
 
@@ -79,7 +79,7 @@ function reqListener( evt) {
 		lng = parseFloat(jsonResponse.SourceBorderPoints[0][i][0]);
 		lat = parseFloat(jsonResponse.SourceBorderPoints[0][i][1]);
 
-		marker = new L.marker([lat,lng], {icon: littleIcon})
+		marker = new L.marker([lat,lng], {icon: littleIcon, opacity: 0.3} )
 			.addTo( mapOfMaps.get( jsonResponse.Source));
 	}
 
@@ -88,7 +88,7 @@ function reqListener( evt) {
 		lng = parseFloat(jsonResponse.TargetBorderPoints[0][i][0]);
 		lat = parseFloat(jsonResponse.TargetBorderPoints[0][i][1]);
 
-		marker = new L.marker([lat,lng], {icon: littleIcon})
+		marker = new L.marker([lat,lng], {icon: littleIcon, opacity: 0.3})
 			.addTo( mapOfMaps.get( jsonResponse.Target));
 	}
 
