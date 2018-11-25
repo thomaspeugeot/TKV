@@ -1,5 +1,4 @@
 runtime: go111
-api_version: go1
 
 # currently, the server memory footprint is above 512 MB, therefore, it cannot 
 # run on the default (F1) config. 
@@ -13,6 +12,10 @@ handlers:
   static_files: tkv-client.html
   upload: tkv-client.html
 
+- url: /9pixels.png
+  static_files: 9pixels.png
+  upload: 9pixels.png
+
 - url: /
   static_files: tkv-client.html
   upload: tkv-client.html
@@ -24,4 +27,4 @@ handlers:
   static_dir: js
   
 - url: /.*
-  script: _go_app
+  script: auto

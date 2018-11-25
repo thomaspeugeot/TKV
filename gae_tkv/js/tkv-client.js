@@ -1,206 +1,113 @@
+var fra = L.map('fra').setView([47, 0], 5);
+var hti = L.map('hti').setView([18, -72], 5);
 
+var mapOfMaps = new Map();
 
-var app = angular.module("demoapp", ['leaflet-directive']);
+mapOfMaps.set( "fra", fra);
+mapOfMaps.set( "hti", hti);
 
-// var hostname = "https://tenktorg.appspot.com/"
+L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+	maxZoom: 18,
+	attribution: 
+		'A propos 10 000 territories; <a href="https://10ktblog.wordpress.com/a-propos/">10 000</a> contributors, ' +
+		'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+		'<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+		'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+	id: 'mapbox.streets'
+}).addTo(fra);
+
 var hostname
 var protocol
 var port
 var targetService
 
-app.controller("EventsController", [ '$scope', '$http', function($scope, $http) {
+var oReq 
 
-	angular.extend($scope, {
-		france: {
-			lat: 47.374004,
-			lng: 4.890359,
-			zoom: 5
-		},
-		haiti: {
-			lat: 19,
-			lng: -73,
-			zoom: 5
-		},
-		defaults: {
-			scrollWheelZoom: false
-		},
-		events: {
-			map: {
-				enable: ['click'],
-				logic: 'emit'
-			}
-		},
-		
-		villageBorders : {
-			data: {
-			  "type": "FeatureCollection",
-			  "features": [
-				{
-				  "type": "Feature",
-				  "properties": {},
-				  "geometry": {
-					"type": "Polygon",
-					"coordinates": []
-				  }
-				},
-				{
-				  "type": "Feature",
-				  "properties": {},
-				  "geometry": {
-					"type": "Polygon",
-					"coordinates": []
-				  }
-				}
-				
-			  ]
-			},
-			style: {
-				fillColor: "green",
-					weight: 2,
-					opacity: 1,
-					color: 'blue',
-					dashArray: '3',
-					fillOpacity: 0.1
-			}
-		}
-	});
+var littleIcon = L.icon({
+	iconUrl: '9pixels.png',
+	iconSize:     [5, 5], // size of the icon
+	iconAnchor:   [0, 0], // point of the icon which will correspond to marker's location
+});
+
+function onMapClick(e) {
+
+	hostname = window.location.hostname
+	protocol = window.location.protocol
+	port = window.location.port
+	targetService = protocol + "//"+ hostname + ":" + port + "/"
+
+	messageToServer = { lat: e.latlng.lat , lng: e.latlng.lng, country: this._container.id}
+
+	var messageToServerString = JSON.stringify( messageToServer );
+	console.log( messageToServerString);	
+
+	oReq = new XMLHttpRequest();
+	// oReq.responseType = 'json';
+	oReq.addEventListener("load", reqListener);
+	oReq.open("POST", targetService +'translateLatLngInSourceCountryToLatLngInTargetCountry');
+	oReq.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+	oReq.send( messageToServerString);				
+};
+
+function reqListener( evt) {
 	
-	$scope.markers = {};
-	$scope.targetMarkers = {};
+	var jsonResponse = JSON.parse( this.response)
+	
+	console.log('village translateLatLngInSourceCountryToLatLngInTargetCountry answer', 
+		jsonResponse.X, jsonResponse.Y);
 
-	$scope.$on('leafletDirectiveMap.click', function(event, args){
+	lat = parseFloat(jsonResponse.LatClosest);
+	lng = parseFloat(jsonResponse.LngClosest);
 
-		var jsonLatLng = JSON.stringify( args.leafletEvent.latlng);
-		console.log( jsonLatLng);
+	latTarget = parseFloat(jsonResponse.LatTarget);
+	lngTarget = parseFloat(jsonResponse.LngTarget);
 
-		console.log("post for translateLatLngInSourceCountryToLatLngInTargetCountry before");
-				
-		hostname = window.location.hostname
-		protocol = window.location.protocol
-		port = window.location.port
-		targetService = protocol + "//"+ hostname + ":" + port + "/"
+	message = "Territory X="+ 
+		Math.floor(100*jsonResponse.X)+" Y="+
+		Math.floor(100*jsonResponse.Y);
+	
 
-		$http.post( targetService +'translateLatLngInSourceCountryToLatLngInTargetCountry', jsonLatLng ).then
-		(
-			function(response) { // success handler
-				console.log(response.status);
-				console.log('village translateLatLngInSourceCountryToLatLngInTargetCountry answer', response.data.X, response.data.Y);
-
-				message = "Territory X="+ Math.floor(100*response.data.X)+" Y="+Math.floor(100*response.data.Y);
-
-				parseFloat(response.data.LatClosest);
-
-				lat = parseFloat(response.data.LatClosest);
-				lng = parseFloat(response.data.LngClosest);
-
-				latTarget = parseFloat(response.data.LatTarget);
-				lngTarget = parseFloat(response.data.LngTarget);
-
-				xSpead = parseFloat(response.data.Xspread);
-				ySpead = parseFloat(response.data.Yspread);
-
-				message = "Territory X="+ Math.floor(100*response.data.Xspread)+" Y="+Math.floor(100*response.data.Yspread);
-				
-				$scope.targetMarkers['targetVillage'] = {
-					lat: latTarget,
-					lng: lngTarget,
-					message: message, 
-					focus: false,
-					options: {
-						noHide: true
-					}
-				}
-
-				// reset source border markers
-				$scope.markers = []
-				$scope.markers = new Array()
-				$scope.markers.length = response.data.SourceBorderPoints[0].length +1
-				
-				$scope.markers[0] = {
-					lat: args.leafletEvent.latlng.lat,
-					lng: args.leafletEvent.latlng.lng,
-					message: message, 
-					focus: true,
-					draggable: false,
-					options: {
-						noHide: true
-					}
-				};	
-
-				for (var i = 0; i < $scope.sourceBorderMarkers.length; i++) {
-					lat = parseFloat( response.data.SourceBorderPoints[0][i][0]);
-					lng = parseFloat( response.data.SourceBorderPoints[0][i][1]);
-
-					$scope.markers[i] = {
-						lat: lat,
-						lng: lng,
-						focus: true,
-						draggable: false,
-						options: {
-							noHide: true
-						}
-					};	
-				}
-
-				$http.post(targetService + 'villageTargetBorder', jsonLatLng ).then
-				(
-					function(response) { // success handler
-						console.log(response.status);
-						console.log('target village villageCoordinates before ', $scope.villageBorders.data.features[0].geometry.coordinates[0] )
-						
-						// reset source border points
-						$scope.villageBorders.data.features[0].geometry.coordinates = [ [ [] ] ];
-						$scope.villageBorders.data.features[0].geometry.coordinates[0] = new Array()
-						$scope.villageBorders.data.features[0].geometry.coordinates[0].length = response.data[0].length
-						
-						for (var i = 0; i < response.data[0].length; i++) {
-							$scope.villageBorders.data.features[0].geometry.coordinates[0][i] = new Array(2)
-							$scope.villageBorders.data.features[0].geometry.coordinates[0][i][0] = parseFloat(response.data[0][i][0]);
-							$scope.villageBorders.data.features[0].geometry.coordinates[0][i][1] = parseFloat(response.data[0][i][1]);
-						}
-
-						console.log('target village villageCoordinates answer ', $scope.villageBorders.data.features[0].geometry.coordinates[0] )
-
-						$http.post(targetService + 'villageSourceBorder', jsonLatLng ).then
-						(
-							function(response) { // success handler
-								console.log(response.status);
-								console.log('source village villageCoordinates before ', $scope.villageBorders.data.features[1].geometry.coordinates[0] )		
-										
-								// convert response data field to float
-								$scope.villageBorders.data.features[1].geometry.coordinates = [ [ [] ] ];
-								$scope.villageBorders.data.features[1].geometry.coordinates[0] = new Array()
-								$scope.villageBorders.data.features[1].geometry.coordinates[0].length = response.data[0].length
-								
-								for (var i = 0; i < response.data[0].length; i++) {
-									$scope.villageBorders.data.features[1].geometry.coordinates[0][i] = new Array(2)
-									$scope.villageBorders.data.features[1].geometry.coordinates[0][i][0] = parseFloat(response.data[0][i][0]);
-									$scope.villageBorders.data.features[1].geometry.coordinates[0][i][1] = parseFloat(response.data[0][i][1]);
-								}
-
-								console.log('source village villageCoordinates answer ', $scope.villageBorders.data.features[1].geometry.coordinates[0] )
-
-							}, 
-							function(errResponse) { // error handler
-								console.error('error while posting jsonLatLng');
-								console.error(errResponse);
-							}
-						);
-					}, 
-					function(errResponse) { // error handler
-						console.error('error while posting jsonLatLng');
-						console.error(errResponse);
-					}
-				);
-			}, 
-			function(errResponse) { // error handler
-				console.error('error while posting jsonLatLng');
-				console.error(errResponse);
-			}
-		);
 		
-		console.log("post for translateLatLngInSourceCountryToLatLngInTargetCountry is over");
+	L.marker([lat, lng]).addTo( mapOfMaps.get( jsonResponse.Source))
+		.bindPopup( message).openPopup();
+		
+	L.marker([latTarget, lngTarget]).addTo( mapOfMaps.get( jsonResponse.Target))
+		.bindPopup( message).openPopup();
+
+	for (var i = 0; i < jsonResponse.SourceBorderPoints[0].length; i++) {
+
+		lng = parseFloat(jsonResponse.SourceBorderPoints[0][i][0]);
+		lat = parseFloat(jsonResponse.SourceBorderPoints[0][i][1]);
+
+		marker = new L.marker([lat,lng], {icon: littleIcon, opacity: 0.3} )
+			.addTo( mapOfMaps.get( jsonResponse.Source));
+	}
+
+	for (var i = 0; i < jsonResponse.TargetBorderPoints[0].length; i++) {
+
+		lng = parseFloat(jsonResponse.TargetBorderPoints[0][i][0]);
+		lat = parseFloat(jsonResponse.TargetBorderPoints[0][i][1]);
+
+		marker = new L.marker([lat,lng], {icon: littleIcon, opacity: 0.3})
+			.addTo( mapOfMaps.get( jsonResponse.Target));
+	}
+
+	// reset zoom & location on target map 
+	mapOfMaps.get( jsonResponse.Target).setView( [latTarget, lngTarget], 
+		mapOfMaps.get( jsonResponse.Source).getZoom());
+};
 
 
-	}); // end of click
-}]);
+fra.on('click', onMapClick);
+
+hti.on('click', onMapClick);
+
+L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+	maxZoom: 18,
+	attribution: 
+		'A propos 10 000 territories; <a href="https://10ktblog.wordpress.com/a-propos/">10 000</a> contributors, ' +
+		'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+		'<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+		'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+	id: 'mapbox.streets'
+}).addTo(hti);

@@ -293,3 +293,36 @@ PUTAIN CA MARCHE !!!!!
 ![First working deployment](victoryImage.png)
 
 Except it works from the firefox on my mac. Not from safari on the ipad or the iphone.
+
+## 2018, november the 15th
+
+many issues have been solved. Let's update production server
+
+'''
+cd goroot/src/github.com/thomaspeugeot/tkv/gae_tkv/
+dev_appserver.py app.yaml
+'''
+after a few changes, it works OK
+upgrade to gcloud v226
+'''
+gcloud --quiet app deploy
+
+Beginning deployment of service [default]...
+╔════════════════════════════════════════════════════════════╗
+╠═ Uploading 157 files to Google Cloud Storage              ═╣
+╚════════════════════════════════════════════════════════════╝
+File upload done.
+ERROR: (gcloud.app.deploy) INVALID_ARGUMENT: The following fields are not allowed in app.yaml: api_version.
+'''
+line is now removed from the app.yaml
+'''
+ERROR: (gcloud.app.deploy) INVALID_ARGUMENT: script field for handler '/.*' must be set to 'auto' for runtime go111.
+'''
+With
+'''
+- url: /.*
+  script: auto
+'''
+IT now works
+
+

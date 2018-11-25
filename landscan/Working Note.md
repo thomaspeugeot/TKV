@@ -15,7 +15,7 @@ No technical documentation is provided
 The "Country" directory contains a "dbf" file and 2 subdirectories
 - countries
 - info
-"countries" contains some "adf" files and a "metadat.xml" files
+"countries" contains some "adf" files and a "metadata.xml" files
 "info" contains one "arc.dir" file and 3 pairs of "arc000x.dat" and "arc000x.nit" files
 
 The "Population" directory contains a "lsop2014.lyr" file and 2 directories
@@ -50,3 +50,8 @@ That is chinese to me. "nontopological geometry" ? "spatial features" ? "data se
 - dBASE table:   counties.dbf
 
 Many files in the haiti landscan are not of those types
+
+11 november 2018
+__________________
+Landscan is no shapefile, landscan is GRID raster file
+
