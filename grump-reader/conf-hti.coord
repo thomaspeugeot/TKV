@@ -1,7 +1,7 @@
 {
 	"Name": "hti",
-	"NCols": 480,
-	"NRows": 480,
-	"XllCorner": -75,
-	"YllCorner": 17
+	"NCols": 343,
+	"NRows": 249,
+	"XllCorner": -74,
+	"YllCorner": 18
 }

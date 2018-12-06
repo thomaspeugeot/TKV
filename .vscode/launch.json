@@ -14,7 +14,7 @@
             "host": "127.0.0.1",
             "program": "${workspaceFolder}/grump-reader/grump-reader.go",
             "env": {},
-            "args": ["-sampleRatio=100", "-fibo", "-targetMaxBodies=1000000"],
+            "args": ["-country=usa", "-tkvdata=/Users/thomaspeugeot/the-mapping-data", "-targetMaxBodies=1500000"],
             "cwd": "${workspaceFolder}/grump-reader",
             // "showLog": true,
             // "trace": "verbose",

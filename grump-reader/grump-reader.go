@@ -8,19 +8,20 @@
 //
 package main
 
-import "flag"
-import "math"
+import (
+	"bufio"
+	"flag"
+	"fmt"
+	"log"
+	"math"
+	"math/rand"
+	"os"
+	"path/filepath"
 
-import "math/rand"
-import "fmt"
-import "os"
-import "log"
-import "bufio"
-import "path/filepath"
-import "github.com/thomaspeugeot/tkv/barnes-hut"
-import "github.com/thomaspeugeot/tkv/quadtree"
-import "github.com/thomaspeugeot/tkv/grump"
-import "github.com/gyuho/goraph"
+	"github.com/thomaspeugeot/tkv/barnes-hut"
+	"github.com/thomaspeugeot/tkv/grump"
+	"github.com/thomaspeugeot/tkv/quadtree"
+)
 
 // coordinates of arrangement of circle packing in a square
 type circleCoord struct {
@@ -98,7 +99,7 @@ func main() {
 			return
 		}
 	}
-	
+
 	// parse the grump
 	var word int
 	scanner := bufio.NewScanner(grumpFile)
@@ -136,28 +137,31 @@ func main() {
 	// scan the file and store result in inputPopulationMatrix
 	for row := 0; row < country.NRows; row++ {
 		lat := country.Row2Lat(row)
-		inputPopulationMatrix[(country.NRows-row-1)] = make( []float64, country.NCols)
+		inputPopulationMatrix[(country.NRows - row - 1)] = make([]float64, country.NCols)
 		for col := 0; col < country.NCols; col++ {
 			scanner.Scan()
 			// lng := float64(country.XllCorner) + (float64(col)*colLngWidth)
 
 			var nbIndividualsInCell float64
 			fmt.Sscanf(scanner.Text(), "%f", &nbIndividualsInCell)
+
+			if -2147483647 == nbIndividualsInCell {
+				nbIndividualsInCell = 0
+			}
+
 			popTotal += nbIndividualsInCell
 
-			inputPopulationMatrix[(country.NRows-row-1)][col] = nbIndividualsInCell
+			inputPopulationMatrix[(country.NRows - row - 1)][col] = nbIndividualsInCell
 		}
-		fmt.Printf("\rrow %5d lat %2.3f total %f", row, lat, popTotal)		
+		fmt.Printf("\rrow %5d lat %2.3f total %f", row, lat, popTotal)
 	}
 	fmt.Printf("\n")
 	grump.Info.Printf("reading grump file is over, closing")
 	grumpFile.Close()
 	fmt.Printf("pop total\t\t\t%10.0f\n", popTotal)
-	cutoff := popTotal/float64(targetMaxBodies)
+	cutoff := popTotal / float64(targetMaxBodies)
 	fmt.Printf("pop cutoff per cell\t%10.0f\n", cutoff)
 
-	
-	
 	// get the arrangement
 	var arrangements arrangementsStore
 	if !*fiboPtr {
@@ -199,7 +203,7 @@ func main() {
 		}
 		grump.Info.Printf("reading circle packing files is over")
 	} else {
-		maxCirclePerCell = 3000
+		maxCirclePerCell = 10000
 		arrangements = make(arrangementsStore, maxCirclePerCell+1)
 		goldentRatio := 1.0 + math.Sqrt(5.0)
 		for nbCircles := 1; nbCircles <= maxCirclePerCell; nbCircles++ {
@@ -236,6 +240,7 @@ func main() {
 	// 2D array to store wether the cell has no bodies but some pop
 	parselyPopulatedCellCoords := make([][]bool, country.NRows)
 
+	grump.Info.Printf("Parsing the pop cells and generating bodies")
 	for row := 0; row < country.NRows; row++ {
 		lat := country.Row2Lat(row)
 
@@ -244,17 +249,22 @@ func main() {
 		for col := 0; col < country.NCols; col++ {
 			lng := float64(country.XllCorner) + (float64(col) * colLngWidth)
 
-
 			// compute relative coordinate of the cell
 			relX, relY := country.LatLng2XY(lat, lng)
 
 			// fetch count of the cell
 			nbIndividualsInCell := inputPopulationMatrix[row][col]
 
+			// if cell is -2147483647, then set it to 0
+			if -2147483647 == nbIndividualsInCell {
+				nbIndividualsInCell = 0
+				inputPopulationMatrix[row][col] = 0
+			}
+
 			// how many bodies ? it is maxBodies *( nbIndividualsInCell / country.PCount)
 			nbBodiesInCell := int(math.Floor(float64(targetMaxBodies) * nbIndividualsInCell / popTotal))
 
-			massPerBody := float64(nbIndividualsInCell) / float64(nbBodiesInCell)
+			massPerBody := cutoff
 
 			if nbBodiesInCell == 0 {
 				nbCellsWithZeroBodies++
@@ -292,101 +302,31 @@ func main() {
 		}
 	}
 
-	// construct the nodes of the graph of parsely populated cells
-	graph := goraph.NewGraph()
-	for row := 0; row < country.NRows; row++ {
-		for col := 0; col < country.NCols; col++ {
-			if parselyPopulatedCellCoords[row][col] == true {
-				nodeID := fmt.Sprintf("%d-%d", row, col)
-				n := goraph.NewNode(nodeID)
-				graph.AddNode(n)
-			}
+	arrangements = nil
+	var popInParselyPopulatedCells, notAccountedForPop float64
 
-		}
+	// since this is a memory hungry operation
+	// the following operation is split among set of rows
+	nbChunk := 10
+	for chunk := 0; chunk < nbChunk; chunk++ {
+
+		grump.Info.Printf("%d/%d to %d/%d", chunk, nbChunk, chunk+1, nbChunk)
+		grump.AddBodiesOfParselyPopulatedCells(
+			chunk*(country.NRows/nbChunk),
+			(chunk+1)*(country.NRows/nbChunk),
+			&country,
+			parselyPopulatedCellCoords,
+			inputPopulationMatrix,
+			colLngWidth,
+			cutoff,
+			sampleRatio,
+			bodies,
+			&popInParselyPopulatedCells,
+			&notAccountedForPop)
 	}
 
-	// construct edges of the graph of parsely populated cells
-	// an edge is present if the next cell to the right or below is also
-	// parsely populated
-	for row := 0; row < country.NRows -1 ; row++ {
-		for col := 0; col < country.NCols -1; col++ {
-			if parselyPopulatedCellCoords[row][col] == true {
-
-				var from goraph.StringID
-				from = goraph.StringID(fmt.Sprintf("%d-%d", row, col))
-
-				// node to the right
-				if parselyPopulatedCellCoords[row][col+1]  == true {
-					var to goraph.StringID = goraph.StringID(fmt.Sprintf("%d-%d", row, col+1))
-					graph.AddEdge( from, to, 1.0) 
-					graph.AddEdge( to, from, 1.0) 
-				}			
-
-				// node below
-				if parselyPopulatedCellCoords[row+1][col]  == true {
-					var to goraph.StringID = goraph.StringID(fmt.Sprintf("%d-%d", row+1, col))
-					graph.AddEdge( from, to, 1.0) 
-					graph.AddEdge( to, from, 1.0) 
-				}			
-			}
-		}
-	}
-	fmt.Printf("Graph nb of nodes\t\t%10d\n", graph.GetNodeCount())
-	setOfSets := goraph.Tarjan( graph)
-	fmt.Printf("Graph number of connected graph\t%10d\n", len(setOfSets))
-
-	// parse the connected set
-	popInParselyPopulatedCells := 0.0
-	
-	// population that is not accounted for in the graph
-	notAccountedForPop := 0.0
-	for setId := 0; setId < len(setOfSets); setId++ {
-		popInGraph := 0.0
-		for nodeRank :=0 ; nodeRank < len( setOfSets[setId]); nodeRank++ {
-			nodeID := setOfSets[setId][nodeRank]
-			var row, col int
-			fmt.Sscanf(nodeID.String(), "%d-%d", &row, &col)
-			popInParselyPopulatedCells += inputPopulationMatrix[row][col]
-			popInGraph += inputPopulationMatrix[row][col]
-			
-			if(  inputPopulationMatrix[row][col] > cutoff ) {
-				grump.Error.Printf("Too much pop ! %f row %d col %d", inputPopulationMatrix[row][col], row, col)
-			}
-			
-			// generates a body if popInGraph above cutoff
-			if popInGraph > cutoff {
-				popInGraph -= cutoff
-				
-				// get lat/lng
-				lat := country.Row2Lat(row)
-				lng := float64(country.XllCorner) + (float64(col) * colLngWidth)
-				grump.Trace.Printf("%f %f", lat, lng)
-								
-				// compute relative coordinate of the cell
-				relX, relY := country.LatLng2XY(lat, lng)
-			
-				var body quadtree.Body
-				// angle := float64(i) * 2.0 * math.Pi / float64(nbBodiesInCell)
-				body.X = relX + (1.0/float64(country.NCols))*0.5
-				body.Y = relY + (1.0/float64(country.NRows))*0.5
-				body.M = cutoff
-
-				// sample bodies
-				sample := rand.Float64() * 100.0
-				if sample < sampleRatio {
-					bodies = append(bodies, body)
-				}
-			}
-			
-			// get remainder
-			if nodeRank == (len( setOfSets[setId]) -1) {
-				notAccountedForPop += popInGraph
-			}
-		}
-	}
 	fmt.Printf("Total pop in graph cells\t%10.0f\n", popInParselyPopulatedCells)
 
-	
 	// var quadtree quadtree.Quadtree
 	// quadtree.Init( &bodies)
 	// fmt.Println(" ", )
