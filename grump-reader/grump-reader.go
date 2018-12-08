@@ -114,10 +114,10 @@ func main() {
 	fmt.Sscanf(scanner.Text(), "%d", &country.NRows)
 	scanner.Scan()
 	scanner.Scan()
-	fmt.Sscanf(scanner.Text(), "%d", &country.XllCorner)
+	fmt.Sscanf(scanner.Text(), "%f", &country.XllCorner)
 	scanner.Scan()
 	scanner.Scan()
-	fmt.Sscanf(scanner.Text(), "%d", &country.YllCorner)
+	fmt.Sscanf(scanner.Text(), "%f", &country.YllCorner)
 
 	country.Serialize()
 	grump.Info.Println("country struct content is ", country)
@@ -307,7 +307,7 @@ func main() {
 
 	// since this is a memory hungry operation
 	// the following operation is split among set of rows
-	nbChunk := 10
+	nbChunk := 1
 	for chunk := 0; chunk < nbChunk; chunk++ {
 
 		grump.Info.Printf("%d/%d to %d/%d", chunk, nbChunk, chunk+1, nbChunk)

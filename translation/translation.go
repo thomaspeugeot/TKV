@@ -20,8 +20,8 @@ func GetTranslateCurrent() *Translation {
 		sourceCountry.Step = 8725
 
 		targetCountry.Name = "hti"
-		targetCountry.NbBodies = 927787
-		targetCountry.Step = 8564
+		targetCountry.NbBodies = 190948
+		targetCountry.Step = 1334
 
 		translateCurrent.Init(sourceCountry, targetCountry)
 	}

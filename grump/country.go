@@ -20,7 +20,8 @@ const GrumpSpacing float64 = 0.0083333333333
 // Country stores country meta data
 type Country struct {
 	Name                               string
-	NCols, NRows, XllCorner, YllCorner int
+	NCols, NRows int
+	XllCorner, YllCorner float64
 }
 
 // Row2Lat converts from row index to lat
