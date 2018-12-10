@@ -14,13 +14,13 @@ import (
 	"github.com/thomaspeugeot/tkv/quadtree"
 )
 
-type Country struct {
+type CountryWithBodies struct {
 	grump.Country
 
 	NbBodies int // nb of bodies according to the filename
 
 	bodiesOrig     *[]quadtree.BodyXY // original bodies position in the quatree
-	bodiesSpread   *[]quadtree.BodyXY   // bodies position in the quatree after the spread simulation
+	bodiesSpread   *[]quadtree.BodyXY // bodies position in the quatree after the spread simulation
 	VilCoordinates [][]int
 	Step           int // step when the simulation stopped
 }
@@ -48,7 +48,7 @@ var nbVillagePerAxe int = 100
 var numberOfVillagePerAxe float64 = 100.0
 
 // init variables
-func (country *Country) Init() {
+func (country *CountryWithBodies) Init() {
 
 	// unserialize from conf-<country trigram>.coord
 	// store step because the unseralize set it to a wrong value
@@ -76,7 +76,7 @@ var bodsFileReaderErr error
 
 // load configuration from filename into country
 // check that it matches the
-func (country *Country) LoadConfig(isOriginal bool) bool {
+func (country *CountryWithBodies) LoadConfig(isOriginal bool) bool {
 
 	bodsFileReaderErr = nil
 
@@ -150,7 +150,7 @@ func (country *Country) LoadConfig(isOriginal bool) bool {
 }
 
 // compute villages barycenters
-func (country *Country) ComputeBaryCenters() {
+func (country *CountryWithBodies) ComputeBaryCenters() {
 	Info.Printf("ComputeBaryCenters begins for country %s", country.Name)
 
 	// parse bodiesSpread to compute bary centers
@@ -169,7 +169,7 @@ func (country *Country) ComputeBaryCenters() {
 }
 
 // given lat, lng, get coords after simulation
-func (country *Country) ClosestBodyInOriginalPosition(lat, lng float64) (
+func (country *CountryWithBodies) ClosestBodyInOriginalPosition(lat, lng float64) (
 	distance,
 	latClosest, lngClosest,
 	xSpread, ySpread float64,
@@ -209,7 +209,7 @@ func (country *Country) ClosestBodyInOriginalPosition(lat, lng float64) (
 	return minDistance, latOptimClosest, lngOptimClosest, xSpread, ySpread, closestIndex
 }
 
-func (country *Country) XYToLatLng(x, y float64) (lat, lng float64) {
+func (country *CountryWithBodies) XYToLatLng(x, y float64) (lat, lng float64) {
 
 	Info.Printf("XYSpreadToLatLngOrig input x %f y %f", x, y)
 
@@ -238,7 +238,7 @@ func (country *Country) XYToLatLng(x, y float64) (lat, lng float64) {
 }
 
 // get the bodies of a village from x, y spread coordinates
-func (country *Country) XYtoTerritoryBodies(x, y float64) PointList {
+func (country *CountryWithBodies) XYtoTerritoryBodies(x, y float64) PointList {
 
 	points := make(PointList, 0)
 
@@ -264,7 +264,7 @@ func (country *Country) XYtoTerritoryBodies(x, y float64) PointList {
 }
 
 // given x, y of a point, return the border in the country
-func (country *Country) LatLngToTerritoryBorder(lat, lng float64) PointList {
+func (country *CountryWithBodies) LatLngToTerritoryBorder(lat, lng float64) PointList {
 
 	// from input lat, lng, get the xSpread, ySpread
 	_, _, _, xSpread, ySpread, _ := country.ClosestBodyInOriginalPosition(lat, lng)

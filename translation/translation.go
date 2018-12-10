@@ -3,27 +3,50 @@ Package translation provides functions for managing a translation between two co
 */
 package translation
 
+/* import (
+	"github.com/thomaspeugeot/tkv/grump"
+) */
+
 // Singloton pointing to the current translation
 // the singloton can be autocally initiated if it is nil
 var translateCurrent Translation
+
+// storage for all countries
+var mapOfCountries map[string]*CountryWithBodies = nil
+
+type CountrySpec struct {
+	Name           string
+	NbBodies, Step int
+}
+
+// should have done this array directly with CountryWithBodies but
+// aint compile even with
+// 	CountryWithBodies{Name: "fra", NbBodies: 934136, Step: 8725},
+var countrySpecs = []CountrySpec{
+	CountrySpec{Name: "fra", NbBodies: 934136, Step: 8725},
+	CountrySpec{Name: "hti", NbBodies: 190948, Step: 1334},
+}
 
 // Singloton pattern to init the current translation
 func GetTranslateCurrent() *Translation {
 
 	// check if the current translation is void.
-	if translateCurrent.sourceCountry == nil {
-		var sourceCountry Country
-		var targetCountry Country
+	if mapOfCountries == nil {
 
-		sourceCountry.Name = "fra"
-		sourceCountry.NbBodies = 934136
-		sourceCountry.Step = 8725
+		mapOfCountries = make(map[string]*CountryWithBodies)
 
-		targetCountry.Name = "hti"
-		targetCountry.NbBodies = 190948
-		targetCountry.Step = 1334
+		for _, countrySpec := range countrySpecs {
+			country := CountryWithBodies{}
+			country.Name = countrySpec.Name
+			country.NbBodies = countrySpec.NbBodies
+			country.Step = countrySpec.Step
+			country.Init()
 
-		translateCurrent.Init(sourceCountry, targetCountry)
+			mapOfCountries[country.Name] = &country
+		}
+
+		translateCurrent.sourceCountry = mapOfCountries["fra"]
+		translateCurrent.targetCountry = mapOfCountries["hti"]
 	}
 
 	return &translateCurrent
@@ -31,9 +54,8 @@ func GetTranslateCurrent() *Translation {
 
 // Definition of a translation between a source and a target country
 type Translation struct {
-	xMin, xMax, yMin, yMax float64 // coordinates of the rendering window (used to compute liste of villages)
-	sourceCountry          *Country
-	targetCountry          *Country
+	sourceCountry *CountryWithBodies
+	targetCountry *CountryWithBodies
 }
 
 func (t *Translation) GetSourceCountryName() string {
@@ -45,7 +67,7 @@ func (t *Translation) GetTargetCountryName() string {
 }
 
 // Init source & target countries of the translation
-func (t *Translation) Init(sourceCountry, targetCountry Country) {
+func (t *Translation) Init(sourceCountry, targetCountry CountryWithBodies) {
 
 	Info.Printf("Init : Source Country is %s with nbBodies %d at simulation step %d", sourceCountry.Name, sourceCountry.NbBodies, sourceCountry.Step)
 	Info.Printf("Init : Target Country is %s with nbBodies %d at simulation step %d", targetCountry.Name, targetCountry.NbBodies, targetCountry.Step)
@@ -62,10 +84,6 @@ func (t *Translation) Swap() {
 	tmp := t.sourceCountry
 	t.sourceCountry = t.targetCountry
 	t.targetCountry = tmp
-}
-
-func (t *Translation) SetRenderingWindow(xMin, xMax, yMin, yMax float64) {
-	t.xMin, t.xMax, t.yMin, t.yMax = xMin, xMax, yMin, yMax
 }
 
 // from lat, lng in source country, find the closest body in source country

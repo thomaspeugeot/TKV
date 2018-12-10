@@ -10,7 +10,7 @@ var epsilon float64 = 0.0000001
 // testing the translation lat lng to XY function of country
 func TestFRALatLng2XY(t *testing.T) {
 
-	var fra Country
+	var fra CountryWithBodies
 	fra.Name = "fra"
 	fra.NbBodies = 34413
 	fra.Step = 0
@@ -34,7 +34,7 @@ func TestFRALatLng2XY(t *testing.T) {
 // test the translation from XY to lat lng of counry
 func TestFRAXY2LatLng(t *testing.T) {
 
-	var fra Country
+	var fra CountryWithBodies
 	fra.Name = "fra"
 	fra.NbBodies = 34413
 	fra.Step = 0
@@ -62,7 +62,7 @@ func TestFRAXY2LatLng(t *testing.T) {
 // test that brest lat long has close proximity to nearest village
 func TestBallBodiesCount(t *testing.T) {
 
-	var fra Country
+	var fra CountryWithBodies
 	fra.Name = "fra"
 	fra.NbBodies = 154301
 	fra.Step = 96962

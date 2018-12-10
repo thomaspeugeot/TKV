@@ -24,6 +24,15 @@ var mapOfMaps = new Map();
 mapOfMaps.set( 'topMap', topMap);
 mapOfMaps.set( 'bottomMap', bottomMap);
 
+// return the country on the other side
+function otherSideCountry( country) {
+	if (mapOfMapNames.get( 'topMap') == country) {
+		return mapOfMapNames.get( 'bottomMap')
+	} else {
+		return mapOfMapNames.get('topMap')
+	}
+}
+
 L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
 	maxZoom: 18,
 	id: 'mapbox.streets'
@@ -62,7 +71,9 @@ function onMapClick(e) {
     var sideOfMap = this._container.id
     var country = mapOfMapNames.get( sideOfMap)
 
-	messageToServer = { lat: e.latlng.lat , lng: e.latlng.lng, country: country }
+	var otherSideCountry_l = otherSideCountry( country)
+
+	messageToServer = { lat: e.latlng.lat , lng: e.latlng.lng, country: country, otherSideCountry: otherSideCountry_l }
 
 	var messageToServerString = JSON.stringify( messageToServer );
 	console.log( messageToServerString);	

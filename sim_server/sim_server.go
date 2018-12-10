@@ -36,12 +36,12 @@ func main() {
 
 	portPtr := flag.String("port", "8000", "listening port")
 
-	startPtr := flag.Bool("start", false, "if true, start simulation run immediatly") 
-	
+	startPtr := flag.Bool("start", false, "if true, start simulation run immediatly")
+
 	flag.Parse()
 
 	// init sourceCountry from flags
-	var sourceCountry translation.Country
+	var sourceCountry translation.CountryWithBodies
 	sourceCountry.Name = *sourceCountryPtr
 	{
 		_, errScan := fmt.Sscanf(*sourceCountryNbBodiesPtr, "%d", &sourceCountry.NbBodies)
@@ -90,12 +90,12 @@ func main() {
 	server.Info.Printf("filename for init %s", filename)
 	r.LoadConfig(filename)
 
-	if !*startPtr	{
+	if !*startPtr {
 		r.SetState(barneshut.STOPPED)
 	} else {
 		r.SetState(barneshut.RUNNING)
 	}
-	
+
 	go r.RunSimulation()
 
 	mux := http.NewServeMux()
