@@ -13,12 +13,13 @@ function TwoWayMap(map){
 	   this.reverseMap[value] = key;   
 	}
  }
+ TwoWayMap.prototype.set = function(key, value){ this.map[key] = value; this.reverseMap[value] = key;};
  TwoWayMap.prototype.get = function(key){ return this.map[key]; };
  TwoWayMap.prototype.revGet = function(key){ return this.reverseMap[key]; };
 
 var mapOfMapNames = new TwoWayMap( 
 	{
-		'topMap': 'fra',
+		'topMap': 'usa',
 		'bottomMap': 'hti'
 	}
 );
@@ -70,6 +71,39 @@ var littleIcon = L.icon({
 	iconSize:     [5, 5], // size of the icon
 	iconAnchor:   [0, 0], // point of the icon which will correspond to marker's location
 });
+
+L.Control.SwitchMap = L.Control.extend({
+    onAdd: function(map) {
+        var img = L.DomUtil.create('img');
+
+		img.type = "button";
+		img.value = "fra <> usa";
+		img.style.backgroundSize = "30px 30px";
+		img.style.width = '30px';
+		img.style.height = '30px';
+		img.style.backgroundColor = 'white';
+
+		img.onclick = function() {
+			console.log('buttonClicked');
+			currentTopMap = mapOfMapNames.get('topMap')
+			if ( 'fra' == currentTopMap ) {
+				mapOfMapNames.set('topMap', 'usa');
+ 			} else {
+				mapOfMapNames.set('topMap', 'fra');
+			}
+			topMapCenter = mapOfMapViews.get( mapOfMapNames.get( 'topMap'));
+			topMap.setView( topMapCenter, 4);
+			topMap.removeLayer( Markers);	
+		}
+		return img;
+    },
+});
+
+L.control.switchMap = function(opts) {
+    return new L.Control.SwitchMap(opts);
+}
+
+L.control.switchMap({ position: 'bottomleft' }).addTo(topMap);
 
 function onMapClick(e) {
 
@@ -135,7 +169,7 @@ function reqListener( evt) {
 		lat = parseFloat(jsonResponse.TargetBorderPoints[0][i][1]);
 
 		marker = new L.marker([lat,lng], {icon: littleIcon, opacity: 0.3})
-			.addTo( mapOfMaps.get( mapOfMapSides.get(jsonResponse.Target)));
+			.addTo( mapOfMaps.get( mapOfMapNames.revGet( jsonResponse.Target)));
 	}
 
 	// reset zoom & location on target map 
