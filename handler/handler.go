@@ -20,7 +20,8 @@ type testStruct struct {
 
 type LatLngCountry struct {
 	Lat, Lng float64
-	Country  string
+	SourceCountry  string
+	TargetCountry string
 }
 
 var lastReqest LatLngCountry // store last request.
@@ -48,12 +49,9 @@ func GetTranslationResult(w http.ResponseWriter, req *http.Request) {
 		lastReqest = llc
 	}
 
-	// check wether country is the source country
-	// if not, switch source & target
-	sourceCountry := translation.GetTranslateCurrent().GetSourceCountryName()
-	if llc.Country != sourceCountry {
-		translation.GetTranslateCurrent().Swap()
-	}
+	// setup translation
+	translation.GetTranslateCurrent().SetSourceCountry( llc.SourceCountry)
+	translation.GetTranslateCurrent().SetTargetCountry( llc.TargetCountry)
 
 	distance, latClosest, lngClosest, xSpread, ySpread, _ :=
 		translation.GetTranslateCurrent().BodyCoordsInSourceCountry(llc.Lat, llc.Lng)

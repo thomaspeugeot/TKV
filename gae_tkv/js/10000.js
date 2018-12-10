@@ -5,13 +5,23 @@ mapOfMapViews.set( 'hti', [18, -72]);
 mapOfMapViews.set( 'usa', [39, -100]);
 
 // dynamicaly allocate topMap and bottomMap map
-var mapOfMapNames = new Map()
-mapOfMapNames.set( 'topMap', 'fra');
-mapOfMapNames.set( 'bottomMap', 'hti');
+function TwoWayMap(map){
+	this.map = map;
+	this.reverseMap = {};
+	for(var key in map){
+	   var value = map[key];
+	   this.reverseMap[value] = key;   
+	}
+ }
+ TwoWayMap.prototype.get = function(key){ return this.map[key]; };
+ TwoWayMap.prototype.revGet = function(key){ return this.reverseMap[key]; };
 
-var mapOfMapSides = new Map()
-mapOfMapSides.set( 'fra', 'topMap')
-mapOfMapSides.set( 'hti', 'bottomMap')
+var mapOfMapNames = new TwoWayMap( 
+	{
+		'topMap': 'fra',
+		'bottomMap': 'hti'
+	}
+);
 
 var topMapCenter = mapOfMapViews.get( mapOfMapNames.get( 'topMap'));
 var bottomMapCenter = mapOfMapViews.get( mapOfMapNames.get( 'bottomMap'));
@@ -69,11 +79,12 @@ function onMapClick(e) {
 	targetService = protocol + "//"+ hostname + ":" + port + "/"
 
     var sideOfMap = this._container.id
-    var country = mapOfMapNames.get( sideOfMap)
+    var sourceCountry = mapOfMapNames.get( sideOfMap)
 
-	var otherSideCountry_l = otherSideCountry( country)
+	var targetCountry = otherSideCountry( sourceCountry)
 
-	messageToServer = { lat: e.latlng.lat , lng: e.latlng.lng, country: country, otherSideCountry: otherSideCountry_l }
+	messageToServer = { lat: e.latlng.lat , lng: e.latlng.lng, 
+		sourceCountry: sourceCountry, targetCountry: targetCountry }
 
 	var messageToServerString = JSON.stringify( messageToServer );
 	console.log( messageToServerString);	
@@ -103,10 +114,10 @@ function reqListener( evt) {
 		Math.floor(100*jsonResponse.X)+" Y="+
 		Math.floor(100*jsonResponse.Y);
 	
-	L.marker([lat, lng]).addTo( mapOfMaps.get( mapOfMapSides.get( jsonResponse.Source)))
+	L.marker([lat, lng]).addTo( mapOfMaps.get( mapOfMapNames.revGet( jsonResponse.Source)))
 		.bindPopup( message).openPopup();
 		
-	L.marker([latTarget, lngTarget]).addTo( mapOfMaps.get( mapOfMapSides.get(jsonResponse.Target)))
+	L.marker([latTarget, lngTarget]).addTo( mapOfMaps.get( mapOfMapNames.revGet(jsonResponse.Target)))
 		.bindPopup( message).openPopup();
 
 	for (var i = 0; i < jsonResponse.SourceBorderPoints[0].length; i++) {
@@ -115,7 +126,7 @@ function reqListener( evt) {
 		lat = parseFloat(jsonResponse.SourceBorderPoints[0][i][1]);
 
 		marker = new L.marker([lat,lng], {icon: littleIcon, opacity: 0.3} )
-			.addTo( mapOfMaps.get( mapOfMapSides.get( jsonResponse.Source)));
+			.addTo( mapOfMaps.get( mapOfMapNames.revGet( jsonResponse.Source)));
 	}
 
 	for (var i = 0; i < jsonResponse.TargetBorderPoints[0].length; i++) {
@@ -128,8 +139,8 @@ function reqListener( evt) {
 	}
 
 	// reset zoom & location on target map 
-	mapOfMaps.get( mapOfMapSides.get(jsonResponse.Target)).setView( [latTarget, lngTarget], 
-		mapOfMaps.get( mapOfMapSides.get( jsonResponse.Source)).getZoom());
+	mapOfMaps.get( mapOfMapNames.revGet(jsonResponse.Target)).setView( [latTarget, lngTarget], 
+		mapOfMaps.get( mapOfMapNames.revGet( jsonResponse.Source)).getZoom());
 };
 
 

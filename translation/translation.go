@@ -25,6 +25,7 @@ type CountrySpec struct {
 var countrySpecs = []CountrySpec{
 	CountrySpec{Name: "fra", NbBodies: 934136, Step: 8725},
 	CountrySpec{Name: "hti", NbBodies: 190948, Step: 1334},
+	CountrySpec{Name: "usa", NbBodies: 1422837, Step: 0},
 }
 
 // Singloton pattern to init the current translation
@@ -62,28 +63,16 @@ func (t *Translation) GetSourceCountryName() string {
 	return t.sourceCountry.Name
 }
 
+func (t *Translation) SetSourceCountry(name string) {
+	t.sourceCountry = mapOfCountries[name]
+}
+
 func (t *Translation) GetTargetCountryName() string {
 	return t.targetCountry.Name
 }
 
-// Init source & target countries of the translation
-func (t *Translation) Init(sourceCountry, targetCountry CountryWithBodies) {
-
-	Info.Printf("Init : Source Country is %s with nbBodies %d at simulation step %d", sourceCountry.Name, sourceCountry.NbBodies, sourceCountry.Step)
-	Info.Printf("Init : Target Country is %s with nbBodies %d at simulation step %d", targetCountry.Name, targetCountry.NbBodies, targetCountry.Step)
-
-	t.sourceCountry = &sourceCountry
-	t.sourceCountry.Init()
-
-	t.targetCountry = &targetCountry
-	t.targetCountry.Init()
-}
-
-// Swap source & target
-func (t *Translation) Swap() {
-	tmp := t.sourceCountry
-	t.sourceCountry = t.targetCountry
-	t.targetCountry = tmp
+func (t *Translation) SetTargetCountry(name string) {
+	t.targetCountry = mapOfCountries[name]
 }
 
 // from lat, lng in source country, find the closest body in source country
