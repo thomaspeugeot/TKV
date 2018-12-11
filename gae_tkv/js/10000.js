@@ -20,7 +20,7 @@ function TwoWayMap(map){
 
 var mapOfMapNames = new TwoWayMap( 
 	{
-		'topMap': 'chn',
+		'topMap': 'usa',
 		'bottomMap': 'hti'
 	}
 );
