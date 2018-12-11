@@ -3,6 +3,7 @@ var mapOfMapViews = new Map();
 mapOfMapViews.set( 'fra', [47, 0]);
 mapOfMapViews.set( 'hti', [18, -72]);
 mapOfMapViews.set( 'usa', [39, -100]);
+mapOfMapViews.set( 'chn', [38, 100]);
 
 // dynamicaly allocate topMap and bottomMap map
 function TwoWayMap(map){
@@ -19,7 +20,7 @@ function TwoWayMap(map){
 
 var mapOfMapNames = new TwoWayMap( 
 	{
-		'topMap': 'usa',
+		'topMap': 'chn',
 		'bottomMap': 'hti'
 	}
 );

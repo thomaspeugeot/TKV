@@ -26,6 +26,7 @@ var countrySpecs = []CountrySpec{
 	CountrySpec{Name: "fra", NbBodies: 934136, Step: 8725},
 	CountrySpec{Name: "hti", NbBodies: 190948, Step: 1334},
 	CountrySpec{Name: "usa", NbBodies: 1422837, Step: 2735},
+	CountrySpec{Name: "chn", NbBodies: 771973, Step: 0},
 }
 
 // Singloton pattern to init the current translation

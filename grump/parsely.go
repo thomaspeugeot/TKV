@@ -116,6 +116,7 @@ func AddBodiesOfParselyPopulatedCells(
 		}
 	}
 	graph = nil
+	runtime.GC()
 }
 
 func PrintMemUsage() {
