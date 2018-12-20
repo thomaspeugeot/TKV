@@ -4,6 +4,7 @@ mapOfMapViews.set( 'fra', [47, 0]);
 mapOfMapViews.set( 'hti', [18, -72]);
 mapOfMapViews.set( 'usa', [39, -100]);
 mapOfMapViews.set( 'chn', [38, 100]);
+mapOfMapViews.set( 'rus', [55, 60]);
 
 // dynamicaly allocate topMap and bottomMap map
 function TwoWayMap(map){
@@ -73,7 +74,7 @@ var littleIcon = L.icon({
 	iconAnchor:   [0, 0], // point of the icon which will correspond to marker's location
 });
 
-L.Control.SwitchMap = L.Control.extend({
+L.Control.SwitchTopMap = L.Control.extend({
     onAdd: function(map) {
         var img = L.DomUtil.create('img');
 
@@ -89,7 +90,14 @@ L.Control.SwitchMap = L.Control.extend({
 			currentTopMap = mapOfMapNames.get('topMap')
 			if ( 'fra' == currentTopMap ) {
 				mapOfMapNames.set('topMap', 'usa');
- 			} else {
+			}
+			if ( 'usa' == currentTopMap ) {
+				mapOfMapNames.set('topMap', 'chn');
+			}
+			if ( 'chn' == currentTopMap ) {
+				mapOfMapNames.set('topMap', 'rus');
+			}
+			if ( 'rus' == currentTopMap ) {
 				mapOfMapNames.set('topMap', 'fra');
 			}
 			topMapCenter = mapOfMapViews.get( mapOfMapNames.get( 'topMap'));
@@ -100,11 +108,51 @@ L.Control.SwitchMap = L.Control.extend({
     },
 });
 
-L.control.switchMap = function(opts) {
-    return new L.Control.SwitchMap(opts);
+L.control.SwitchTopMap = function(opts) {
+    return new L.Control.SwitchTopMap(opts);
 }
 
-L.control.switchMap({ position: 'bottomleft' }).addTo(topMap);
+L.control.SwitchTopMap({ position: 'bottomleft' }).addTo(topMap);
+
+L.Control.SwitchBottomMap = L.Control.extend({
+    onAdd: function(map) {
+        var img = L.DomUtil.create('img');
+
+		img.type = "button";
+		img.value = "fra <> usa";
+		img.style.backgroundSize = "30px 30px";
+		img.style.width = '30px';
+		img.style.height = '30px';
+		img.style.backgroundColor = 'white';
+
+		img.onclick = function() {
+			console.log('buttonClicked');
+			currentbottomMap = mapOfMapNames.get('bottomMap')
+			if ( 'fra' == currentbottomMap ) {
+				mapOfMapNames.set('bottomMap', 'usa');
+			}
+			if ( 'usa' == currentbottomMap ) {
+				mapOfMapNames.set('bottomMap', 'chn');
+			}
+			if ( 'chn' == currentbottomMap ) {
+				mapOfMapNames.set('bottomMap', 'hti');
+			}
+			if ( 'hti' == currentbottomMap ) {
+				mapOfMapNames.set('bottomMap', 'fra');
+			}
+			bottomMapCenter = mapOfMapViews.get( mapOfMapNames.get( 'bottomMap'));
+			bottomMap.setView( bottomMapCenter, 4);
+			bottomMap.removeLayer( Markers);	
+		}
+		return img;
+    },
+});
+
+L.control.SwitchBottomMap = function(opts) {
+    return new L.Control.SwitchBottomMap(opts);
+}
+
+L.control.SwitchBottomMap({ position: 'bottomleft' }).addTo(bottomMap);
 
 function onMapClick(e) {
 

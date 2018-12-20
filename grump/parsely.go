@@ -22,6 +22,8 @@ func AddBodiesOfParselyPopulatedCells(
 
 	Info.Printf("Construct the nodes of the graph of parsely populated cells")
 	graph := goraph.NewGraph()
+	Info.Printf("Nb of nodes at the start\t%10d\n", graph.GetNodeCount())
+
 	for row := startRow; row < endRow; row++ {
 		for col := 0; col < country.NCols; col++ {
 			if parselyPopulatedCellCoords[row][col] == true {
@@ -34,6 +36,7 @@ func AddBodiesOfParselyPopulatedCells(
 		runtime.ReadMemStats(&m)
 		fmt.Printf("\rrow %5d total %10d, %v MiB", row, graph.GetNodeCount(), bToMb(m.Sys))
 	}
+	Info.Println()
 
 	// construct edges of the graph of parsely populated cells
 	// an edge is present if the next cell to the right or below is also
@@ -115,6 +118,7 @@ func AddBodiesOfParselyPopulatedCells(
 			}
 		}
 	}
+
 	graph = nil
 	runtime.GC()
 }

@@ -307,7 +307,7 @@ func main() {
 
 	// since this is a memory hungry operation
 	// the following operation is split among set of rows
-	nbChunk := 20
+	nbChunk := 10
 	for chunk := 0; chunk < nbChunk; chunk++ {
 
 		grump.Info.Printf("%d/%d to %d/%d", chunk, nbChunk, chunk+1, nbChunk)
