@@ -3,7 +3,6 @@ package barneshut
 import (
 	"fmt"
 	"math/rand"
-	"os"
 	"testing"
 
 	"github.com/thomaspeugeot/tkv/quadtree"
@@ -137,11 +136,8 @@ func BenchmarkOutputGif_1MBody_1KSteps(b *testing.B) {
 	var r Run
 	r.Init(&bodies)
 
-	var output *os.File
-	output, _ = os.Create("essai30Kbody_6Ksteps.gif")
-
 	for i := 0; i < b.N; i++ {
 		r.SetState(RUNNING)
-		r.OutputGif(output, 600)
+		r.CaptureGif()
 	}
 }

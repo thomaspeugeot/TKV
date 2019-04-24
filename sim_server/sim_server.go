@@ -38,6 +38,8 @@ func main() {
 
 	startPtr := flag.Bool("start", false, "if true, start simulation run immediatly")
 
+	captureGifStep := flag.Int("stepsBetweenGifs", 40, "steps between gif")
+
 	flag.Parse()
 
 	// init sourceCountry from flags
@@ -84,6 +86,8 @@ func main() {
 	}
 	server.Info.Printf("will listen on port %d", port)
 	r = barneshut.NewRun()
+
+	r.CaptureGifStep = *captureGifStep
 
 	// load configuration files.
 	filename := fmt.Sprintf(barneshut.CountryBodiesNamePattern, sourceCountry.Name, sourceCountry.NbBodies, sourceCountry.Step)

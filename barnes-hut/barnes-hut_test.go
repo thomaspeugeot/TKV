@@ -2,7 +2,6 @@ package barneshut
 
 import (
 	"math"
-	"os"
 	"syscall"
 	"testing"
 	"time"
@@ -20,11 +19,8 @@ func TesOutputGif(t *testing.T) {
 	r.Init(&bodies)
 	r.SetCountry("fra")
 
-	var output *os.File
-	output, _ = os.Create("essai.gif")
-
 	r.SetState(RUNNING)
-	r.OutputGif(output, 0)
+	r.CaptureGif()
 	// visual verification
 }
 

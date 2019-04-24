@@ -6,8 +6,8 @@ density of the country of interest.
 At the end of the simulation, bodies are spread evenly on a 2D rectangle. At the end of the simulation,
 the body repartition is said to be hyperuniform (https://www.quantamagazine.org/hyperuniformity-found-in-birds-math-and-physics-20160712/)
 
-Barnes-Hut is an embarisgly parallel algorithm. This implementation is used the concurrent model of the go langage. 
-Nb of conurrent routine can be set up dynamicaly. 
+Barnes-Hut is an embarisgly parallel algorithm. This implementation is used the concurrent model of the go langage.
+Nb of conurrent routine can be set up dynamicaly.
 
 TKV implementation starts from a Barnes-Hut implementation of the gravitation simulation
 and make the following modification:
@@ -179,9 +179,9 @@ type Run struct {
 	maxRepulsiveForce       MaxRepulsiveForce // computed at each step (to compute optimal DT value)
 	maxVelocity             float64           // max velocity
 	dtOptim                 float64           // optimal dt
-	ratioOfBodiesWithCapVel float64			// ratio of bodies where the speed has been capped
-	energy					float64			// total repulsive energy
-	energyDecreaseRatio		float64			// energy decrease ratio. Is used as a shutdown criteria
+	ratioOfBodiesWithCapVel float64           // ratio of bodies where the speed has been capped
+	energy                  float64           // total repulsive energy
+	energyDecreaseRatio     float64           // energy decrease ratio. Is used as a shutdown criteria
 
 	status string // status of the run
 
@@ -189,31 +189,32 @@ type Run struct {
 
 	OutputDir     string // output dir for the run
 	StatusFileLog *os.File
+
+	CaptureGifStep int // simulaton steps between gif generation
 }
 
 // (in order to solve issue "over accumulation of bodies at border slows dow spreading #5")
 var maxMinInterBodyDistance float64 // this variable store the max of the previous value
 
 // RunSimulation is the main entry to the simulation
-// It call for one step of simulation until the 
+// It call for one step of simulation until the
 // energy decrease ratio is met
 func (r *Run) RunSimulation() {
 
 	Info.Printf("Energy decrease %f, ShutdownCriteria %f crit %t", r.energyDecreaseRatio, ShutdownCriteria, (r.energyDecreaseRatio > ShutdownCriteria))
-	for (r.energyDecreaseRatio > ShutdownCriteria) {
+	for r.energyDecreaseRatio > ShutdownCriteria {
 		// if state is STOPPED, pause
 		for r.state == STOPPED {
 			time.Sleep(100 * time.Millisecond)
 		}
 		r.OneStep()
 	}
-	
+
 	r.state = STOPPED
 	r.CaptureConfig()
 	// r.CreateMovieFromGif()
 	os.Exit(0)
 }
-
 
 func (r *Run) SetCountry(country string) {
 	r.country = country
@@ -299,7 +300,7 @@ func (r *Run) Init(bodies *([]quadtree.Body)) {
 
 	r.energy = math.MaxFloat64 // very high
 	r.energyDecreaseRatio = 1.0
-	
+
 	DtAdjustMode = AUTO
 
 	Trace.Printf("Init end")
@@ -403,7 +404,7 @@ func (r *Run) OneStep() {
 func (r *Run) OneStepOptional(updatePosition bool) {
 
 	// serialize into a file the gif
-	if r.step%100 == 0 {
+	if r.step%r.CaptureGifStep == 0 {
 		r.CaptureGif()
 	}
 
@@ -503,7 +504,7 @@ func (r *Run) OneStepOptional(updatePosition bool) {
 		r.step,
 		float64(len(*r.bodies)*len(*r.bodies))/float64(nbComputationPerStep), //speedup
 		StepDuration/1000000000, // duration in seconds
-		r.energy, // energy
+		r.energy,                // energy
 		r.minInterBodyDistance,
 		maxMinInterBodyDistance,
 		r.maxVelocity,
@@ -515,7 +516,7 @@ func (r *Run) OneStepOptional(updatePosition bool) {
 		r.energyDecreaseRatio)
 
 	fmt.Fprintf(r.StatusFileLog, r.Status())
-	fmt.Printf(r.Status())	
+	fmt.Printf(r.Status())
 }
 
 var Gflops float64
