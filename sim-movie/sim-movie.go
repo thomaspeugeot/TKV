@@ -58,8 +58,9 @@ func main() {
 		f.Close()
 
 		outGif.Image = append(outGif.Image, inGif.(*image.Paletted))
-		outGif.Delay = append(outGif.Delay, 100)
+		outGif.Delay = append(outGif.Delay, 5)
 	}
+	outGif.LoopCount = -1
 
 	// save to out.gif
 	outputFilename := cwd.Name() + "/" + movieFileName + ".gif"
