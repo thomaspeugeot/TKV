@@ -21,7 +21,7 @@ function TwoWayMap(map){
 
 var mapOfMapNames = new TwoWayMap( 
 	{
-		'topMap': 'usa',
+		'topMap': 'fra',
 		'bottomMap': 'hti'
 	}
 );
@@ -92,12 +92,6 @@ L.Control.SwitchTopMap = L.Control.extend({
 				mapOfMapNames.set('topMap', 'usa');
 			}
 			if ( 'usa' == currentTopMap ) {
-				mapOfMapNames.set('topMap', 'chn');
-			}
-			if ( 'chn' == currentTopMap ) {
-				mapOfMapNames.set('topMap', 'rus');
-			}
-			if ( 'rus' == currentTopMap ) {
 				mapOfMapNames.set('topMap', 'fra');
 			}
 			topMapCenter = mapOfMapViews.get( mapOfMapNames.get( 'topMap'));
@@ -128,18 +122,6 @@ L.Control.SwitchBottomMap = L.Control.extend({
 		img.onclick = function() {
 			console.log('buttonClicked');
 			currentbottomMap = mapOfMapNames.get('bottomMap')
-			if ( 'fra' == currentbottomMap ) {
-				mapOfMapNames.set('bottomMap', 'usa');
-			}
-			if ( 'usa' == currentbottomMap ) {
-				mapOfMapNames.set('bottomMap', 'chn');
-			}
-			if ( 'chn' == currentbottomMap ) {
-				mapOfMapNames.set('bottomMap', 'hti');
-			}
-			if ( 'hti' == currentbottomMap ) {
-				mapOfMapNames.set('bottomMap', 'fra');
-			}
 			bottomMapCenter = mapOfMapViews.get( mapOfMapNames.get( 'bottomMap'));
 			bottomMap.setView( bottomMapCenter, 4);
 			bottomMap.removeLayer( Markers);	
