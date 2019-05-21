@@ -1,6 +1,10 @@
 Working note on deploying 10000 on google application engine
 ======================================================
 
+## 2019, may the 21th
+
+First try on the MacBook Air
+
 ## 2018, october the 9th
 
 **choosing standard or flexible environment**
