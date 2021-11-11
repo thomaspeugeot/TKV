@@ -21,17 +21,10 @@ The 10000 runtime server
 
 **Running the web server with go command tool**
 
-Have go (golang.org) latest (>= v1.11) installed
-blank GOPATH & GOROOT env
+Have go (golang.org) (>= v1.16) installed
 
 ```
-cd
-go get github.com/gyuho/goraph
-go get github.com/thomaspeugeot/tkv
-go get github.com/thomaspeugeot/pq
-go get github.com/ajstarks/svgo
-cd go/src/github.com/thomaspeugeot/tkv/runtime_server
-go run runtime_server.go
+go run runtime_server/runtime_server.go
 ```
 
 a vscode configuration is available to run and debug the server.
@@ -39,7 +32,7 @@ a vscode configuration is available to run and debug the server.
 **Running the web client**
 
 
-launch your browser at http://localhost:8002/tkv-client.html
+launch your browser at http://localhost:8002/10000.html
 
 On the top panel, zoom to your place of interest (it is currently limited to france). Left click. You terrritory appears as well as the matching territory in Haiti.
 
